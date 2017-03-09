@@ -1,0 +1,289 @@
+o1
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o1 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=5813823,totmem=6249428kb,availmem=6076604kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=96328117279,state=free,jobs=? 15201,rectime=1389577554
+
+o2
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o2 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=5812611,totmem=6249428kb,availmem=6087600kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=66178558273,state=free,jobs=? 15201,rectime=1389577532
+
+o3
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o16 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6309646,totmem=6249428kb,availmem=6085856kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=913777671,state=free,jobs=26408.master,rectime=1389577563
+
+o4
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o4 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=2868,nsessions=1,nusers=1,idletime=5813270,totmem=6249428kb,availmem=6083108kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=6726215277,state=free,jobs=? 15201,rectime=1389577557
+
+o5
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o5 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=5813832,totmem=6249428kb,availmem=5746780kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=9780503749,state=free,jobs=? 15201,rectime=1389577553
+
+o6
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o6 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6676992,totmem=6249428kb,availmem=6054088kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=8088052348,state=free,jobs=? 15201,rectime=1389577560
+
+o7
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o7 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6659725,totmem=6249428kb,availmem=5743420kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=10738046163,state=free,jobs=? 15201,rectime=1389577562
+
+o8
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o8 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6313243,totmem=6249428kb,availmem=6009968kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=7060072239,state=free,jobs=? 15201,rectime=1389577557
+
+o9
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o9 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6300190,totmem=6249428kb,availmem=6077160kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=16953313175,state=free,jobs=? 15201,rectime=1389577524
+
+o10
+     state = down
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o10 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=24744,nsessions=1,nusers=1,idletime=5291132,totmem=6249428kb,availmem=5909224kb,physmem=2056472kb,ncpus=4,loadave=4.00,netload=1204854923,state=free,jobs=25295.master,rectime=1380687196
+
+o11
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o11 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6622556,totmem=6249428kb,availmem=6010492kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=3242528272,state=free,jobs=? 15201,rectime=1389577566
+
+o12
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o12 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=6196,nsessions=1,nusers=1,idletime=5813313,totmem=6249428kb,availmem=6032872kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=3240279518,state=free,jobs=? 15201,rectime=1389577563
+
+o13
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o13 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6312924,totmem=6249428kb,availmem=6084468kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=2401973287,state=free,jobs=? 15201,rectime=1389577557
+
+o14
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o14 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=6308599,totmem=6249428kb,availmem=6084720kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=2035241091,state=free,jobs=? 15201,rectime=1389577567
+
+o15
+     state = down
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+
+o16
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o17 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=5814065,totmem=6249428kb,availmem=6087188kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=856895518,state=free,jobs=? 15201,rectime=1389577550
+
+o17
+     state = free
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o15 2.6.21.5 #1 SMP Mon Jul 30 18:37:52 EDT 2007 x86_64,sessions=? 0,nsessions=? 0,nusers=0,idletime=5813754,totmem=6249428kb,availmem=6032192kb,physmem=2056472kb,ncpus=4,loadave=0.00,netload=842041955,state=free,jobs=? 0,rectime=1389577560
+
+o18
+     state = down
+     np = 4
+     properties = o2200,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux o18 2.6.21.5 #1 SMP Mon Jul 30 19:10:38 EDT 2007 x86_64,sessions=? 0,nsessions=? 0,nusers=0,idletime=74,totmem=6249428kb,availmem=6185892kb,physmem=2056472kb,ncpus=4,loadave=0.18,netload=1646801,state=free,jobs=26135.master,rectime=1382933259
+
+dq1
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28243.master, 1/28243.master, 2/28243.master, 3/28243.master, 4/28243.master, 5/28243.master, 6/28243.master, 7/28243.master
+     status = opsys=linux,uname=Linux dq1 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=7055,nsessions=1,nusers=1,idletime=15581117,totmem=12394208kb,availmem=7948448kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=2758290849136,state=free,jobs=28243.master,rectime=1389577561
+
+dq2
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28244.master, 1/28244.master, 2/28244.master, 3/28244.master, 4/28244.master, 5/28244.master, 6/28244.master, 7/28244.master
+     status = opsys=linux,uname=Linux dq2 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=29866,nsessions=1,nusers=1,idletime=18358946,totmem=12394208kb,availmem=11706820kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=635660358211,state=free,jobs=28244.master,rectime=1389577566
+
+dq3
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28245.master, 1/28245.master, 2/28245.master, 3/28245.master, 4/28245.master, 5/28245.master, 6/28245.master, 7/28245.master
+     status = opsys=linux,uname=Linux dq3 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=21927,nsessions=1,nusers=1,idletime=18443060,totmem=12394208kb,availmem=11703628kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=380889525932,state=free,jobs=28245.master,rectime=1389577544
+
+dq4
+     state = free
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     status = opsys=linux,uname=Linux dq4 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=9010257,totmem=12394208kb,availmem=11979988kb,physmem=8201252kb,ncpus=8,loadave=0.00,netload=512207704699,state=free,jobs=? 15201,rectime=1389577525
+
+dq5
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28249.master, 1/28249.master, 2/28249.master, 3/28249.master, 4/28249.master, 5/28249.master, 6/28249.master, 7/28249.master
+     status = opsys=linux,uname=Linux dq5 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=11718,nsessions=1,nusers=1,idletime=18443096,totmem=12394208kb,availmem=11628052kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=430311954105,state=free,jobs=28249.master,rectime=1389577557
+
+dq6
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28246.master, 1/28246.master, 2/28246.master, 3/28246.master, 4/28246.master, 5/28246.master, 6/28246.master, 7/28246.master
+     status = opsys=linux,uname=Linux dq6 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=18605,nsessions=1,nusers=1,idletime=18443326,totmem=12394208kb,availmem=11724648kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=511561968621,state=free,jobs=28246.master,rectime=1389577548
+
+dq7
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28250.master, 1/28250.master, 2/28250.master, 3/28250.master, 4/28250.master, 5/28250.master, 6/28250.master, 7/28250.master
+     status = opsys=linux,uname=Linux dq7 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=25332,nsessions=1,nusers=1,idletime=18443236,totmem=12394208kb,availmem=11706772kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=545107680435,state=free,jobs=28250.master,rectime=1389577548
+
+dq8
+     state = free
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/23833.master, 1/23833.master, 2/23833.master, 3/23833.master, 4/23833.master, 5/23833.master, 6/23833.master, 7/23833.master
+     status = opsys=linux,uname=Linux dq8 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=14838 21067,nsessions=2,nusers=1,idletime=18443320,totmem=12394208kb,availmem=11436204kb,physmem=8201252kb,ncpus=8,loadave=7.94,netload=36513328419,state=free,jobs=23833.master,rectime=1389577563
+
+dq9
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28251.master, 1/28251.master, 2/28251.master, 3/28251.master, 4/28251.master, 5/28251.master, 6/28251.master, 7/28251.master
+     status = opsys=linux,uname=Linux dq9 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=5958 10829,nsessions=2,nusers=2,idletime=14451106,totmem=12394208kb,availmem=11734192kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=484386425908,state=free,jobs=28251.master,rectime=1389577558
+
+dq10
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28265.master, 1/28265.master, 2/28265.master, 3/28265.master, 4/28265.master, 5/28265.master, 6/28265.master, 7/28265.master
+     status = opsys=linux,uname=Linux dq10 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=11904,nsessions=1,nusers=1,idletime=18443194,totmem=12394208kb,availmem=11215416kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=640523894380,state=free,jobs=28265.master,rectime=1389577525
+
+dq11
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28252.master, 1/28252.master, 2/28252.master, 3/28252.master, 4/28252.master, 5/28252.master, 6/28252.master, 7/28252.master
+     status = opsys=linux,uname=Linux dq11 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=11159,nsessions=1,nusers=1,idletime=18442997,totmem=12394208kb,availmem=11707168kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=412822531543,state=free,jobs=28252.master,rectime=1389577563
+
+dq12
+     state = job-exclusive
+     np = 8
+     properties = dquad,all
+     ntype = cluster
+     jobs = 0/28253.master, 1/28253.master, 2/28253.master, 3/28253.master, 4/28253.master, 5/28253.master, 6/28253.master, 7/28253.master
+     status = opsys=linux,uname=Linux dq12 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=10058,nsessions=1,nusers=1,idletime=4525682,totmem=12394208kb,availmem=11713924kb,physmem=8201252kb,ncpus=8,loadave=8.00,netload=422365211734,state=free,jobs=28253.master,rectime=1389577554
+
+qc1
+     state = job-exclusive
+     np = 8
+     properties = qquad,chem
+     ntype = cluster
+     jobs = 0/28259.master, 1/28259.master, 2/28259.master, 3/28259.master, 4/28259.master, 5/28259.master, 6/28259.master, 7/28259.master
+     status = opsys=linux,uname=Linux qc1 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=5359,nsessions=1,nusers=1,idletime=8563459,totmem=62660888kb,availmem=61844752kb,physmem=12329248kb,ncpus=8,loadave=8.00,netload=635637493196,state=free,jobs=28259.master,rectime=1389577540
+
+qc2
+     state = job-exclusive
+     np = 8
+     properties = qquad,chem
+     ntype = cluster
+     jobs = 0/28260.master, 1/28260.master, 2/28260.master, 3/28260.master, 4/28260.master, 5/28260.master, 6/28260.master, 7/28260.master
+     status = opsys=linux,uname=Linux qc2 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=18085,nsessions=1,nusers=1,idletime=8137955,totmem=62660888kb,availmem=61842680kb,physmem=12329248kb,ncpus=8,loadave=8.00,netload=1180079646704,state=free,jobs=28260.master,rectime=1389577546
+
+qc3
+     state = job-exclusive
+     np = 8
+     properties = qquad,chem
+     ntype = cluster
+     jobs = 0/28261.master, 1/28261.master, 2/28261.master, 3/28261.master, 4/28261.master, 5/28261.master, 6/28261.master, 7/28261.master
+     status = opsys=linux,uname=Linux qc3 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=1324,nsessions=1,nusers=1,idletime=18443178,totmem=62660888kb,availmem=61802056kb,physmem=12329248kb,ncpus=8,loadave=8.00,netload=836149885261,state=free,jobs=28261.master,rectime=1389577567
+
+qc4
+     state = job-exclusive
+     np = 8
+     properties = qquad,chem
+     ntype = cluster
+     jobs = 0/28262.master, 1/28262.master, 2/28262.master, 3/28262.master, 4/28262.master, 5/28262.master, 6/28262.master, 7/28262.master
+     status = opsys=linux,uname=Linux qc4 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=16873,nsessions=1,nusers=1,idletime=18443154,totmem=12329248kb,availmem=11521676kb,physmem=12329248kb,ncpus=8,loadave=8.00,netload=555594107287,state=free,jobs=28262.master,rectime=1389577549
+
+qc5
+     state = free
+     np = 8
+     properties = qquad,chem
+     ntype = cluster
+     jobs = 0/28247.master, 1/28247.master, 2/28247.master, 3/28247.master, 4/28247.master, 5/28247.master, 6/28247.master, 7/28247.master
+     status = opsys=linux,uname=Linux qc5 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=31507,nsessions=1,nusers=1,idletime=17924235,totmem=62660888kb,availmem=61987624kb,physmem=12329248kb,ncpus=8,loadave=8.00,netload=532942436026,state=free,jobs=28247.master,rectime=1389577521
+
+qc6
+     state = free
+     np = 8
+     properties = qquad,chem
+     ntype = cluster
+     jobs = 0/28263.master, 1/28263.master, 2/28263.master, 3/28263.master, 4/28263.master, 5/28263.master, 6/28263.master, 7/28263.master
+     status = opsys=linux,uname=Linux qc6 2.6.23.17-88.fc7 #1 SMP Thu May 15 00:02:29 EDT 2008 x86_64,sessions=6030,nsessions=1,nusers=1,idletime=13832734,totmem=62660952kb,availmem=61876992kb,physmem=12329312kb,ncpus=8,loadave=8.00,netload=872478182259,state=free,jobs=28263.master,rectime=1389577541
+
+gpu1
+     state = free
+     np = 16
+     properties = E5-2650,M2090,gpu
+     ntype = cluster
+     status = opsys=linux,uname=Linux gpu1 2.6.32-358.11.1.el6.x86_64 #1 SMP Wed Jun 12 03:34:52 UTC 2013 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=1133102,totmem=64845948kb,availmem=61717572kb,physmem=32844476kb,ncpus=16,loadave=0.00,netload=32496938964,state=free,jobs=? 15201,rectime=1389577535
+
+gpu2
+     state = free
+     np = 16
+     properties = E5-2650,M2090,gpu
+     ntype = cluster
+     status = opsys=linux,uname=Linux gpu2 2.6.32-358.11.1.el6.x86_64 #1 SMP Wed Jun 12 03:34:52 UTC 2013 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=1131474,totmem=64845948kb,availmem=62467628kb,physmem=32844476kb,ncpus=16,loadave=0.00,netload=665431827498,state=free,jobs=? 15201,rectime=1389577549
+
+gpu3
+     state = free
+     np = 16
+     properties = E5-2650,M2090,gpu
+     ntype = cluster
+     status = opsys=linux,uname=Linux gpu2 2.6.32-358.11.1.el6.x86_64 #1 SMP Wed Jun 12 03:34:52 UTC 2013 x86_64,sessions=? 15201,nsessions=? 15201,nusers=0,idletime=1131474,totmem=64845948kb,availmem=62467628kb,physmem=32844476kb,ncpus=16,loadave=0.00,netload=665431827498,state=free,jobs=? 15201,rectime=1389577549
+

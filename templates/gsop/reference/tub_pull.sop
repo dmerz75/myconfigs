@@ -1,0 +1,148 @@
+# Configuration file for pulling sop-protein
+# Go to 'equil.sop' to see more explanations 
+author N
+
+device 1
+
+# Protein name
+name TUB_multiEh 
+stage pull
+
+# Input system
+structure	<name>.pdb
+topology        topologies/<name>_Rlb8.0_Rsc2.0_eh2.0_tandem1-0.top           # Topology file
+coordinates	structures/<name>_<author><run>_equil_final.pdb	# Read coordinates from final equilibration frame 
+											# (name and run parameters are same as there)
+# Tandem creation
+createTandem    no
+linkerLength    0
+monomerCount    1
+tandemDirection endToEnd
+tandemVectorX   0.0
+tandemVectorY   0.0
+tandemVectorZ   0.0
+
+# Force field
+temperature	0.6
+zeta		50.0
+R_limit		2.0
+R_limit_bond	8.0
+SC_limit_bond	2.0
+R_sigma		16.0
+kspring_cov	20.0
+a		3.8
+el		1.0
+eh		2.0
+covalentRepulsion	off
+nav		1000
+
+# Pairlist generaion
+pairs_cutoff	20.0
+pairs_freq	1000
+
+# Pulling
+fixed_beads	67		# Number of fixed beads.
+fixed1          247            # First fixed bead (to fix more beads, add 'fixed2', 'fixed3'... and change the 'fixed_beads')
+fixed2          252
+fixed3          256
+fixed4          261
+fixed5		324
+fixed6		325
+fixed7		328
+fixed8		347
+fixed9		348
+fixed10		1113
+fixed11		1118
+fixed12		1122
+fixed13		1127
+fixed14		1190
+fixed15		1191
+fixed16		1194
+fixed17		1213
+fixed18		1214
+fixed19		1979
+fixed20		1984
+fixed21		1988
+fixed22		1993
+fixed23		2056
+fixed24		2057
+fixed25		2060
+fixed26		2079
+fixed27		2080
+fixed28		2845
+fixed29		2850
+fixed30         2854
+fixed31		2859
+fixed32 	2922
+fixed33 	2923
+fixed34 	2926
+fixed35 	2945
+fixed36		2946
+fixed37		3711
+fixed38		3716
+fixed39		3720
+fixed40         3725
+fixed41		3788
+fixed42		3789
+fixed43		3792
+fixed44		3811
+fixed45		3812
+fixed46		20998
+fixed47		17055
+fixed48		7956
+fixed49		12286
+fixed50		16616
+fixed51		20080
+fixed52		24410
+fixed53		4065
+fixed54		8395
+fixed55		12725
+fixed56		20519
+fixed57         24849
+fixed58		653
+fixed59 	4983
+fixed60 	9313
+fixed61 	13643
+fixed62 	17973
+fixed63		21437
+fixed64		4544
+fixed65		8874
+fixed66		13204
+fixed67         17534
+
+pulled_beads 	2		# Number of beads being pulled
+pulled1         23299             # Fist pulled bead (same story as with fixed)
+pulled2         23374
+
+deltax		0.0001
+k_trans		0.025
+pullDirection   vector
+
+pullVector	-0.983282	-0.182089	0
+
+
+
+# End to end
+fixedEnd 	<fixed10>
+pulledEnd 	<pulled2>
+
+#fixedEnd <fixed1>
+#pulledEnd <pulled1>
+
+# Simulations
+numsteps	100000000000
+timestep	0.16
+seed		30655325
+firstrun	2
+runnum		1
+
+# Output
+reffilename 	<name>.ref.pdb			# Referance pdb to load into VMD
+outputtiming	1000000				# Frequency of printing out data (former 'nav')
+outputname	dat/<name>_<author><run>_<stage>.dat		# Filename mask for energy file
+dcdfreq		1000000					# Frequency of saving output and coordinates into dcd file (former 'nav1')
+DCDfile		dcd/<name>_<author><run>_<stage>.dcd		# Filename mask for dcd file
+restartfreq	100000					# Frequency of saving restart coordinates and parameters
+restartname 	output/<name>_<author><run>_restart			# Name of restart files (extensions .pdb and .conf will be added)
+finalcoord	output/<name>_<author><run>_<stage>_final.pdb		# Filename mask for final coordinates file
+

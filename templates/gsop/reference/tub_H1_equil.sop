@@ -1,0 +1,67 @@
+# Configuration file for equilibration simulations.
+# See 'conf.txt' for details
+author N
+
+device 0
+
+# Protein name
+name 5pf				# Name, assigned to the protein
+stage equil
+
+# Input system
+structure	<name>.pdb		# Initial pdb
+topology	topologies/<name>_Rlb8.0_Rsc2.0_eh2.0_tandem1-0.top		# Topology file
+coordinates	structures/<name>_tandem1-0.initial.pdb
+
+# Tandem creation
+createTandem    no 	
+linkerLength    0	
+monomerCount	1
+tandemDirection	endToEnd
+tandemVectorX	0.0
+tandemVectorY	0.0
+tandemVectorZ	0.0
+
+
+# Force field
+temperature	0.6 
+zeta		50.0
+R_limit		2.0
+R_limit_bond	8.0
+SC_limit_bond	2.0
+R_sigma		16.0
+kspring_cov	20.0
+a		3.8
+el		1.0
+eh		2.0
+covalentRepulsion	off
+nav		1000
+
+# Pairlist generation
+pairs_cutoff	20.0
+pairs_freq	1000
+
+# End to end
+fixed1		0
+pulled1		25979
+fixedEnd	<fixed1>
+pulledEnd	<pulled1>
+
+# Simulations
+numsteps	1000000		# Total number of steps
+timestep	0.16			# Timestep
+seed		18782			# Random seed (actual seed is constructed from this and run number)
+firstrun	4			# Run number (i.e. number of trajectory)
+runnum		1
+
+# Output
+reffilename 	structures/<name>.ref.pdb			# Referance pdb to load into VMD
+outputtiming	100000				# Frequency of printing out data (former 'nav')
+outputname	dat/<name>_<author><run>_<stage>.dat		# Filename mask for energy file
+dcdfreq		100000					# Frequency of saving output and coordinates into dcd file (former 'nav1')
+DCDfile		dcd/<name>_<author><run>_<stage>.dcd		# Filename mask for dcd file
+restartfreq	100000					# Frequency of saving restart coordinates and parameters
+restartname 	output/<name>_<author><run>_restart			# Name of restart files (extensions .pdb and .conf will be added)
+finalcoord	structures/<name>_<author><run>_<stage>_final.pdb		# Filename mask for final coordinates file
+
+

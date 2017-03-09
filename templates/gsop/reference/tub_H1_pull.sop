@@ -1,0 +1,188 @@
+# Configuration file for pulling sop-protein
+# Go to 'equil.sop' to see more explanations 
+author N
+
+device 0
+
+# Protein name
+name 5pf
+stage pull
+
+# Input system
+structure	<name>.pdb
+topology        topologies/<name>_Rlb8.0_Rsc2.0_eh2.0_tandem1-0.top           # Topology file
+coordinates	structures/<name>_<author><run>_equil_final.pdb	# Read coordinates from final equilibration frame 
+											# (name and run parameters are same as there)
+# Tandem creation
+createTandem    no
+linkerLength    0
+monomerCount    1
+tandemDirection endToEnd
+tandemVectorX   0.0
+tandemVectorY   0.0
+tandemVectorZ   0.0
+
+# Force field
+temperature	0.6
+zeta		50.0
+R_limit		2.0
+R_limit_bond	8.0
+SC_limit_bond	2.0
+R_sigma		16.0
+kspring_cov	20.0
+a		3.8
+el		1.0
+eh		2.0
+covalentRepulsion	off
+nav		1000
+
+# Pairlist generaion
+pairs_cutoff	20.0
+pairs_freq	1000
+
+# Pulling
+fixed_beads	105		# Number of fixed beads.
+fixed1          247            # First fixed bead (to fix more beads, add 'fixed2', 'fixed3'... and change the 'fixed_beads')
+fixed2          252
+fixed3          256
+fixed4          261
+fixed5		324
+fixed6		325
+fixed7		328
+fixed8		347
+fixed9		348
+fixed10		1113
+fixed11		1118
+fixed12		1122
+fixed13		1127
+fixed14		1190
+fixed15		1191
+fixed16		1194
+fixed17		1213
+fixed18		1214
+fixed19		1979
+fixed20		1984
+fixed21		1988
+fixed22		1993
+fixed23		2056
+fixed24		2057
+fixed25		2060
+fixed26		2079
+fixed27		2080
+fixed28		2845
+fixed29		2850
+fixed30         2854
+fixed31		2859
+fixed32 	2922
+fixed33 	2923
+fixed34 	2926
+fixed35 	2945
+fixed36		2946
+fixed37		3711
+fixed38		3716
+fixed39		3720
+fixed40         3725
+fixed41		3788
+fixed42		3789
+fixed43		3792
+fixed44		3811
+fixed45		3812
+fixed46		4419
+fixed47		4442
+fixed48		4492
+fixed49		4856
+fixed50		4881
+fixed51		4931
+fixed52		8008
+fixed53		8091
+fixed54		8131
+fixed55		8447
+fixed56		8531
+fixed57         8570
+fixed58		8749
+fixed59 	8772
+fixed60 	8822
+fixed61 	9186
+fixed62 	9211
+fixed63		9261
+fixed64		12338
+fixed65		12421
+fixed66		12461
+fixed67         12777
+fixed68         12861
+fixed69         12900
+fixed70         13079
+fixed71         13102
+fixed72         13152
+fixed73         13516
+fixed74         13541
+fixed75         13591
+fixed76         16668
+fixed77         16751
+fixed78         16791
+fixed79         17107
+fixed80         17191
+fixed81         17230
+fixed82         17409
+fixed83         17432
+fixed84         17482
+fixed85         17846
+fixed86         17871
+fixed87         17921
+fixed88         20998
+fixed89         21081
+fixed90         21121
+fixed91         21437
+fixed92         21521
+fixed93         21560
+fixed94         21739
+fixed95         21762
+fixed96         21812
+fixed97         22176
+fixed98         22201
+fixed99         22251
+fixed100        25328
+fixed101        25411
+fixed102        25451
+fixed103        25767
+fixed104        25851
+fixed105        25890
+
+
+
+pulled_beads 	2		# Number of beads being pulled
+pulled1         24165             # Fist pulled bead (same story as with fixed)
+pulled2         24230
+
+deltax		0.0001
+k_trans		0.025
+pullDirection   vector
+
+pullVector	-0.989627	-0.143661	0
+
+
+
+# End to end
+fixedEnd 	<fixed23>
+pulledEnd 	<pulled2>
+
+#fixedEnd <fixed1>
+#pulledEnd <pulled1>
+
+# Simulations
+numsteps	100000000000
+timestep	0.16
+seed		499395
+firstrun	4
+runnum		1
+
+# Output
+reffilename 	<name>.ref.pdb			# Referance pdb to load into VMD
+outputtiming	1000000				# Frequency of printing out data (former 'nav')
+outputname	dat/<name>_<author><run>_<stage>.dat		# Filename mask for energy file
+dcdfreq		1000000					# Frequency of saving output and coordinates into dcd file (former 'nav1')
+DCDfile		dcd/<name>_<author><run>_<stage>.dcd		# Filename mask for dcd file
+restartfreq	100000					# Frequency of saving restart coordinates and parameters
+restartname 	output/<name>_<author><run>_restart			# Name of restart files (extensions .pdb and .conf will be added)
+finalcoord	output/<name>_<author><run>_<stage>_final.pdb		# Filename mask for final coordinates file
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+# #PBS -l nodes=1:ppn=1:xxnodexx
+#PBS -l nodes=1:ppn=1:dq4
+#PBS -l walltime=300:00:00
+
+USER=xxuserxx        
+JOB_SUB=xxjob_subxx           # directory label on scratch drive
+MY_DIR=xxmy_dirxx             # submit location
+JOB_DIR=xxjob_dirxx           # /scratch/user/$JOB_SUB
+COMPLETE_D=xxcompleted_dirxx  # /data4/user/completed/$JOB_SUB
+
+rm -rf $JOB_DIR
+mkdir -p $JOB_DIR
+cd $MY_DIR
+cp * $JOB_DIR
+cd $JOB_DIR
+
+# compile
+# gcc -O3 main_pullends_fullGo_dcd_nucl.c read_protein.c rforce.c force_pullends_nucl.c iteration_nucl.c update_dcd_fullGo_nucl.c ras_structure_nucl.c identify.c dcdio.c -lm -Wall -o run_protein_Fene
+# run 4
+
+cd $JOB_DIR
+mkdir Coord
+mkdir Struct_data
+
+# ./xxrunxx xxpdbxx xxcontactxx xxstructxx xxseedxx
+make xxargv_onexx
+make run
+wait
+
+rsync -auvz $JOB_DIR/* $COMPLETE_D
+rm -rf $JOB_DIR

@@ -1,0 +1,32 @@
+######################################################
+## My TkCon Resource File
+
+# Use a fixed default font
+tkcon font fixed; # valid on unix
+#tkcon font systemfixed; # valid on win
+# tkcon font Courier 12; # valid everywhere
+# tkcon font Courier 14; # valid everywhere
+# tkcon font Helvetica 12; # failed
+# tkcon font Arial 14; # failed
+# tkcon font "Lucida Console" 14
+
+# Keep 50 commands in history
+set ::tkcon::OPT(history) 150
+
+# Use a pink prompt
+set ::tkcon::COLOR(prompt) red
+######################################################
+
+set ::tkcon::COLOR(bg) ivory
+# set ::tkcon::OPT(font) "{Lucida Console} 13" -fail
+# set ::tkcon::OPT(font) "{Verdana} 13" - fail
+# set ::tkcon::OPT(font) "{Liberation Mono} 13"
+# set ::tkcon::OPT(font) "{monospace} 13"
+# works:
+# set ::tkcon::OPT(font) "Consolas 20"
+# set ::tkcon::OPT(font) 12
+set ::tkcon::OPT(font) "{Verdana} 16"
+
+# Size:
+set tkcon::OPT(cols) 290; # YMMV, change these to suit your
+set tkcon::OPT(rows) 14;  # screen resolution and taste.

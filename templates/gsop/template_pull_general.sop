@@ -1,0 +1,71 @@
+# Configuration file for pulling sop-protein
+# Go to 'equil.sop' to see more explanations
+author D
+
+device xxgsopdevicexx  # 0,1,2
+
+# Protein name
+name xxgsopnamexx
+stage pull
+
+# Input system
+structure   structures/<name>.pdb
+topology    topologies/<name>_topology.top    # Topology file
+coordinates structures/<name>_<author><run>_equil_final.pdb
+
+# Tandem creation
+createTandem    no
+linkerLength    0
+monomerCount    1
+tandemDirection endToEnd
+tandemVectorX   0.0
+tandemVectorY   0.0
+tandemVectorZ   0.0
+
+# Force field
+temperature   0.6
+zeta          50.0
+R_limit       2.0
+R_limit_bond  8.0
+SC_limit_bond 2.0
+R_sigma       16.0
+kspring_cov   20.0
+a             3.8
+el            1.0
+eh            1.25
+covalentRepulsion off
+nav           1000
+
+# Pairlist generaion
+pairs_cutoff  20.0
+pairs_freq    1000
+
+# Pulling
+fixed_beads  1      # Number of fixed beads.
+fixed1       xxfixedbeadxx      # First fixed bead (to fix more beads, add 'fixed2', 'fixed3'... and change the 'fixed_beads')
+pulled_beads 1      # Number of beads being pulled
+pulled1      xxpulledbeadxx    # Fist pulled bead (same story as with fixed)
+deltax       0.0005
+k_trans      0.05
+pullDirection endToEnd
+
+# End to end
+fixedEnd   <fixed1>
+pulledEnd  <pulled1>
+
+# Simulations
+numsteps    xxnumstepsxx # hsp70 nbd
+timestep    0.08
+seed        xxseedxx   # CHANGE THIS!
+firstrun    30         # CHANGE THIS!
+runnum      1
+
+# Output
+reffilename  <name>.ref.pdb         # Referance pdb to load into VMD
+outputtiming 200000             # Frequency of printing out data (former 'nav')
+outputname   dat/<name>_<author><run>_<stage>.dat       # Filename mask for energy file
+dcdfreq      200000                 # Frequency of saving output and coordinates into dcd file (former 'nav1')
+DCDfile      dcd/<name>_<author><run>_<stage>.dcd       # Filename mask for dcd file
+restartfreq  200000                 # Frequency of saving restart coordinates and parameters
+restartname  output/<name>_<author><run>_restart            # Name of restart files (extensions .pdb and .conf will be added)
+finalcoord   output/<name>_<author><run>_<stage>_final.pdb      # Filename mask for final coordinates file

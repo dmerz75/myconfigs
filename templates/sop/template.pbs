@@ -1,0 +1,45 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=1:xxnodexx
+#PBS -l walltime=700:00:00
+#PBS -N xxsubnamexx
+
+# Fix environment variables.
+USER=xxuserxx # self.user
+MY_DIR=xxmy_dirxx # self.cwd
+JOB_DIR_NAME=xxjob_dir_namexx # self.job_dir_name
+JOB_PATH_LOCAL=xxjob_path_localxx # self.job_path_local
+JOB_PATH_RUN=xxjob_path_runxx # self.job_path_run # /scratch/user/$JOB_SUB
+JOB_COMPLETED_DIR=xxcompleted_dirxx # self.completed_dir # /data4/user/completed/$JOB_SUB
+
+# Prepare directories.
+rm -rf $JOB_PATH_RUN
+mkdir -p $JOB_PATH_RUN
+cp $JOB_PATH_LOCAL/* $JOB_PATH_RUN
+# rsync -auvz --exclude 'sopnucleo*' --exclude 'contacts*' --exclude 'biopython' $MY_DIR/* $JOB_DIR
+cd $JOB_PATH_RUN
+
+# Job Execution.
+# compile
+# gcc -O3 main_pullends_fullGo_dcd_nucl.c read_protein.c rforce.c
+# force_pullends_nucl.c iteration_nucl.c update_dcd_fullGo_nucl.c
+# ras_structure_nucl.c identify.c dcdio.c -lm -Wall -o run_protein_Fene
+
+# cd $JOB_DIR
+mkdir -p Coord
+mkdir -p Struct_data
+
+STARTTIME=$(date +%s)
+# make xxargv_onexx
+# wait
+./xxrunxx xxpdbxx xxcontactxx xxstructxx xxseedxx
+wait
+ENDTIME=$(date +%s)
+TOTALTIME=$(($ENDTIME-$STARTTIME))
+
+echo $TOTALTIME >> ${JOB_DIR}/soptime.dat
+# printf "%d\n" $TOTALTIME
+# printf "%0.2f\n" $TOTALTIME
+
+# Clean up!
+rsync -auvz $JOB_PATH_RUN/* $JOB_COMPLETED_DIR
+#rm -rf $JOB_DIR

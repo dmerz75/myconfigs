@@ -1,0 +1,123 @@
+### MATPLOTLIBRC FORMAT
+
+### FONT
+# The font.family property has five values: 'serif' (e.g., Times),
+# 'sans-serif' (e.g., Helvetica), 'cursive' (e.g., Zapf-Chancery),
+# 'fantasy' (e.g., Western), and 'monospace' (e.g., Courier).  Each of
+# these font families has a default list of font names in decreasing
+# order of priority associated with them.  When text.usetex is False,
+# font.family may also be one or more concrete font names.
+#
+# The font.weight property has effectively 13 values: normal, bold,
+# bolder, lighter, 100, 200, 300, ..., 900.  Normal is the same as
+# 400, and bold is 700.  bolder and lighter are relative values with
+# respect to the current weight.
+#
+font.family         : sans-serif
+font.style          : normal
+font.variant        : normal
+font.weight         : 400
+font.size           : 28.0
+font.sans-serif     : Geneva
+# no - Courier,Helvetica,sans-serif,Tahoma,Arial,Lucid
+# Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
+
+
+### LINES
+# See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
+# information on line properties.
+lines.linewidth   : 2.0    # line width in points
+
+
+### AXES
+# default face and edge color, default tick sizes,
+# default fontsizes for ticklabels, and so on.  See
+# http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
+#axes.hold           : True    # whether to clear the axes by default on
+#axes.facecolor      : white   # axes background color
+#axes.edgecolor      : black   # axes edge color
+axes.linewidth      : 2.0     # edge linewidth
+#axes.grid           : False   # display grid or not
+axes.titlesize      : 36.0   # fontsize of the axes title
+axes.labelsize      : 32.0  # fontsize of the x any y labels
+axes.labelweight    : 700  # weight of the x and y labels
+#axes.labelcolor     : black
+#axes.axisbelow      : False   # whether axis gridlines and ticks are below
+                               # the axes elements (lines, text, etc)
+
+#axes.formatter.limits : -7, 7 # use scientific notation if log10
+                               # of the axis range is smaller than the
+                               # first or larger than the second
+#axes.formatter.use_locale : False # When True, format tick labels
+                                   # according to the user's locale.
+                                   # For example, use ',' as a decimal
+                                   # separator in the fr_FR locale.
+#axes.formatter.use_mathtext : False # When True, use mathtext for scientific
+                                     # notation.
+#axes.formatter.useoffset      : True    # If True, the tick label formatter
+                                         # will default to labeling ticks relative
+                                         # to an offset when the data range is very
+                                         # small compared to the minimum absolute
+                                         # value of the data.
+
+#axes.unicode_minus  : True    # use unicode for the minus symbol
+                               # rather than hyphen.  See
+                               # http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
+#axes.color_cycle    : b, g, r, c, m, y, k  # color cycle for plot lines
+                                            # as list of string colorspecs:
+                                            # single letter, long name, or
+                                            # web-style hex
+#axes.xmargin        : 0  # x margin.  See `axes.Axes.margins`
+#axes.ymargin        : 0  # y margin See `axes.Axes.margins`
+
+#polaraxes.grid      : True    # display grid on polar axes
+#axes3d.grid         : True    # display grid on 3d axes''
+
+
+### Legend
+#legend.fancybox      : False  # if True, use a rounded box for the
+                               # legend, else a rectangle
+#legend.isaxes        : True
+#legend.numpoints     : 2      # the number of points in the legend line
+legend.fontsize      : xx-large
+#legend.borderpad     : 0.5    # border whitespace in fontsize units
+#legend.markerscale   : 1.0    # the relative size of legend markers vs. original
+# the following dimensions are in axes coords
+#legend.labelspacing  : 0.5    # the vertical space between the legend entries in fraction of fontsize
+#legend.handlelength  : 2.     # the length of the legend lines in fraction of fontsize
+#legend.handleheight  : 0.7     # the height of the legend handle in fraction of fontsize
+#legend.handletextpad : 0.8    # the space between the legend line and legend text in fraction of fontsize
+#legend.borderaxespad : 0.5   # the border between the axes and legend edge in fraction of fontsize
+#legend.columnspacing : 2.    # the border between the axes and legend edge in fraction of fontsize
+#legend.shadow        : False
+legend.frameon       : False   # whether or not to draw a frame around legend
+#legend.framealpha    : 1.0    # opacity of of legend frame
+#legend.scatterpoints : 3 # number of scatter points
+
+
+### FIGURE
+# See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
+figure.figsize   : 9.8, 5.8    # figure size in inches
+figure.dpi       : 300      # figure dots per inch
+#figure.facecolor : 0.75    # figure facecolor; 0.75 is scalar gray
+#figure.edgecolor : white   # figure edgecolor
+#figure.autolayout : False  # When True, automatically adjust subplot
+                            # parameters to make the plot fit the figure
+#figure.max_open_warning : 20  # The maximum number of figures to open through
+                               # the pyplot interface before emitting a warning.
+                               # If less than one this feature is disabled.
+
+# The figure subplot parameters.  All dimensions are a fraction of the
+# figure width or height
+# plt.subplots_adjust(left=0.140,right=0.960,top=0.940,bottom=0.200)
+figure.subplot.left    : 0.140  # the left side of the subplots of the figure
+figure.subplot.right   : 0.960  # the right side of the subplots of the figure
+figure.subplot.bottom  : 0.200  # the bottom of the subplots of the figure
+figure.subplot.top     : 0.940  # the top of the subplots of the figure
+figure.subplot.wspace  : 0.2    # the amount of width reserved for blank space between subplots
+figure.subplot.hspace  : 0.2    # the amount of height reserved for white space between subplots
+
+### TEXT
+# http://matplotlib.org/api/artist_api.html#module-matplotlib.text for more
+#text.color          : black
+text.usetex         : True  # use latex for all text handling. The following fonts

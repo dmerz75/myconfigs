@@ -1,0 +1,64 @@
+# Configuration file for equilibration simulations.
+# See 'conf.txt' for details
+author D
+
+device xxgsopdevicexx  # 0,1,2
+
+# Protein name
+name  xxgsopnamexx   # Name, assigned to the protein
+stage equil
+
+# Input system
+structure   structures/<name>.pdb    # Initial pdb
+topology    topologies/<name>_topology.top    # Topology file
+coordinates structures/<name>_tandem<monomerCount>-<linkerLength>.initial.pdb
+
+# Tandem creation
+createTandem    no
+linkerLength    0
+monomerCount    1
+tandemDirection endToEnd
+tandemVectorX   0.0
+tandemVectorY   0.0
+tandemVectorZ   0.0
+
+# Force field
+temperature   0.6
+zeta          50.0
+R_limit       2.0
+R_limit_bond  8.0
+SC_limit_bond 2.0
+R_sigma       16.0
+kspring_cov   20.0
+a             3.8
+el            1.0
+eh            1.25
+covalentRepulsion off
+nav           1000
+
+# Pairlist generation
+pairs_cutoff  20.0
+pairs_freq    1000
+
+# End to end
+fixed1      xxfixedbeadxx
+pulled1     xxpulledbeadxx # 381
+fixedEnd    <fixed1>
+pulledEnd   <pulled1>
+
+# Simulations
+numsteps    2000000  # Total number of steps
+timestep    0.08     # Timestep
+seed        xxseedxx   # Random seed (actual seed is constructed from this and run number)
+firstrun    30       # Run number (i.e. number of trajectory)
+runnum      1
+
+# Output
+reffilename  structures/<name>.ref.pdb             # Reference pdb to load into VMD
+outputtiming 1000                                  # Frequency of printing out data (former 'nav')
+outputname   dat/<name>_<author><run>_<stage>.dat  # Filename mask for energy file
+dcdfreq      1000                                  # Frequency of saving output and coordinates into dcd file (former 'nav1')
+DCDfile      dcd/<name>_<author><run>_<stage>.dcd  # Filename mask for dcd file
+restartfreq  100000                                # Frequency of saving restart coordinates and parameters
+restartname  output/<name>_<author><run>_restart   # Name of restart files (extensions .pdb and .conf will be added)
+finalcoord   structures/<name>_<author><run>_<stage>_final.pdb  # Filename mask for final coordinates file

@@ -1,0 +1,379 @@
+# /etc/bash.bashrc
+
+# If not running interactively, don't do anything!
+[[ $- != *i* ]] && return
+
+# Enable checkwinsize so that bash will check the terminal size when
+shopt -s checkwinsize
+
+# Enable history appending instead of overwriting.
+shopt -s histappend
+
+function proml
+{
+    case $TERM in
+        xterm*)
+            local TITLEBAR='\[\033]0;\u@\h:\w\007\]'
+            ;;
+        *)
+            local TITLEBAR=''
+            ;;
+    esac
+
+    PS1="${TITLEBAR}\
+[\$(date +%H%M)]\
+[\u@\h:\w]\
+\$ "
+    PS2='> '
+    PS4='+ '
+}
+proml
+
+
+# sanitize TERM:
+safe_term=${TERM//[^[:alnum:]]/?}
+match_lhs=""
+
+[[ -f ~/.dir_colors ]] && match_lhs="${match_lhs}$(<~/.dir_colors)"
+[[ -f /etc/DIR_COLORS ]] && match_lhs="${match_lhs}$(</etc/DIR_COLORS)"
+[[ -z ${match_lhs} ]] \
+    && type -P dircolors >/dev/null \
+    && match_lhs=$(dircolors --print-database)
+
+# colors
+if [[ $'\n'${match_lhs} == *$'\n'"TERM "${safe_term}* ]] ; then
+    # we have colors :-)
+    # Enable colors for ls, etc. Prefer ~/.dir_colors
+    if type -P dircolors >/dev/null ; then
+        if [[ -f ~/.dir_colors ]] ; then
+            eval $(dircolors -b ~/.dir_colors)
+        elif [[ -f /etc/DIR_COLORS ]] ; then
+            eval $(dircolors -b /etc/DIR_COLORS)
+        fi
+    fi
+    # Use this other PS1 string if you want \W for root and \w for all other users:
+    PS1="$(if [[ ${EUID} == 0 ]]; then echo '\[\033[01;31m\]\h'; else echo '\[\033[01;32m\]\u@\h'; fi)\[\033[01;34m\] \w \$([[ \$? != 0 ]] && echo \"\[\033[01;31m\]:(\[\033[01;34m\] \")\\$\[\033[00m\] "
+    # PS1="$(if [[ ${EUID} == 0 ]]; then echo '\[\033[01;31m\]\h\[\033[01;34m\] \W'; else echo '\[\033[01;32m\]\u@\h\[\033[01;34m\] \w'; fi) \$([[ \$? != 0 ]] && echo \"\[\033[01;31m\]:(\[\033[01;34m\] \")\\$\[\033[00m\] "
+    alias ls="ls --color=auto"
+    alias dir="dir --color=auto"
+    alias grep="grep --color=auto"
+    alias dmesg='dmesg --color'
+
+    # Uncomment the "Color" line in /etc/pacman.conf instead of uncommenting the following line...!
+    # alias pacman="pacman --color=auto"
+else
+    # show root@ when we do not have colors
+    PS1="\u@\h \w \$([[ \$? != 0 ]] && echo \":( \")\$ "
+    # Use this other PS1 string if you want \W for root and \w for all other users:
+    # PS1="\u@\h $(if [[ ${EUID} == 0 ]]; then echo '\W'; else echo '\w'; fi) \$([[ \$? != 0 ]] && echo \":( \")\$ "
+fi
+
+# Try to keep environment pollution down, EPA loves us.
+unset safe_term match_lhs
+
+
+# auto-completion:
+# Try to enable the auto-completion (type: "pacman -S bash-completion" to install it).
+[ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
+# Try to enable the "Command not found" hook ("pacman -S pkgfile" to install it).
+# See also: https://wiki.archlinux.org/index.php/Bash#The_.22command_not_found.22_hook
+[ -r /usr/share/doc/pkgfile/command-not-found.bash ] && . /usr/share/doc/pkgfile/command-not-found.bash
+# ---- OTHER
+if [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+fi
+
+
+xhost +local:root > /dev/null 2>&1
+complete -cf sudo
+shopt -s cdspell
+shopt -s checkwinsize
+shopt -s cmdhist
+shopt -s dotglob
+shopt -s expand_aliases
+shopt -s extglob
+shopt -s histappend
+shopt -s hostcomplete
+shopt -s nocaseglob
+export HISTSIZE=10000
+export HISTFILESIZE=${HISTSIZE}
+export HISTCONTROL=ignoreboth
+
+# directory listing:
+alias ls='ls --group-directories-first --time-style=+"%m.%d.%Y %H:%M" --color=auto -F'
+# di = directory
+# fi = file
+# ln = symbolic link
+# pi = fifo file
+# so = socket file
+# bd = block (buffered) special file
+# cd = character (unbuffered) special file
+# or = symbolic link pointing to a non-existent file (orphan)
+# mi = non-existent file pointed to by a symbolic link (visible when you type ls -l)
+# ex = file which is executable (ie. has 'x' set in permissions).
+# The *.rpm=90 parameter at the end tells ls to display any files ending in .rpm in the specified colour, in this case colour 90 (dark grey). This can be applied to any types of files (eg. you could use '*.png=35' to make jpeg files appear purple.) As many or as few parameters as you like can go into the LS_COLORS variable, as long as the parameters are separated by colons.
+# Using trial and error (and a little bash script I wrote... my first one ever! :) I worked out all the colour codes, at least my interpretation of them -
+# 0   = default colour
+# 1   = bold
+# 4   = underlined
+# 5   = flashing text
+# 7   = reverse field
+# 31  = red
+# 32  = green
+# 33  = orange
+# 34  = blue
+# 35  = purple
+# 36  = cyan
+# 37  = grey
+# 40  = black background
+# 41  = red background
+# 42  = green background
+# 43  = orange background
+# 44  = blue background
+# 45  = purple background
+# 46  = cyan background
+# 47  = grey background
+# 90  = dark grey
+# 91  = light red
+# 92  = light green
+# 93  = yellow
+# 94  = light blue
+# 95  = light purple
+# 96  = turquoise
+# 100 = dark grey background
+# 101 = light red background
+# 102 = light green background
+# 103 = yellow background
+# 104 = light blue background
+# 105 = light purple background
+# 106 = turquoise background
+# combined: di=5;31;42
+alias testb='source ~/.bashrc && ls'
+alias ll='ls -l --group-directories-first --time-style=+"%m.%d.%Y %H:%M" --color=auto -F'
+alias la='ls -la --group-directories-first --time-style=+"%m.%d.%Y %H:%M" --color=auto -F'
+alias lt='ls -lhtr --group-directories-first --time-style=+"%m.%d.%Y %H:%M" --color=auto -F'
+alias grep='grep --color=tty -d skip'
+alias df='df -h'                          # human-readable sizes
+alias duh='du -h --max-depth=1'
+alias free='free -m'                      # show sizes in MB
+alias np='nano PKGBUILD'
+
+# ex - archive extractor
+# usage: ex <file>
+ex ()
+{
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xjf $1   ;;
+      *.tar.gz)    tar xzf $1   ;;
+      *.bz2)       bunzip2 $1   ;;
+      *.rar)       unrar x $1     ;;
+      *.gz)        gunzip $1    ;;
+      *.tar)       tar xf $1    ;;
+      *.tbz2)      tar xjf $1   ;;
+      *.tgz)       tar xzf $1   ;;
+      *.zip)       unzip $1     ;;
+      *.Z)         uncompress $1;;
+      *.7z)        7z x $1      ;;
+      *)           echo "'$1' cannot be extracted via ex()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# prompt
+# PS1='[\u@\h \W]\$ '
+BROWSER=/usr/bin/xdg-open
+
+# --- END OF MANJARO _ ARCH
+alias xo='/usr/bin/xdg-open'
+PS1='\[\e[1;31m\][\u\w]\$\[\e[0m\]'
+if [ -e /usr/share/terminfo/x/xterm-256color ]; then
+    export TERM='xterm-256color'
+else
+    export TERM='xterm-color'
+fi
+# export TERM=xterm-256color
+
+# directory movement
+alias doc='cd ~/Documents'
+alias namd='cd ~/Documents/namd_equilibration'
+alias nt='xdg-open ~/Dropbox/pdfman/namd-tutorial-unix.pdf'
+alias tt='cd ~/Documents/namd/tutorials/stretchAla/files'
+alias drop='cd ~/Dropbox'
+alias gromacs='cd ~/Documents/gromacs'
+alias amber='cd ~/Documents/nanosum/'
+alias asmd='cd ~/Documents/namd/asmd'
+alias data='cd ~/Documents/nanosum/deca/namd/01.vac'
+alias pdf='cd ~/Dropbox/pdfman'
+alias mzmine='bash /opt/packages/MZmine-2.10/startMZmine_Linux.sh'
+alias matlab='/usr/local/MATLAB/R2012a_Student/bin/./matlab -glnx86'
+alias mat='cd ~/Documents/MATLAB'
+alias work='cd /home/dale/Documents/valiant/xproject'
+alias val='cd /home/dale/Documents/valiant'
+alias asmd2='cd ~/Documents/md/asmd2'
+alias asmd3='cd /home/dale/Documents/md/asmd3'
+alias rhx='cd /home/dale/Documents/rhx'
+alias work='cd /home/dale/Documents/md/analyze/workingp65'
+alias dima='cd ~/Documents/uc/dima'
+alias uc='cd ~/uc'
+alias opt='cd ~/opt'
+alias lcthw='cd ~/Documents/uc/lcthw'
+alias emacs.d='cd ~/.emacs.d'
+alias oc='cd ~/Documents/computational_chemistry/objectivec'
+alias ppt='cd /home/dale/.wine/drive_c/Program\ Files\ \(x86\)/Microsoft\ Office/Office12'
+alias wppt='wine /home/dale/.wine/drive_c/Program\ Files\ \(x86\)/Microsoft\ Office/Office12/PPTVIEW.EXE'
+
+# research
+alias rr='cd ~/ext/research_review'
+alias sop='cd ~/sop_dev'
+alias com='cd ~/ext/completed'
+alias sbd='cd ~/ext/completed_sbd'
+
+# pylib
+alias pylib='source ~/.pylib/upload.sh; upload-pylib'
+alias pyload='source ~/.pylib/upload.sh'
+
+# vim
+alias vi='vim'
+
+# emacs
+alias em='emacs -bg DarkSlateGray -fg Wheat -geometry 80x40 -fn 10x20'
+alias ed='emacs --daemon'
+alias e='emacsclient -t'
+alias ec='emacsclient -c'
+alias ek='emacsclient -e "(kill-emacs)"'
+export TERM=xterm-256color
+alias killemacs='emacsclient -e "(kill-emacs)"'
+
+# text
+export EDITOR='emacsclient'
+
+# GATES
+export AMBERHOME=~/opt/amber12
+export XHOME=/usr/lib64
+export XLIB=/usr/lib64
+# export PATH=$PATH:$XLIB
+export PATH=~/opt/NAMD_2.9_Linux-x86_64-multicore:$PATH
+#  /home/dale/opt/NAMD_2.9_Linux-x86_64-multicore
+export PATH=~/opt/mendeleydesktop-1.10.1-linux-x86_64/bin:$PATH
+export PATH=~/opt/mendeleydesktop-1.11-linux-x86_64/bin:$PATH
+export PATH=$PATH:$AMBERHOME/exe
+# export VMDHOME=~/opt/vmd/vmd
+# export VMDHOME=/usr/local/bin/vmd
+# export PATH=$PATH:$VMDHOME
+# export PATH=/home/dale/opt/vmd/bin:$PATH
+# export PATH=~/opt/emacs24:$PATH
+export PYTHONPATH=$HOME/lib/python/:$PYTHONPATH
+export PATH=/usr/bin/gnu:$PATH
+export PATH=/home/dale/opt/NAMD_2.9_Linux-x86_64-multicore:$PATH
+#           /home/dale/opt/NAMD_2.9_Linux-x86_64-multicore
+# export PATH=/home/dmerz3/python/bin:$PATH
+# export PATH=/opt/xulrunner:$PATH
+# export PATH=/opt/xulrunner/1.9.2/xulrunner:$PATH
+# export PATH=/home/dale/opt/vmd:$PATH
+
+# Alias definitions.
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# enable programmable completion features (you don't need to enable
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+    . /etc/bash_completion
+fi
+
+# ruby
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+
+# gwyddion
+export LD_LIBRARY_PATH=/home/dale/opt/gwyddion-2.34/modules/pygwy/.libs:$LD_LIBRARY_PATH
+export PYTHONPATH=/home/dale/opt/gwyddion-2.34/modules/pygwy/.libs:$PYTHONPATH
+
+# arch
+alias pk='makepkg -i PKGBUILD'
+export MOUNT1=~/mount1
+# sudo mount /dev/sda1 $MOUNT1
+
+# cscope
+alias scope='cscope -b -q -k -R'
+# alias scope='cscope -b -q -R' - fails
+# alias scope='cscope -b -q -R -i cscope.files' -fails
+
+# http://wikemacs.org/wiki/Python#Anaconda
+# pycscope
+# apt-get install cscope
+# pip install pycscope
+# in project base dir:
+alias pyscope1="find . -name '*.py' > cscope.files"
+alias pyscope2='cscope -R'
+# cscope -R
+
+# cuda
+export PATH=/opt/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/opt/cuda/lib64:$LD_LIBRARY_PATH
+alias m870='sudo tee /proc/acpi/bbswitch <<< ON'
+export PATH=/home/dale/.pylib/cuda/maintenance:$PATH
+alias bbswitch='source ~/.pylib/cuda/bbswitch/bbswitch.sh'
+
+# sop_dev
+# alias get_tension='cp ~/sop_dev/tension/run_*.py ~/sop_dev/tension/2kho_nbd.pdb .'
+# alias get_chi='cp ~/sop_dev/chi_analysis/run_*.py .'
+export PATH=$PATH:$HOME/sop_dev/chi_analysis:$HOME/sop_dev/tension:$HOME/sop_dev/accessible_area:$HOME/sop_dev/contacts
+export PATH=$PATH:$HOME/sop_dcontactarray/contacts/new_contacts
+# $HOME/sop_dcontactarray/contacts/new_contacts
+export PATH=$PATH:$HOME/ext/completed_nbd/sop_dcontactarray_commit/contacts/new_contacts/
+# run_contacts_bond_vector_angle
+# export PATH=$PATH:$HOME/sop_dcontactarray/contacts/analyze/
+# run_analyze
+# run_segment
+# export PATH=$PATH:$HOME/sop_dcontactarray/contacts/segment/bin
+# export PATH=$PATH:$HOME/sop_dev/contacts/segment/bin
+
+# MMTSB (FEIG-MSU)
+# Do not forget to set MMTSBDIR to /home/dale/Documents/mmtsb and
+# add $MMTSBDIR/perl and $MMSTBDIR/bin to your path.
+export MMTSBDIR=/home/dale/Documents/mmtsb
+export PATH=$PATH:$MMTSBDIR/perl:$MMTSBDIR/bin
+
+# CSU
+export PATH=$PATH:/home/dale/opt/csu_rscP/rescP
+
+# pulchra
+export PATH=$PATH:/home/dale/Dropbox/skolnick/pulchra304/bin/linux
+
+# charmm
+# export PATH=$PATH:/home/dale/opt/c36b2/exec/gnu
+
+# vmd
+export PATH=/home/dale/opt/catdcd/LINUXAMD64/bin/catdcd4.0:$PATH
+# export VMDDIR=~/.pylib/vmd_tcl
+# export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
+export PATH=/usr/local/bin/vmd2:$PATH
+
+# Leiningen
+export PATH=$PATH:/home/dale/Dropbox/lein
+
+# wine
+export WINEPREFIX=$HOME/.config/wine/
+export WINEARCH=win32
+
+# cask
+export PATH=/home/dale/.cask/bin:$PATH
+
+# lammps
+export PATH=~/opt/lammps-15May15/src:$PATH
+
+# anaconda
+export PATH=$PATH:/opt/anaconda/bin
+
+# charmm
+export PATH=$PATH:~/opt/c36b2/exec/gnu
+
+# highway
+export PATH=~/.pylib:$PATH
+
+# converter
+export PATH=~/.pylib/bin:$PATH

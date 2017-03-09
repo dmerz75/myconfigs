@@ -1,0 +1,5 @@
+# if root is using bash & pstree exists
+
+original_user=${SUDO_USER:-$(pstree -Alsu "$$" | sed -n "s/.*(\([^)]*\)).*($USER)[^(]*$/\1/p")}
+export HISTTIMEFORMAT="<%F %T> (${original_user:-$USER}) [$$] "
+export PROMPT_COMMAND='builtin history 1 >> /var/log/root.log'
