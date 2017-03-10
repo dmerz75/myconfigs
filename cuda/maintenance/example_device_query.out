@@ -1,0 +1,27 @@
+CUDA Device Query...
+There are 1 CUDA devices.
+
+
+Device Number: 0
+  Device name: GeForce GTX 870M
+  Memory Clock Rate (KHz): 2500000
+  Memory Clock Rate (MHz): 2500
+  Memory Bus Width (bits): 192
+  Peak Memory Bandwidth (GB/s): 120.000000
+
+Major revision number:         3
+Minor revision number:         0
+Name:                          GeForce GTX 870M
+Total global memory:           2147287040
+Total global memory (GB):      6143
+Total shared memory per block: 49152
+Total registers per block:     65536
+Warp size:                     32
+Maximum memory pitch:          2147483647
+Maximum threads per block:     1024
+Clock rate:                    967000
+Total constant memory:         65536
+Texture alignment:             512
+Concurrent copy and execution: Yes
+Number of multiprocessors:     7
+Kernel execution timeout:      No
