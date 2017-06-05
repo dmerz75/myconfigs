@@ -6,8 +6,9 @@ print (sys.version)
 import time
 import glob
 import re
-
 import numpy as np
+
+
 
 my_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -17,54 +18,34 @@ my_dir = os.path.abspath(os.path.dirname(__file__))
 my_library = os.path.expanduser('~/.pylib')
 sys.path.append(my_library)
 from plot.cdf import *
-# mpl_moving_average
-# mpl_forcequench
-# mpl_worm
+from mylib.FindAllFiles import *
 
 #  ---------------------------------------------------------  #
 #  Start matplotlib (1/4)                                     #
 #  ---------------------------------------------------------  #
 import matplotlib
-# default - Qt5Agg
-# print matplotlib.rcsetup.all_backends
-# matplotlib.use('GTKAgg')
-# matplotlib.use('TkAgg')
-print 'backend:',matplotlib.get_backend()
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 fig = plt.figure(0)
 
-
 gs = GridSpec(1,1)
 ax1 = plt.subplot(gs[0,:])
-# ax2 = plt.subplot(gs[1,:-1])
 ax = [ax1]
 
 fig.set_size_inches(7,5)
-plt.subplots_adjust(left=0.140,right=0.960,top=0.920,bottom=0.20)
-# fig.set_size_inches(8.5,5.1)
-# plt.subplots_adjust(left=0.160,right=0.960,top=0.950,bottom=0.20)
-# font_prop_large = matplotlib.font_manager.FontProperties(size='large')
-# for k in matplotlib.rcParams.keys():
-#     print k
+plt.subplots_adjust(left=0.180,right=0.950,top=0.940,bottom=0.22)
 dct_font = {'family':'sans-serif',
             'weight':'normal',
             'size'  :'20'}
 matplotlib.rc('font',**dct_font)
-# matplotlib.rcParams['legend.frameon'] = False
-# matplotlib.rcParams['figure.dpi'] = 900
-# print matplotlib.rcParams['figure.dpi']
-
-# ax[0].set_xticklabels([],size=20)
-# ax[0].set_yticklabels([],size=20)
 
 
 #  ---------------------------------------------------------  #
 #  Import Data! (2/4)                                         #
 #  ---------------------------------------------------------  #
 result_type = 'force' # sop | sopnucleo | gsop | namd
-plot_type = 'histogram' # fe | tension | rmsd | rdf
-data_name = 'round_16_17'
+plot_type = 'hist' # fe | tension | rmsd | rdf
+data_name = 'cdf'
 option = None
 
 #  ---------------------------------------------------------  #
@@ -76,11 +57,12 @@ def parse_arguments():
     ''' Parse script's arguments.
     '''
     parser = argparse.ArgumentParser()
-    # parser.add_argument("-o","--option",help="select None,publish,show")
-    # parser.add_argument("-d","--dataname",help="data name: run280, 76n")
-    # parser.add_argument("-f","--filename",help="filename: data file")
     parser.add_argument("-t","--topology",help="topology: all, reg, AHM, LHM, or top56")
     parser.add_argument("-p","--position",help="position: doz1,doz2,doz3,doz4,doz5")
+    parser.add_argument("-fn","--filenumber",help="filenumber: 0,1,2 ..",type=int)
+    parser.add_argument("-rnd","--rnd",help="round: 13, 14, 16, 17")
+    parser.add_argument("-nb","--nbins",help="number of bins: 3,4,5,6..",type=int)
+    parser.add_argument("-cdf","--cdf",help="cdf-line: 0-off, 1-on",type=int)
     args = vars(parser.parse_args())
     return args
 
@@ -88,6 +70,10 @@ def parse_arguments():
 args = parse_arguments()
 topology = args['topology']
 position = args['position']
+rnd = args['rnd']
+fnum = args['filenumber']
+nbins = args['nbins']
+cdf_on_off = args['cdf']
 # MY ARGS:
 # topology: all, AHM, reg, LHM, top56
 # position: doz1,2,3,4,5
@@ -96,15 +82,44 @@ position = args['position']
 #  ---------------------------------------------------------  #
 #  Import Data! (3/4)                                         #
 #  ---------------------------------------------------------  #
-# lst_files = sys.argv[1:]
-# print lst_files
+def load_dct(cwd=my_dir,pattern='*.dat'):
+    # FindAllFiles
+    print 'cwd:',cwd
+    print 'pattern:',pattern
+    dct_find = {'cwd':cwd,'pattern':pattern}
+    x = FindAllFiles(dct_find)
+    # print x.pattern
+    x.get_files()
+    # x.print_query(x.dct)
+    print len(x.dct.keys()),'of',x.total
+    set9 = x.remove_dirname('fail',None,x.dct)
+    # set9 = x.query_filename(rnd,set9)
+    set9 = x.sort_filename(set9)
+    # x.dct (last pos.)
+    # set9 = x.sort_dirname(-1,x.dct)
+    # x.print_ [query,class]
+    # x.query_ [dirname,file,filename](searchstring,pos,dct)
+    # x.remove_[dirname,file,filename](searchstring,pos,dct)
+    # x.print_query(set9)
+    # print len(set9.keys()),'of',x.total
+    # sys.exit()
+    return set9
+    # return x.dct
+
+dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'rev_*.out')
+for k,v in dct_hist.iteritems():
+    print k,v['filename']
 # sys.exit()
 
+
+
 def get_data(datafile,topology,position):
+    print datafile
     lst_data = []
     with open(datafile,'r+') as fp:
         for line in fp:
-
+            # print line
+            # print position
             if (topology != None and position != None):
                 if ((re.search(topology,line) != None) and
                     (re.search(position,line) != None)):
@@ -115,15 +130,101 @@ def get_data(datafile,topology,position):
                     # print line
                     lst_data.append(float(line.split()[1]))
             elif (position != None):
+                # print position
                 if (re.search(position,line) != None):
                     # print line
                     lst_data.append(float(line.split()[1]))
             else:
+                print line.split()
                 lst_data.append(float(line.split()[1]))
 
     data = np.array(lst_data)
     print data.shape
     return data
+
+
+def get_cdf(data,color='b',fill=True,**kwargs):
+    '''
+    '''
+    if 'lower_limit' in kwargs:
+        lower_limit = kwargs['lower_limit']
+    else:
+        lower_limit = min(data)
+
+    if 'upper_limit' in kwargs:
+        upper_limit = kwargs['upper_limit']
+    else:
+        upper_limit = max(data)
+
+
+    cdf = myCDF(data)
+    # cdf.print_class()
+
+    # cdf.determine_bins(lower_limit=0.3,upper_limit=0.6,nbins=3) # set
+    cdf.determine_bins_limits(lower_limit=lower_limit,
+                              upper_limit=upper_limit,
+                              nbins=nbins) # set
+    # print cdf.bins
+
+    # cdf.get_hist(bins=cdbins)
+    cdf.get_hist()
+    cdf.print_values()
+    cdf.plot_bars(color=color,fill=fill)
+
+    if cdf_on_off != None:
+        cdf.plot_cdf(color=color)
+
+    # cdf.plot_hist4(data,bins,color='b')
+    # cdf.plot_cdf(data,color='b')
+
+    # stats:
+    cdf.print_stats()
+
+    # if re.search('max',v['file']) != None:
+    #     data_name = data_name + '_max'
+    # elif re.search('first',v['file']) != None:
+    #     data_name = data_name + '_first'
+
+    # if re.search('2pts',v['file']) != None:
+    #     data_name = data_name + '_2pts'
+    # elif re.search('1pts',v['file']) != None:
+    #     data_name = data_name + '_1pts'
+
+
+def axis_settings():
+    try:
+        ax[0].set_xlim(0.18,1.2)
+        # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+        ax[0].set_ylim(-0.01,1.01)
+        ax[0].set_xlabel('Forces',fontsize=24)
+        # ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+        ax[0].set_ylabel('Norm. Freq.',fontsize=24)
+    except NameError:
+        pass
+
+def legend_settings(lst):
+
+    # legend
+    # 1:
+    # handles, labels = ax1.get_legend_handles_labels()
+    # ax1.legend(handles, labels,prop={'size':10})
+    # 2:
+    # lst_labels = ['','',]
+    ax1.legend(lst,loc=1,prop={'size':18})
+    # 3:
+    # lst_labels = ['','',]
+    leg = plt.gca().get_legend()
+    for label in leg.get_lines():
+        label.set_linewidth(2.5)
+
+    # some lines in legend!
+    # print len(ax1.lines),ax1.lines
+    # lst_labels = ['0.3','0.4','0.5','0.6','0.7']
+    # for i,line in enumerate(ax1.lines[2:7]):
+    #     print lst_labels[i]
+    #     line.set_label(lst_labels[i])
+    # ax1.legend()
+
 
 
 
@@ -139,66 +240,124 @@ if 0:
 
 
 # TYPE 2:
-if 1:
-    cdfs = []
-    # lst_files = glob.glob(os.path.join(my_dir,'ff.file','*.out'))
-    # lst_files = [os.path.join(my_dir,'crit_breaks','crit_breaks_*.out'),
-    #              os.path.join(my_dir,'crit_breaks','crit_breaks_')
-    lst_files = ['cur_crit_breaks_16.first.out',
-                 'cur_crit_breaks_16.maxvalue.out',
-                 'cur_crit_breaks_17.first.out',
-                 'cur_crit_breaks_17.maxvalue.out']
-    lst_files = [os.path.join(my_dir,'crit_breaks',x) for x in lst_files]
-    print lst_files
-
-    colors = ['red','blue','m','cyan']
+if 0:
+    # colors = ['red','blue','m','cyan']
+    colors = ['firebrick','red','blue','cyan']
+    colors = ['blue']
 
     # Get myCDF
-    for i,f in enumerate(lst_files):
-        data = get_data(f,topology,position)
-        # print data[0]
-        if data[0] < 0.4:
-            bins = np.linspace(0.30,0.62,9)
-        elif data[0] >= 0.4:
-            bins = np.linspace(0.48,1.10,9)
+    # for i,f in enumerate(lst_files):
+    for k,v in dct_hist.iteritems():
 
-        # cdf
+        if fnum != k:
+            continue
+
+        # data = get_data(f,topology,position)
+        # print v['file']
+        data = get_data(v['file'],topology,position)
         cdf = myCDF(data)
-        # print 'min-max:',min(cdf.data),max(cdf.data)
-        cdf.get_hist(bins=bins)
-        # cdf.get_hist()
+        # cdf.print_class()
+
+        # cdf.determine_bins(lower_limit=0.3,upper_limit=0.6,nbins=3) # set
+        cdf.determine_bins_limits(nbins=nbins) # set
+        # print cdf.bins
+
+        # cdf.get_hist(bins=cdbins)
+        cdf.get_hist()
         cdf.print_values()
-        cdfs.append(cdf)
 
-    # myCDF.print_class
-    for i in range(len(cdfs)):
-        continue
-        cdfs[i].print_class()
+        cdf.plot_bars(color='b')
+
+        if cdf_on_off != None:
+            cdf.plot_cdf(color='b')
+
+        # cdf.plot_hist4(data,bins,color='b')
+        # cdf.plot_cdf(data,color='b')
+
+        # stats:
+        cdf.print_stats()
+
+        if re.search('max',v['file']) != None:
+            data_name = data_name + '_max'
+        elif re.search('first',v['file']) != None:
+            data_name = data_name + '_first'
+
+        if re.search('2pts',v['file']) != None:
+            data_name = data_name + '_2pts'
+        elif re.search('1pts',v['file']) != None:
+            data_name = data_name + '_1pts'
 
 
-    for i in range(len(cdfs)):
-        cdfs[i].plot_bars(color=colors[i])
-        cdfs[i].plot_cdf(color=colors[i])
 
-    # sys.exit()
 
-    # plot_hist4(data,bins,color=colors[i])
-    # plot_cdf(data,color=colors[i])
+for k,v in dct_hist.iteritems():
+    print k,v
 
+if 1:
+    data_name = data_name + '_8_12plate'
+    colors = ['g','b','orange','r']
+    fillval= [False,False,True,True]
+    limits = [(0.22,0.5),(0.48,0.9),(0.22,0.5),(0.48,0.9)]
+    for i,k in enumerate([1,0,4,3]): # 8 first, max, 12p first, max
+        data = get_data(dct_hist[k]['file'],topology,position)
+        get_cdf(data,colors[i],fillval[i],
+                lower_limit=limits[i][0],
+                upper_limit=limits[i][1])
+
+    axis_settings()
+    legend_settings(['mt8-first','mt8-crit','mt12-plate-first','mt12-plate-crit'])
+else:
+    data_name = data_name + '_8_12noplate'
+    colors = ['g','b','orange','r']
+    fillval= [False,False,True,True]
+    limits = [(0.22,0.5),(0.48,0.9),(0.22,0.5),(0.48,0.9)]
+    for i,k in enumerate([1,0,5,2]): # 8 first, max, 12np first, max
+        data = get_data(dct_hist[k]['file'],topology,position)
+        # get_cdf(data,colors[i],fillval[i])
+        get_cdf(data,colors[i],fillval[i],
+                lower_limit=limits[i][0],
+                upper_limit=limits[i][1])
+
+    axis_settings()
+    legend_settings(['mt8-first','mt8-crit','mt12-noplate-first','mt12-noplate-crit'])
+
+
+if 0:
+
+    for k in [1,0,5,2]: # 8 first, max, 12np first, max
+        pass
+
+    data1 = get_data(dct_hist[0]['file'],topology,position)
+    data2 = get_data(dct_hist[1]['file'],topology,position)
+    get_cdf(data1,'b',False)
+    get_cdf(data2,'g',False)
+
+
+    data1 = get_data(dct_hist[0]['file'],topology,position)
+    data2 = get_data(dct_hist[1]['file'],topology,position)
+    get_cdf(data1,'b',False)
+    get_cdf(data2,'g',False)
+
+
+    # data_name =
 
     # Plot Adjustments:
-    ax[0].set_xlim(0.23,1.2)
-    ax[0].set_ylim(-0.01,1.01)
 
-    ax[0].set_xlabel('Forces',fontsize=24)
-    # ax[0].set_ylabel('Frequency',fontsize=24)
-    ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+    try:
+        ax[0].set_xlim(0.18,1.2)
+        # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+        ax[0].set_ylim(-0.01,1.01)
+        ax[0].set_xlabel('Forces',fontsize=24)
+        ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+    except NameError:
+        pass
 
     # legend
     # 16-NoPlate
     # 17-Plate
-    lst_labels = ['NoPlate-1st','NoPlate-Crit','Plate-1st','Plate-Crit']
-    ax[0].legend(lst_labels,loc=1,prop={'size':16})
+    # lst_labels = ['NoPlate-1st','NoPlate-Crit','Plate-1st','Plate-Crit']
+    # ax[0].legend(lst_labels,loc=1,prop={'size':16})
+
 
 
 #  ---------------------------------------------------------  #
@@ -220,7 +379,22 @@ if topology != None:
     data_name = data_name + '_%s' % topology
 if position != None:
     data_name = data_name + '_%s' % position
+data_name = data_name + '_rnd%s' % rnd
 
 from plot.SETTINGS import *
-save_fig(my_dir,0,'fig','%s_%s_%s' % (result_type,plot_type,data_name),option)
-# mpl_myargs_end
+
+# Save a matplotlib figure.
+# REQ:
+# (1) cwd = saves here, else provide 'destdirname'
+# (2) name = filename without suffix. eg. 'png' (def), 'svg'
+# OPT:
+# (3) destdirname: eg. 'fig/histograms'
+# (4) dpi: (optional) 120 (default), 300, 600, 1200
+# (5) filetypes: ['png','svg','eps','pdf']
+
+# P = SaveFig(cwd,name,destdirname*,dpi*,filetypes*)
+# print plt.gcf().canvas.get_supported_filetypes()
+
+P = SaveFig(my_dir,
+            'hist_%s_%s' % (result_type,data_name),
+            destdirname='fig/histogramCDF')

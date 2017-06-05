@@ -38,6 +38,46 @@ class myCDF():
         print 'cumulative:',self.cumulative
         print 'regular-sum:',self.regsum
 
+    def print_stats(self):
+        print self.data
+        self.mean = np.mean(self.data)
+        self.std = np.std(self.data)
+
+        print 'Mean:',self.mean
+        print 'Stddev:',self.std
+
+
+    def determine_bins_limits(self,**kwargs):
+        '''
+        Determine bins.
+        '''
+        # print 'getting bins.'
+        # print 'first-last:'
+        # print self.data[0],self.data[-1]
+
+        # print 'min-max:'
+        # print min(self.data),max(self.data)
+
+        # for k,v in kwargs.iteritems():
+        #     print k,v
+
+        if 'nbins' not in kwargs:
+            nbins = 3
+        else:
+            nbins = kwargs['nbins']
+
+        if 'lower_limit' in kwargs:
+            setattr(self,'lower_limit',kwargs['lower_limit'])
+        else:
+            setattr(self,'lower_limit',min(self.data))
+
+        if 'upper_limit' in kwargs:
+            setattr(self,'upper_limit',kwargs['upper_limit'])
+        else:
+            setattr(self,'upper_limit',max(self.data))
+
+        self.bins = np.linspace(self.lower_limit,self.upper_limit,nbins+1)
+
 
     def get_hist(self,**kwargs):
         '''
@@ -49,13 +89,14 @@ class myCDF():
         #     print obj
         # return
 
-        if not 'bins' in kwargs:
-            # not bins:
-            # == None:
-            hist = np.histogram(self.data) # normed, density, still hits 10
-        else:
-            hist = np.histogram(self.data,bins=kwargs['bins']) # normed, density, still hits 10
+        # if not 'bins' in kwargs:
+        #     # not bins:
+        #     # == None:
+        #     hist = np.histogram(self.data) # normed, density, still hits 10
+        # else:
+        #     hist = np.histogram(self.data,bins=kwargs['bins']) # normed, density, still hits 10
 
+        hist = np.histogram(self.data,bins=self.bins)
 
         self.freq = hist[0]
         self.bins = hist[1]
@@ -78,12 +119,25 @@ class myCDF():
 
         return
 
-    def plot_bars(self,color='b'):
+    def plot_bars(self,**kwargs):
         '''
         Plot a histogram (bar graph).
         '''
+
+        if 'color' in kwargs:
+            color = kwargs['color']
+        else:
+            color = 'b'
+
+        if 'fill' in kwargs:
+            fill = kwargs['fill']
+        else:
+            fill = True
+
         # CDF-1
-        plt.bar(self.bins[:-1],self.norm,self.width,color=color,alpha=0.6)
+        plt.bar(self.bins[:-1],self.norm,self.width,color=color,fill=fill,
+                alpha=0.6,
+                edgecolor=color)
 
     def plot_cdf(self,color='b'):
         '''

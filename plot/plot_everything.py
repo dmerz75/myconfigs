@@ -166,7 +166,7 @@ def build_1st_mt(dct):
         self.topdir = os.path.join(self.dirname,'topologies')
         '''
         mt.set_attributes(v)
-        mt.find_psf(my_dir,psffile)
+        mt.find_psf('%s/structural' % my_dir,psffile)
         mt.find_dcd()
         mt.get_frame_count()
         mt.get_analysis_file()

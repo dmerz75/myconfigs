@@ -1,5 +1,5 @@
-# # !/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
 import sys
 print (sys.version)
@@ -26,6 +26,11 @@ import MDAnalysis
 # from mdanalysis.MoleculeUniverse import MoleculeUniverse
 
 
+from cycler import cycler
+# print matplotlib.rcParams['axes.prop_cycle']
+mycolors = ['k', 'r', 'g', 'b','c','m','lime','darkorange','sandybrown','hotpink']
+# ax1.set_prop_cycle(cycler('color',mycolors))
+
 
 class Microtubule():
     """
@@ -39,6 +44,7 @@ class Microtubule():
         self.name = name
         self.dimers = []
         self.truncated = 'no'
+        # self.rnd = rnd
 
 
     def print_class(self):
@@ -84,28 +90,55 @@ class Microtubule():
     def find_psf(self,psfdir,psf):
         os.chdir(psfdir)
 
+        print self.rnd
+        # sys.exit()
+
         if psf != None:
             self.psf = os.path.join(psfdir,psf)
             return
 
 
         # if ((not re.search('nop',self.name)) and (not re.search('rev',self.name))):
-        if re.search('nop',self.name) != None:
-            lst = glob('mt_noplate.psf')
+
+        if ((self.rnd != 16) and (self.rnd != 17)):
+            if re.search('nop',self.name) != None:
+                lst = glob('mt_noplate.psf')
+            else:
+                lst = glob('mt.psf')
         else:
-            lst = glob('mt.psf')
+            if self.rnd == 16:
+                lst = glob('mt12_lev.psf')
+            elif self.rnd == 17:
+                if re.search("rev",self.name) != None:
+                    lst = glob('mt12_rev.psf')
+                else:
+                    # lst = glob('mt12_plate.psf')
+                    # lst = glob('mt12.psf')
+                    # lst = glob('mt12_lev.psf')
+                    lst = glob('mt12_plate.psf')
+                    # mt12_lev.psf
+                    # mt12_plate.psf
+                    # mt12.psf
+                    # mt12_rev.psf
+        # print lst
+        # sys.exit()
+
+        # if len(lst) == 0:
+        #     lst = glob('mt12_plate.psf')[0]
 
         # lst = glob('*.psf')
         # print  lst
         # print self.name
         # time.sleep(5)
 
-
-
         if len(lst) == 1:
             psf = lst[0]
             self.psf = os.path.join(psfdir,psf)
+        # elif len(lst) == 0:
+        #     self.psf = os.path
         else:
+            print psfdir
+            print lst
             print 'multiple psf\'s found.'
             sys.exit(1)
 
@@ -117,10 +150,13 @@ class Microtubule():
             sys.exit(1)
         os.chdir(dcddir)
         lst = glob('*.dcd')
+
         if len(lst) == 1:
             dcd = lst[0]
             self.dcd = os.path.join(self.dcddir,dcd)
         else:
+            print self.dcddir
+            print lst
             print 'multiple dcd\'s found.'
             sys.exit(1)
 
@@ -156,7 +192,14 @@ class Microtubule():
             # print self.dcd
 
             # self.dcd = MDAnalysis.coordinates.DCD.DCDReader(dcd)
-            self.u = MDAnalysis.Universe(self.psf,self.dcd)
+            # self.u = MDAnalysis.Universe(self.psf,self.dcd)
+            try:
+                self.u = MDAnalysis.Universe(self.psf,self.dcd)
+            except:
+                print self.psf
+                print self.dcd
+                print "check load value error."
+                sys.exit(1)
 
             # for fr in self.u.trajectory:
             #     pass
@@ -265,6 +308,7 @@ class Microtubule():
                  self.direction = 'forward'
 
         if (re.search('_nop_',self.name)) != None:
+            print self.name
             if int(self.name.split('_nop_')[-1]) != 0:
                 self.direction = 'reverse'
                 return
@@ -348,7 +392,7 @@ class Microtubule():
             diff = y[0,c] - y[-1,c]
             dimers.append((c,diff))
 
-        # Sort, last 10.
+        # Sort, last 10nnnn.
         mod_dimers = sorted(dimers, key=lambda x: x[1])[-10:]
         # print mod_dimers,len(mod_dimers)
 
@@ -460,7 +504,7 @@ class Microtubule():
         # print datax[1,0:15,0:4,::]
 
 
-    def get_emol_mtcontacts_3(self,total_num_dimers):
+    def get_emol_mtcontacts_3(self,fp,total_num_dimers):
         '''
         '''
         # print self.file
@@ -474,7 +518,9 @@ class Microtubule():
         # sys.exit()
         # data = np.loadtxt(os.path.join(self.)
         try:
-            data = np.loadtxt(os.path.join(self.dirname,'emol_mtcontacts_by_subdomain3.dat'))
+            # data = np.loadtxt(os.path.join(self.dirname,'emol_mtcontacts_by_subdomain3.dat'))
+            # data = np.loadtxt(os.path.join(self.dirname,fp))
+            data = np.loadtxt(os.path.join(fp))
         except:
             print 'No emol_mtcontacts_by_subdomain.dat file found.'
             sys.exit(1)
@@ -498,7 +544,7 @@ class Microtubule():
         self.emol3 = datax
         return
 
-    def get_emol_mtcontacts_3n(self,total_num_dimers):
+    def get_emol_mtcontacts_3n(self,fp,total_num_dimers):
         '''
         '''
         # print self.file
@@ -512,7 +558,8 @@ class Microtubule():
         # sys.exit()
         # data = np.loadtxt(os.path.join(self.)
         try:
-            data = np.loadtxt(os.path.join(self.dirname,'emol_mtcontacts_by_subdomain3n.dat'))
+            # data = np.loadtxt(os.path.join(self.dirname,'emol_mtcontacts_by_subdomain3n.dat'))
+            data = np.loadtxt(fp)
         except:
             print 'No emol_mtcontacts_by_subdomain.dat file found.'
             sys.exit(1)
@@ -650,7 +697,17 @@ class Microtubule():
         '''
         Arrange Analysis(contacts) vs. ITF (indentation,time,frame), also angles/curvature.
         (contacts, indentation, time, frame, angles, curvature)
-        at the length of self.externalcontacts.
+        at the length
+
+
+
+
+
+
+
+
+
+of self.externalcontacts.
 
         Currently, empty, not being used.
         '''
@@ -709,7 +766,10 @@ class Microtubule():
                    'steps']
 
         percent = float(reversal_frame) / self.total_frames
+        # print self.percent
+
         print 'percent_for_truncating:',percent
+        # sys.exit()
 
         for obj in targets:
 
@@ -825,6 +885,358 @@ class Microtubule():
         setattr(self,dir_obj,nesw_contacts)
 
 
+    def get_force_at_frame(self,frame):
+        '''
+        Get force at a particular frame.
+        '''
+        # print self.f_nano
+        # print self.ext_raw
+        # print self.frames
+
+        print self.f_nano.shape
+        print self.ext_raw.shape
+        print self.frames.shape
+
+        percent = float(frame)/self.frames.shape[0]
+        print percent
+
+        fsize = int(percent * self.f_nano.shape[0])
+        esize = int(percent * self.ext_raw.shape[0])
+
+        tempf = self.f_nano[:fsize]
+        tempe = self.ext_raw[:esize]
+
+        lastf = tempf[-1]
+        laste = tempe[-1]
+
+        return laste,lastf
+        # sys.exit()
+        # pass
+
+
     def combine_force_and_indentation(self,arr_force,arr_indentation,rev_ind):
         pass
         # frameindex =
+
+
+    def emol_topology_based_contact_files(self,dirname):
+        if dirname == None:
+            dirname = self.dirname
+        self.emoltopfilename = "emol_mtcontacts_by_subdomain_top.dat"
+        self.emoltop3filename = "emol_mtcontacts_by_subdomain3_top.dat"
+        self.emoltop3nfilename = "emol_mtcontacts_by_subdomain3n_top.dat"
+
+        self.emoltopfile = os.path.join(dirname,self.emoltopfilename)
+        self.emoltop3file = os.path.join(dirname,self.emoltop3filename)
+        self.emoltop3nfile = os.path.join(dirname,self.emoltop3nfilename)
+
+    def emol_topology_contact(self,fp,num_dimers):
+        '''
+        '''
+        data = np.loadtxt(fp)
+
+        print data.shape
+        print data.shape[0] / num_dimers
+
+
+        frames = data.shape[0] / num_dimers
+        datax = data.reshape(frames,num_dimers,data.shape[1])
+
+        print 'num_dimers:',num_dimers
+        print 'num_frames:',frames
+        print datax.shape
+        self.emol3top = datax
+
+        return
+
+    def plot_emol3top(self,my_dir,option,dimers=[]):
+        '''
+        '''
+        #  ---------------------------------------------------------  #
+        #  Start matplotlib (1/4)                                     #
+        #  ---------------------------------------------------------  #
+        import matplotlib
+        # default - Qt5Agg
+        # print matplotlib.rcsetup.all_backends
+        # matplotlib.use('GTKAgg')
+        # matplotlib.use('TkAgg')
+        print 'backend:',matplotlib.get_backend()
+        import matplotlib.pyplot as plt
+        from matplotlib.gridspec import GridSpec
+        plt.clf()
+        fig = plt.figure(0)
+
+        gs = GridSpec(1,1)
+        ax1 = plt.subplot(gs[0,:])
+        # ax2 = plt.subplot(gs[1,:-1])
+        ax = [ax1]
+
+        # fig.set_size_inches(14,6)
+        # plt.subplots_adjust(left=0.14,right=0.93,top=0.950,bottom=0.15,wspace=1.0,hspace=0.8)
+
+        # dct_font = {'family':'sans-serif',
+        #             'weight':'normal',
+        #             'size'  :'24'}
+        # matplotlib.rc('font',**dct_font)
+
+        # gs = GridSpec(12,9)
+        # ax1 = plt.subplot(gs[1:11,0:5])
+
+        # # SEW
+        # ax2 = plt.subplot(gs[9:12,6:8])
+        # ax3 = plt.subplot(gs[6:9,7:9])
+        # ax4 = plt.subplot(gs[6:9,5:7])
+        # # NEW
+        # ax5 = plt.subplot(gs[0:3,6:8])
+        # ax6 = plt.subplot(gs[3:6,7:9])
+        # ax7 = plt.subplot(gs[3:6,5:7])
+
+        # ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
+
+        #  ---------------------------------------------------------  #
+        #  Import Data! (2/4)                                         #
+        #  ---------------------------------------------------------  #
+        result_type = 'emol3top' # sop | sopnucleo | gsop | namd
+        plot_type = self.name # fe | tension | rmsd | rdf
+        data_name = 'initial'
+
+        #  ---------------------------------------------------------  #
+        #  Import Data! (3/4)                                         #
+        #  ---------------------------------------------------------  #
+
+        for x in range(self.emol3top.shape[1]):
+            print x
+            print self.emol3top[::,x,0]
+            # plt.plot(self.emol3top[::,x,0])
+
+
+
+        # return
+
+
+        # for i in range(1,7):
+        #     # get columns: l-first position.
+        #     #              h-final position.
+        #     l = (i-1)*4 + 12
+        #     h = i*4 + 12
+        #     print 'bounds: ',i,l,h-1
+
+        #     # if i != 1:
+        #     #     continue
+
+        #     # Description:
+        #     # REMEMBER: this h-1
+        #     # 0: main
+        #     #      4    4:24-27
+        #     # NEW 6 5   5:28-31, 6:32-35
+        #     # SEW 3 2   2:16-19, 3:20-23
+        #     #      1    1:12-15
+        #     #
+        #     # csub = mt.emol3[::,iv[0],l:h]
+        #     csub = self.emol3top[::,iv[0],l:h]
+        #     x = np.arange(0,csub.shape[0])
+        #     # print x
+        #     # print csub.shape
+        #     yt = csub[::,0]
+        #     y1 = csub[::,1]
+        #     y2 = csub[::,1] + csub[::,2]
+        #     # y3 = csub[::,1] + csub[::,2] + csub[::,3]
+
+        #     print 'DIMER:',iv[0]
+        #     # print yt
+        #     # print y1
+        #     # print y2
+        #     # print y3
+        #     # print 'y123-t:'
+        #     # print y1[0:5],'red'
+        #     # print y2[0:5],'red + green'
+        #     # print y3[0:5],'red + green + blue'
+        #     print yt[0:5],'total'
+
+        #     # ax[i].fill_between(x,0,y1,where=y1>0,facecolor='r',alpha=0.3,interpolate=True)
+        #     # ax[i].fill_between(x,y1,y2,where=y2>y1,facecolor='g',alpha=0.3,interpolate=True)
+        #     # ax[i].fill_between(x,y2,y3,where=y3>y2,facecolor='b',alpha=0.3,interpolate=True)
+        #     # ax[i].fill_between(x,0,y1,where=y1>0,color='k',facecolor='r',alpha=0.6)
+        #     # ax[i].fill_between(x,y1,y2,where=y2>y1,color='k',facecolor='g',alpha=0.6)
+        #     # ax[i].fill_between(x,y2,y3,where=y3>y2,color='k',facecolor='b',alpha=0.6)
+        #     # ax[i].fill_between(x,0,y1,where=y1>0,color='k',linewidth=0.4,facecolor='r',alpha=0.6)
+        #     ax[i].fill_between(x,0,y1,where=y1>0,color='k',linewidth=0.4,facecolor='r',alpha=0.6)
+        #     ax[i].fill_between(x,y1,y2,where=y2>y1,color='k',linewidth=0.4,facecolor='g',alpha=0.6)
+        #     # ax[i].fill_between(x,y2,y3,where=y3>y2,color='k',linewidth=0.4,facecolor='b',alpha=0.6)
+        #     ax[i].fill_between(x,y2,yt,where=yt>y2,color='k',linewidth=0.4,facecolor='b',alpha=0.6)
+
+
+        # for axe in [ax2,ax3,ax4,ax5,ax6,ax7]:
+        #     # axe.axis('off')
+        #     axe.set_yticks([])
+        #     axe.set_xticks([])
+        #     axe.set_xticklabels(())
+        #     axe.set_yticklabels(())
+
+        # yticks = [0,100,200,300]
+        # ax1.set_yticks(yticks)
+        # ax1.set_yticklabels(yticks,fontsize=18)
+        # ax1.set_y
+        # for axe in ax:
+        #     # axe.set_ylim(0,340)
+        #     axe.set_linewidth(1.0)
+        # return ax
+
+
+        #  ---------------------------------------------------------  #
+        #  Make final adjustments: (4/4)                              #
+        #  mpl - available expansions                                 #
+        #  ---------------------------------------------------------  #
+        # mpl_rc
+        # mpl_font
+        # mpl_label
+        # mpl_xy
+        # mpl_ticks
+        # mpl_tick
+        # mpl_minorticks
+        # mpl_legend
+        # combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
+        # save_fig
+        from plot.SETTINGS import *
+        save_fig(my_dir,0,'fig/%s' % result_type,'%s_%s' % (plot_type,data_name),option)
+
+        # mpl_myargs_end
+
+    def plot_forceindentation(self,ax1):
+        print 'plotting force indentation'
+
+        x = self.ext_raw[1:]
+        y = self.f_nano[1:]
+
+        if ((self.direction == 'forward') and (self.truncated == 'no')):
+            ax1.plot(x,y,'k-',label='Full Indent')
+        elif ((self.direction == 'forward') and (self.truncated == 'yes')):
+            ax1.plot(x,y,'r-',label='Partial Indent')
+        else:
+            ax1.plot(x,y,'g-',label='Retracting')
+
+        if self.truncated == 'yes':
+            ax1.axvline(self.reversal_ind,color='r',linestyle='-',linewidth=1.5)
+        else:
+            ax1.plot(x,y,label=self.name)
+
+        ax1.set_xlim(-1,31)
+        ax1.set_xticks([0,10,20,30])
+        ax1.set_ylim(-.20,.905)
+        ax1.set_yticks([0,.2,.4,.6,.8])
+        ax1.set_ylim(-0.04,0.94)
+
+        ax1.set_xlabel('Indentation Depth X/nm',fontsize=20)
+        ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
+
+        # legend
+        handles,labels = ax1.get_legend_handles_labels()
+        ax1.legend(handles,labels,prop={'size':12},loc=2)
+
+    def plot_forceframe(self,ax1):
+        '''
+        Class. use -fi (integer)
+        '''
+        x = np.linspace(self.frames[0],self.frames[-1],len(self.f_nano[1:]))
+        y = self.f_nano[1:]
+
+        ax1.plot(x,y,label=self.name)
+
+        ax1.set_xlim(x[0],x[-1])
+        # ax1.set_xticks([0,10,20,30])
+        # ax1.set_ylim(-.20,.905)
+        ax1.set_yticks([0,.2,.4,.6,.8])
+        ax1.set_ylim(-0.04,0.94)
+        # ax1.set_xlabel('Indentation Depth X/nm')
+        # ax1.set_xlabel('Frame #')
+        ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
+
+        # legend
+        handles,labels = ax1.get_legend_handles_labels()
+        ax1.legend(handles,labels,prop={'size':14},loc=2)
+
+
+    # def plot_contacts(self):
+    def plot_contacts(self,ax1,dimers,shift=0,limit=None):
+        '''
+        Provide n the index in mt_list for plotting.
+        Provide dimers, a list from "get_dimers."
+        limit = 1320
+        '''
+        print 'plotting contacts'
+        ax1.set_prop_cycle(cycler('color',mycolors))
+        ax = [ax1]
+
+        # print 'shape:'
+        # shape:
+        # (348,)
+        # (348, 104)
+        # print self.frames.shape
+        # print self.contacts.shape
+        # sys.exit()
+
+        x1 = self.frames[1::]
+        x1 = x1 + shift
+
+        y1 = self.contacts[1::,::]
+
+        print dimers
+        for d in dimers:
+            # print d
+            # ax1.plot(self.frames[1::],self.contacts[1::,d])
+
+            try:
+                ax1.plot(x1,y1[::,d],label=str(d*2))
+            except Exception as inst:
+                # x1 = x1[x1.shape - y1.shape::]
+                # print Exception
+                print inst
+                xdiff = x1.shape[0] - (x1.shape[0] - y1.shape[0])
+                # x1 = x1[xdiff::]
+                x1 = x1[:xdiff]
+                print x1.shape
+                ax1.plot(x1,y1[::,d],label=str(d*2))
+                # sys.exit()
+
+            # if ((rnd == 16) or (rnd == 17)):
+            #     ax1.plot(x1,y1[::,d],label=str(d*2))
+            # else:
+            #     print x1.shape
+            #     print y1.shape
+            #     # ax1.plot(x1)
+            #     print 'couldn\'t plot dimers.'
+            #     sys.exit()
+
+        ax1.set_xlabel("Frame #",fontsize=20)
+        ax1.set_ylabel("Qn",fontsize=20)
+
+        ax1.set_xlim(x1[0],x1[-1])
+
+        # if limit != None:
+        #     ax1.set_xlim(x1[0],1320)
+        #     ax1.set_xticks([0,200,400,600,800,1000,1200])
+        # else:
+        #     ax1.set_xlim(x1[0],limit)
+
+        ax1.set_ylim(0.36,1.02)
+        ax1.set_yticks([0.40,0.55,0.70,0.85,1.00])
+
+        # legend
+        # 1:
+        handles, labels = ax1.get_legend_handles_labels()
+        ax1.legend(bbox_to_anchor=(1.02, 1),loc=2,borderaxespad=0.0,fontsize=12)
+
+        if hasattr(self,'reversal_frame'):
+            print 'reversal_frame:',self.reversal_frame
+            ax1.axvline(self.reversal_frame,color='r',linestyle='-',linewidth=1.5)
+
+    def plot_vertlines(self,ax1,lstlines):
+        '''
+        '''
+        print "plotting vertical lines"
+
+        mycolors = ['black','green','magenta']
+        ax1.set_prop_cycle(cycler('color',mycolors))
+
+        for i,line in enumerate(lstlines):
+            ax1.axvline(line,color=mycolors[i],linestyle='--',linewidth=1.5)

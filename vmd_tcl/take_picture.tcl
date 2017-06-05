@@ -60,7 +60,9 @@ proc make_my_movie { {name "pictures"} {start 0} {stop 0} {step 1} args} {
 
         # USE THIS!
         # render Tachyon $filename2 "/usr/bin/tachyon -aasamples 12 %s -format TARGA -res 512 512 -o %s"
-        render Tachyon $filename4 "/usr/bin/tachyon %s -format PNG -res 1024 768 -o %s"
+        # render Tachyon $filename4 "/usr/bin/tachyon %s -format PNG -res 1024 768 -o %s"
+        render Tachyon $filename4 "/usr/bin/tachyon %s -format PNG -res 2048 1536 -o %s"
+
 
 
         # render Tachyon $filename2 "/usr/bin/tachyon -aasamples 12 %s -format TARGA -res 2048 2048 -o %s"

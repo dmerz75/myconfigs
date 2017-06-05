@@ -221,11 +221,11 @@
   "*"
   SF-IMAGE       "The image"   0
   SF-DRAWABLE    "The drawable"   0
-  SF-ADJUSTMENT  "Length of wings (LoW = AL/X) *" '(65.0 -100 500 10 1 1 1)
-  SF-ADJUSTMENT  "Angle between arrow and wing in degree" '(45 5 85 5 15 0 0)
+  SF-ADJUSTMENT  "Length of wings (LoW = AL/X) *" '(75.0 -100 500 10 1 1 1)
+  SF-ADJUSTMENT  "Angle between arrow and wing in degree" '(22 5 85 5 15 0 0)
   SF-TOGGLE      "Fill head of arrow?" TRUE
-  SF-ADJUSTMENT  "Percentage size of notch of arrow head\n(only valid if head of arrow is filled)" '(6 0 100 1 10 0 1)
-  SF-ADJUSTMENT  "Brush Thickness* (BS = AL/X)" '(1 -500 500 1 10 0 1)
+  SF-ADJUSTMENT  "Percentage size of notch of arrow head\n(only valid if head of arrow is filled)" '(8 2 100 1 10 0 1)
+  SF-ADJUSTMENT  "Brush Thickness* (BS = AL/X)" '(0.55 -500 500 1 10 0 1)
   SF-TOGGLE      "Use first path point as arrow head?\n(if not the last path point of is used as arrow head)" FALSE
   SF-TOGGLE      "Delete path after arrow was drawn?" FALSE
   SF-TOGGLE      "Use new layer for arrow?" TRUE

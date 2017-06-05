@@ -241,6 +241,8 @@ proc see_mt { } {
 }
 
 proc see_mtball { } {
+    # Uses colorize_mtball to render microtubule as a large set of
+    # spheres.
 
     set molid [molinfo num]
     puts "usage: see_mt"

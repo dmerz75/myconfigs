@@ -44,7 +44,8 @@ proc colorize_monomer { {id 0} { chain_sel "A"} } {
     }
 };
 
-proc colorize_monomer_cg { {id 0} {x 1} } {
+# proc colorize_monomer_cg { {id 0} {x 1} } {
+proc colorize_tubulin_NMC { {id 0} {x 1} } {
 
     # BETA monomer.
     set lst_resid_a {{0 214} {215 380} {381 438}}

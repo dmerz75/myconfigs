@@ -1,15 +1,6 @@
-# colorize
+# colorize protofilament:
 
-proc get_molinfo {} {
 
-    for {set i 0} {$i < [molinfo top get numreps]} {incr i} {
-        lassign [molinfo top get "{rep $i} {selection $i} {color $i}"] a b c
-        puts "view $i:"
-        puts " representation: $a"
-        puts " selection: $b"
-        puts " coloring method: $c"
-    };                          #
-};                              #
 
 proc call_colorize_indices { {id 0} {index1 0} {index2 1} {colorid 16} } {
     # call colorize_indices 0 300
@@ -174,129 +165,78 @@ proc colorize_index_file { {id 0} {filename "foreach" }} {
     # end foreach
 }
 
+proc colorize_pfball { {id 0} } {
+    # Colorize the protofilament as large sphere/chain.
 
-proc colorize_with_list { rep lst_resids lst_colors {diff 0} {run_type gsop}} {
-    # des.
 
-    set len_resids [llength $lst_resids]
+    # step 1. Make current representations invisible.
+    set num_reps [make_current_reps_invisible $id]
+    puts "number of invisible representations: $num_reps"
 
-    for {set i 1} {$i <= $len_resids} {incr i} {
 
-        # information
-        # puts "loop: $i"
-        set index [expr $i - 1]
-        set resid1 [expr [lindex $lst_resids $index 0] - $diff]
-        set resid2 [expr [lindex $lst_resids $index 1] - $diff]
+    # step 2. Get the number of chains.
+    set sel [atomselect top all]
+    set chains [lsort -ascii -unique [$sel get chain]]
+    set num_chains [llength $chains]
+    puts "the number of chains is: $num_chains"
+    $sel delete
 
-        # type & color
-        set str_tube {mol modstyle $i 0 Tube 1.0 100.0}
-        set str_cpk {mol modstyle $i 0 CPK 3.000000 0.600000 10.00000 8.00000}
-        set str_new {mol modstyle $i 0 NewCartoon 0.28 26 4}
 
-        # #   397 - 412 - beta_2_short (with turn)          ||
-        mol addrep 0
-        mol selection all
-        mol material Opaque
+    # step 3. Get chains with certain number of atoms.
+    # step 4. Get the center of mass of each chain.
+    # step 5. Get the atom closest to the center of mass.
+    for {set ch 0} {$ch < $num_chains} {incr ch} {
+        set chain_name [lindex $chains $ch]
+        set curchain [atomselect $id "chain $chain_name"]
+        set num_atoms_chain [$curchain num]
+        puts "chain: ($ch) $chain_name $num_atoms_chain"
 
-        # Standard simple if with else clause
-        if {$run_type == "gsop"} {
-            # puts "the value of run_type is $run_type, = gsop!"
-            mol modselect $i 0 resid $resid1 to $resid2
-        } else {
-            # puts "the value of run_type is $run_type, not gsop!"
-            mol modselect $i 0 protein and resid $resid1 to $resid2
+        # step 4. COM
+        set COM [center_of_mass $curchain]
+        # puts $COM;
+
+
+        # Loop through Atoms, find the one closest to the COM.
+        set min_dist 1000.0
+        set min_index -1
+        foreach coord [$curchain get {x y z}] ind [$curchain get index] {
+            # puts "the index-coord: $ind $coord"
+            # puts $COM
+            # puts $coord
+            set dist [veclength [vecsub $COM $coord]]
+
+            if {$dist < $min_dist} {
+                set min_dist [expr $dist]
+                set min_index $ind
+                if {$min_dist < 4.0} {
+                    break
+                }
+            }
         }
+        puts "the closest atom:   $min_index   is at distance:  $min_dist"
 
-        mol modcolor $i 0 ColorID [lindex $lst_colors $index]
-        # # mol modstyle 1 0 CPK 3.000000 0.600000 10.00000 8.00000
-        # # switch $rep tube {$str_tube} cpk {$str_cpk} new {$str_new} default {$str_tube}
-        switch $rep tube {set sel $str_tube} cpk {set sel $str_cpk} new {set sel $str_new} default {set sel $str_tube}
-        eval $sel
+        # Selection & Material
+        mol material Opaque
+        mol selection index $min_index
+
+        # 3: orange (alpha)
+        # 10: cyan (beta)
+        # NOTE: elseif must be on the same line as brackets
+        if {$num_atoms_chain == 420 || $num_atoms_chain == 427} {
+            # puts "alpha-tubulin"
+            mol color ColorID 3
+            mol representation Beads 28.0 12.0
+            mol addrep $id
+        } elseif {$num_atoms_chain == 419} {
+            # puts "beta-tubulin"
+            mol color ColorID 10
+            mol representation Beads 28.0 12.0
+            mol addrep $id
+        } elseif {$num_atoms_chain == 300} {
+            # puts "kinesin"
+            mol color ColorID 1
+            mol representation Beads 26.0 12.0
+            mol addrep $id
+        }
     }
-}
-
-proc colorize_nucleotide {} {
-    mol addrep 0
-    mol selection all
-    mol material Opaque
-    # original
-    # mol modselect 1 0 resid 1 to 39 116 to 188
-    mol modselect 6 0 "resid > 384"
-    mol modcolor 6 0 ColorID 16
-    mol modstyle 6 0 CPK 4.000000 0.600000 10.00000 8.00000
-
-    # mol addrep 0
-    # IA Green 7
-}
-proc add_endpoint { {id 0} {residue_num 0} {ball_color 1} } {
-    # add VDW balls of color gray:first and blue:last
-    # mol delete all - deletes everything
-
-    # mol addrep 0
-    mol selection resid $residue_num and name CA
-    mol representation VDW 2.000 14.000
-    mol color ColorID $ball_color
-    # Gray
-    mol material Opaque
-    mol addrep $id
-
-    # # mol addrep 0
-    # mol selection resid $last and name CA
-    # mol representation VDW 1.3000 12.0000
-    # mol color ColorID 0
-    # # Blue
-    # mol material Opaque
-    # mol addrep 0
-}
-proc add_endpoint_by_index { {id 0} {index 0} {ball_color 1} } {
-    # id index color(numeral)
-    mol selection index $index
-    mol representation VDW 4.000 10.000
-    mol color ColorID $ball_color
-    mol material Opaque
-    mol addrep $id
-}
-proc delete_reps { {id 0} {start 1} {stop 1} } {
-    set rep_count [molinfo $id get numreps]
-    puts "total reps: $rep_count"
-
-    for {set i $start} {$i < $stop} {incr i} {
-        # information
-        puts "loop: $i"
-        mol delrep $i $id
-    }
-
-    set rep_count [molinfo $id get numreps]
-    puts "total reps: $rep_count"
-
-}
-proc add_endpoints { first last } {
-    # add VDW balls of color gray:first and blue:last
-    # mol delete all - deletes everything
-
-    # mol addrep 0
-    mol selection resid $first and name CA
-    mol representation VDW 2.000 26.0000
-    mol color ColorID 2
-    # Gray
-    mol material Opaque
-    mol addrep 0
-
-    # mol addrep 0
-    mol selection resid $last and name CA
-    mol representation VDW 2.0000 26.0000
-    mol color ColorID 0
-    # Blue
-    mol material Opaque
-    mol addrep 0
-}
-proc colorize_sopnucleonbd {} {
-    # mol delete all
-    for {set i 0} {$i<7} {incr i} {
-        mol delrep $i 0
-    }
-    colorize_nbd_domains_tube
-    colorize_nucleotide
-    add_endpoints 1 383
-    calc_distance 1 383
 }

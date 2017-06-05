@@ -128,7 +128,7 @@ menu molecule move 10   600
 # menu labels   move 661  29
 # menu render   move 125  525
 # menu sequence move 629  0
-display resize 800 570
+display resize 800 600
 
 # newly loaded molecules/reps, etc
 display projection orthographic
@@ -150,14 +150,17 @@ after idle {
     }
 
     # /home/dale/.pylib/vmd_tcl:
+    source ~/.pylib/vmd_tcl/animatepsf.tcl
     source ~/.pylib/vmd_tcl/load_molecules.tcl
-    source ~/.pylib/vmd_tcl/colorize.tcl
-    source ~/.pylib/vmd_tcl/colorize_spectrin.tcl
-    source ~/.pylib/vmd_tcl/colorize_nbd_domains.tcl
-    source ~/.pylib/vmd_tcl/colorize_sbd_domains.tcl
-    source ~/.pylib/vmd_tcl/colorize_microtubules.tcl
-    source ~/.pylib/vmd_tcl/colorize_hsp110.tcl
-    source ~/.pylib/vmd_tcl/colorize_tub.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_spectrin.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_nbd_domains.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_sbd_domains.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_microtubules.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_protofilament.tcl
+    # source ~/.pylib/vmd_tcl/colorize/colorize_protofilament.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_hsp110.tcl
+    source ~/.pylib/vmd_tcl/colorize/colorize_tub.tcl
     source ~/.pylib/vmd_tcl/evaluate.tcl
     source ~/.pylib/vmd_tcl/take_picture.tcl
 

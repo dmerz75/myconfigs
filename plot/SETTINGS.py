@@ -1,8 +1,158 @@
+# coding: utf-8
 import os
 import sys
+import glob
 import matplotlib
 import matplotlib.pyplot as plt
 import re
+
+
+class SaveFig():
+    '''
+    Save a matplotlib figure.
+    REQ:
+    (1) cwd = saves here, else provide 'destdirname'
+    (2) name = filename without suffix. eg. 'png' (def), 'svg'
+    OPT:
+    (3) destdirname: eg. 'fig/histograms'
+    (4) dpi: (optional) 120 (default), 300, 600, 1200
+    (5) filetypes: ['png','svg','eps','pdf']
+    '''
+
+    def __init__(self,cwd,name,**kwargs):
+        '''
+        Initialize Class.
+        '''
+
+        self.cwd = cwd
+        self.name = name
+        self.kwargs = kwargs
+        self.dpi = 300
+        self.filetypes = ['png']
+
+
+        # begin
+        # self.print_class()
+
+        # A
+        self.set_attributes()
+
+        # B
+        self.set_destdir()
+        self.set_dpi()
+
+
+        # C
+        self.check_for_duplicates()
+
+        # end
+        # self.print_class()
+
+
+        print self.__doc__
+
+        # self.print_class()
+
+        self.save()
+
+
+    def set_attributes(self):
+        '''
+        Set attributes to those values provided.
+        '''
+
+        for k in self.kwargs:
+            # print k,self.kwargs[k]
+            setattr(self,k,self.kwargs[k])
+
+    def print_class(self):
+        '''
+        Print class attributes.
+        '''
+
+        for key in dir(self):
+            print key,getattr(self,key)
+
+    def set_destdir(self):
+
+        if 'destdirname' in self.kwargs.keys():
+            self.destdir = os.path.join(self.cwd,self.kwargs['destdirname'])
+        else:
+            self.destdir = self.cwd
+
+    def set_dpi(self,*args):
+
+        # print args
+        if len(args) > 0:
+            self.dpi = args[0]
+        # elif 'dpi' in self.kwargs.keys():
+            # self.dpi = self.kwargs['dpi']
+
+    # def set_filetypes(self):
+
+    def check_for_duplicates(self):
+        '''
+        writing to destdir,
+        check name in destdir.
+        '''
+        dct = {}
+
+        # print 'filetypes: ',self.filetypes
+        # lst = sorted(glob.glob(os.path.join(self.destdir,'%s*'
+        #                                     % self.name)))
+        # print lst
+        # sys.exit()
+
+        for suffix in self.filetypes:
+
+            dct[suffix] = sorted(glob.glob(
+                os.path.join(self.destdir,'%s*.%s' %
+                             (self.name,
+                              suffix))))
+
+            print 'found: '
+            print dct[suffix][-3:]
+            # print dct.keys()
+
+            # if len(lst) == 0:
+            if len(dct[suffix]) == 0:
+                # try:
+                #     x = int(self.name.split('-')[-1])
+                #     # return
+                # except:
+                self.name = self.name + '-0'
+                return
+            else:
+                nums_found = [int(re.sub('.%s' % suffix,'',f.split('-')[-1])) for f in dct[suffix]]
+                new_num = max(nums_found) + 1
+                self.name = self.name + '-' + str(new_num)
+
+
+    def save(self):
+        '''
+        Save the figure.
+        '''
+
+        fp = os.path.join(self.destdir,self.name)
+
+        for suffix in self.filetypes:
+
+            fps = fp + '.%s' % suffix
+
+            if not os.path.exists(fps):
+                print 'Saving: ',fps,' dpi: ',self.dpi
+
+                # if ((suffix == 'svg') and (self.dpi < 1000)):
+                #     self.dpi = 1000
+                plt.savefig(fps,format=suffix,dpi=self.dpi)
+
+            else:
+                print 'File already exists! ',fps
+
+
+
+
+
 
 def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
     ''' Receive savedir.
@@ -59,8 +209,8 @@ def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
         plt.savefig('%s.eps' % fp_filename,dpi=dpi)
         plt.savefig('%s.svg' % fp_filename,dpi=dpi)
         plt.savefig('%s.png' % fp_filename,dpi=dpi)
-        # plt.savefig('%s.pdf' % fp_filename,dpi=dpi)
-        plt.savefig('%s.tiff' % fp_filename,dpi=dpi)
+        plt.savefig('%s.pdf' % fp_filename,dpi=dpi)
+        # plt.savefig('%s.tiff' % fp_filename,dpi=dpi)
         # PNG
         # plt.savefig('%s.png' % fp_filename,dpi=dpi)
         matplotlib.rcParams['figure.dpi'] = 300
@@ -93,6 +243,10 @@ def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
                 print 'zeroeth image printed!'
                 fp_filename = fp_filename + '-0'
             # except ValueError:
+            #     print 'zeroeth image printed!'
+            #     fp_filename = fp_filename + '-0'
+
+                # except ValueError:
             # except ValueError:
             #     files_num_counted = [int(re.sub('.png','',f.split('-')[2])) for f in files]
             #     print 'ints found:',files_num_counted

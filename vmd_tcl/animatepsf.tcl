@@ -31,3 +31,15 @@ proc write_my_psf { {id 0} } {
 # for gsop - Use structures
 #   loaded trajectory
 # exit
+
+proc write_partial_dcd { {filename "one.dcd"} {sel "all"} {start 0} {stop 100} {step 10} } {
+    #
+    animate write dcd $filename sel $sel beg $start end $stop skip $step
+}
+
+
+proc renumber_residue_1chain { sel name } {
+
+    $sel set resid [$sel get residue]
+    $sel writepdb $name.pdb
+}

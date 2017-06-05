@@ -3,6 +3,18 @@
 # Examples:
 # draw line {0 0 0} {0 2 0} style dashed
 
+
+# http://wiki.tcl.tk/1482
+proc listinsert {_list index args} {
+    upvar $_list list
+    set list [linsert [K $list [set list ""]] $index {*}$args]
+}
+# > set A [list 1 2 3]
+# 1 2 3
+# > lipinsert A 1 a b c
+# 1 a b c 2 3
+
+
 proc generalloop { {molid 0} args } {
     puts "usage: contacts <molid> args(optional)"
     puts "begin code evaluation: ..."
@@ -289,6 +301,23 @@ proc draw_dashed_line { resfirst reslast {sel_color black}} {
 }
 
 
+proc get_example { { input } args } {
+
+    puts $input
+    puts $args
+
+    return
+}
+
+
+# proc get_vector { { } args } {
+
+
+#     puts $args
+
+#     return
+# }
+
 
 proc box_molecule { {molid 0} } {
     # get the min and max values for each of the directions
@@ -355,28 +384,66 @@ proc get_graphics { } {
     # graphics top line {0 0 0} {3 0 0} style dashed
 
 }
-proc calc_distance { first last } {
+
+proc distance_pos { pos1  pos2 } {
+
+    puts "{v1} {v2}"
+    puts $pos1
+    puts $pos2
+
+    # return
+
+    # get vectors
+    # set p1 [measure center $pos1]
+    # set p2 [measure center $pos2]
+
+    # # subtract vectors; $end - $begin for vecsub
+    # pos2 - pos1
+    set v [vecsub $pos2 $pos1]
+    set vn [vecnorm $v]
+    set vni [vecinvert $vn]
+    set vl [veclength $v]
+
+    set d [vecdist $pos2 $pos1]
+
+    puts "vector: $v"
+    puts "vector_norm: $vn"
+    puts "vector norm inverse: $vni"
+    puts "vector_length: $vl"
+    puts "distance: $d"
+
+    return
+}
+
+proc distance_sel { first last } {
     # provide resid (CA will be selected)
 
     # get CA
-    set ca1 [atomselect top "resid $first and name CA"]
-    set ca2 [atomselect top "resid $last and name CA"]
+    # set ca1 [atomselect top "resid $first and name CA"]
+    # set ca2 [atomselect top "resid $last and name CA"]
 
     # get {x y z}
-    set coords1 [$ca1 get {x y z}]
-    set coords2 [$ca2 get {x y z}]
+    # set coords1 [$ca1 get {x y z}]
+    # set coords2 [$ca2 get {x y z}]
+
 
     # set vector12 [vecsub [lindex $coordinates2] [lindex $coordinates1]]
-    set pos_begin [measure center $ca1]
-    set pos_end   [measure center $ca2]
+    set pos_begin [measure center $first]
+    set pos_end   [measure center $last]
 
-    # get the protein vector; $end - $begin for vecsub
-    set vector12 [vecsub $pos_end $pos_begin]
-    set distance12 [veclength $vector12]
+    distance_pos $pos_begin $pos_end
 
-    # print
-    puts $vector12
-    puts $distance12
+    # # set vector12 [vecsub [lindex $coordinates2] [lindex $coordinates1]]
+    # set pos_begin [measure center $ca1]
+    # set pos_end   [measure center $ca2]
+
+    # # get the protein vector; $end - $begin for vecsub
+    # set vector12 [vecsub $pos_end $pos_begin]
+    # set distance12 [veclength $vector12]
+
+    # # print
+    # puts $vector12
+    # puts $distance12
 }
 
 proc geometric_center {selection} {
@@ -463,4 +530,106 @@ proc move_over { {molid 0} {x 0.0} {y 0.0}  {z 0.0} } {
     # for {set i 0} {$i < $num_frames} {incr i} {
     #     $everything moveby {$x $y $z}
     # }
+}
+
+proc get_dihedral { {id 0 } { r1 } { r2 } } {
+
+    # Description:
+    # N CA C O N CA C O
+    # 5909 5910 5911 5912
+    # 5917 5918 5919 5920
+
+    #________________________________________
+    #________________________________________
+    #    0    1    2    3    4    5    6    7
+    # 5909 5910 5911 5912 5917 5918 5919 5920
+
+    # N CA C  N  | psi
+    # C N  CA C  | phi
+
+    # psi: 5909-0  5910-1  5911-2  5917-4
+    # pep: 5912-3  5911-2  5917-4  5918-5
+    # phi: 5911-2  5917-4  5918-5  5919-6
+
+    set d1 [atomselect $id "resid $r1 and name CA"]
+    set d2 [atomselect $id "resid $r2 and name CA"]
+
+    set d1name [$d1 get resname]
+    set d2name [$d2 get resname]
+
+    puts "Adjacent residues: $d1name ($r1) --- $d2name ($r2)"
+
+    set res1 [atomselect $id "resid $r1 and backbone"]
+    set res2 [atomselect $id "resid $r2 and backbone"]
+
+    set lst1 [$res1 list]
+    set lst2 [$res2 list]
+    set lst [concat $lst1 $lst2]
+    # puts $lst1
+    # puts $lst2
+    # puts $lst
+
+    # set name1 [$lst1 get name]
+    # puts $name1
+    # foreach ind
+
+
+    # set pos_psiphi {0 1 2 4 2 4 5 6}
+    set psilist {0 1 2 4}
+    set philist {2 4 5 6}
+    set peplist {3 2 4 5}
+    set pos_psiphi [concat $psilist $philist $peplist]
+    # puts $psilist
+    # puts $philist
+    # puts $pos_psiphi
+
+
+    # puts $lst
+    # puts $pos_psiphi
+
+
+    foreach pos $pos_psiphi {
+
+        # resnum $lst {}
+
+        set residn [lindex $lst $pos]
+        set a [atomselect $id "index $residn"]
+        set aname [$a get name]
+        set aindex [$a get index]
+        set aresid [$a get resid]
+        puts "info: ($pos) $residn $aname $aindex $aresid"
+        # puts "$pos $resnum"
+
+        # set name1 [$a get name]
+        # set name1 [[index [lindex $lst $pos]] get name]
+
+        lappend names $aname
+        lappend dihedrals [lindex $lst $pos]
+    }
+
+    # names
+    set psi_names [lrange $names 0 3]
+    set phi_names [lrange $names 4 7]
+    set pep_names [lrange $names 8 11]
+
+    # dihedrals
+    set psi_ind [lrange $dihedrals 0 3]
+    set phi_ind [lrange $dihedrals 4 7]
+    set pep_ind [lrange $dihedrals 8 11]
+
+    # dihedral angles
+    set psi [measure dihed $psi_ind]
+    set phi [measure dihed $phi_ind]
+    set pep [measure dihed $pep_ind]
+
+    # print
+    puts "psi: (-120)    $psi_names   |  $psi_ind  ->  $psi"
+    puts "phi:  (150)    $phi_names   |  $phi_ind  ->  $phi"
+    puts "pep:(0,180)    $pep_names   |  $pep_ind  ->  $pep"
+    # return
+
+    # puts "dihedral_indices(1): $dih1"
+    # puts "angle(1,N--N,psi,-120): $psi"
+    # puts "dihedral_indices(2): $dih2"
+    # puts "angle(2,C--C,phi,150): $phi"
 }
