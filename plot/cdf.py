@@ -134,10 +134,30 @@ class myCDF():
         else:
             fill = True
 
+        if 'alpha' in kwargs:
+            alpha = kwargs['alpha']
+        else:
+            alpha = 1.0
+
+        if 'pattern' in kwargs:
+            pattern = kwargs['pattern']
+        else:
+            pattern = None
+
+        # print alpha
+        # print pattern
+        # sys.exit()
+
+        # patterns = ('-', '+', 'x', '\\', '*', 'o', 'O', '.')
+        # for bar, pattern in zip(bars, patterns):
+        #     bar.set_hatch(pattern)
         # CDF-1
         plt.bar(self.bins[:-1],self.norm,self.width,color=color,fill=fill,
-                alpha=0.6,
-                edgecolor=color)
+                alpha=alpha,
+                edgecolor=color,
+                hatch=pattern)
+
+
 
     def plot_cdf(self,color='b'):
         '''

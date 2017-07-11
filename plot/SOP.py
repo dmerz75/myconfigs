@@ -37,6 +37,8 @@ def moving_average(x, n, type='simple'):
     # sys.exit()
     return ma
 
+
+
 class PlotSop():
     """ The plotting class for SOP,GSOP,and SOPNucleo trajectories.
     """
@@ -933,3 +935,9 @@ class PlotSop():
             plt.plot(self.frame,self.force,lc,label=label)
         elif plot_type == 'time':
             plt.plot(self.time_array_ms,self.force,lc,label=label)
+
+    def Plot_FE(self):
+        '''
+        Plot FE.
+        '''
+        print 'hello world!'

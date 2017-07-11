@@ -16,6 +16,7 @@ my_library = os.path.expanduser('~/.pylib')
 sys.path.append(my_library)
 from mylib.FindAllFiles import *
 from microtubule import *
+from plot.SETTINGS import *
 # libraries:
 # from mylib.FindAllFiles import *
 # from mylib.moving_average import *
@@ -56,6 +57,7 @@ def parse_arguments():
     #                     None/0-off,1-on,2-emol3n ..",
     #                     type=int)
     parser.add_argument("-c","--contacts",help="contact plot: (off) or on")
+    parser.add_argument("-rnd","--rnd",help="round .. 13,14, 16,17 ..",type=int)
     parser.add_argument("-psf","--psf",help="psf: file")
     parser.add_argument("-nd","--nd",help="num_dimers: 104, 156",type=int)
     parser.add_argument("-r","--run",help="the run commands: (0-both,1-forcei,2-Qn/Contacts) plot_everything, 1-78,83 prints",type=int)
@@ -71,6 +73,7 @@ args['node'])
 option = args['option']
 psffile = args['psf']
 num_dimers = args['nd']
+rnd = args['rnd']
 
 
 if args['integers']:
@@ -92,6 +95,7 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     # x.remove_[dirname,file,filename](searchstring,pos,dct)
     set9 = x.remove_dirname('fail',None,x.dct)
     set9 = x.remove_dirname('example',None,set9)
+    set9 = x.query_dirname('round_%s' % str(rnd),None,set9)
     return set9
 
 # Find all mt_analysis.dat files.
@@ -116,6 +120,7 @@ for k,v in dct_traj.iteritems():
     # continue
 
     mt.my_dir = my_dir
+    mt.rnd = rnd
     mt.setupdirs()
     '''
     self.datdir = os.path.join(self.dirname,'dat')
@@ -2224,6 +2229,12 @@ if ((args['integers'])):
 
     # print args['force'],type(args['force'])
     # sys.exit()
+
+
+    # cd ~/ext2/completed_mt/ &&
+    # ./plot_everything.py -rnd 13 -nd 104 -psf structural/mt.psf -f 0 -i 54,55,56
+
+
     if args['force'] == 0:
 
         fig = plt.figure(0)
@@ -2239,6 +2250,12 @@ if ((args['integers'])):
             print n,type(n)
             build_mt(mt_list[n])
 
+
+            # for n in
+            # plot_forceindentation_group(mt_list[n],linetype='k-',label=str(n))
+            # break
+
+
             if n in [54,55,56]: # pushmid, seamdown, fixedends
                 plot_forceindentation_group(mt_list[n],linetype='k-',label=str(n))
             elif n in [57,58,65]: # pushmid, seamdown, freeplus, btnproto
@@ -2252,6 +2269,8 @@ if ((args['integers'])):
                 plot_forceindentation_group(mt_list[n],linetype='g-',label=str(n))
             elif n in [78,79,99]: # pushmid, seamup, fixedends, latcenter,loncenter
                 plot_forceindentation_group(mt_list[n],linetype='b-',label=str(n))
+
+
 
 
 
@@ -2394,61 +2413,154 @@ if ((args['integers'])):
 
 
 # ALL single plot, force-extension.
-if 0:
+if ((args['force'] >= 200) and (args['force'] <= 299)):
+    # cd ~/ext2/completed_mt/ && ./plot_everything.py
+    #                            -rnd 17 -nd 156 -psf structural/mt12.psf -f 201
 
-    fig = plt.figure(1)
+    M = Microtubule('temp')
+    # M.print_class()
+
+    fig = plt.figure(0)
     gs = GridSpec(1,1)
     ax1 = plt.subplot(gs[0,:])
     ax = [ax1]
 
+    lst_sel = []
+    lst_sel = [3,9,22]
 
-    print lst_forward
-    # lst_forward = []
-    # lst_forward = [112,113,115]
-    # print args['integers']
-    # lst_forward = args['integers']
+    # 17:
+    # lst_sel = [0,4,5,9,13,14,17,21,22]
+    if rnd == 17:
+        lst_sel = [5,13,14,21,22]
+        lst_labels = ['AHM-1','AHM-2','AHM-3','AHM-4','AHM-5']
+    elif rnd == 16:
+        # no 18,26
+        lst_sel = [21,22,24,27,29]
+        lst_labels = ['AHM-1','AHM-2','AHM-3','AHM-4','AHM-5']
+
+    if args['force'] == 201:
+        # bad
+        # 1,2,3,4,5
+        # lst_sel = [4,10,5,13,0]
+        lst_sel = [32,22,5,17,0] # decent (round 17)
+        lst_labels = ['1','2','3','4','5']
+        dcuts = [150,150,150,10,10]
+    if args['force'] == 202:
+        # lst_sel = [3,22,2,11,5] not 4,5, 4-32,
+        # lst_sel = [3,22,2,21,28] # decent
+        # lst_sel = [51,57,50,48,49] # not 4,5
+        # lst_sel = [51,57,50,34,43] # not 5
+        # lst_sel = [51,57,50,34,38] # ok
+        lst_sel = [51,57,50,34,28] # keep, plot
+        lst_labels = ['1','2','3','4','5']
+        dcuts = [150,150,150,10,10]
+    if args['force'] == 203:
+        lst_sel = [3,22,2,21,28] # decent
+        lst_labels = ['1','2','3','4','5']
+        dcuts = [150,150,150,10,10]
+
+
+    # print ''
+    print 'lst_sel:',lst_sel
+    # sys.exit()
+
+    if not lst_sel:
+        sys.exit()
 
     # mycolors = ['k', 'r', 'g', 'b','c','m','lime','darkorange','sandybrown','hotpink']
-    mycolors = ['k', 'r', 'g','c','c','m','lime','darkorange','sandybrown','hotpink']
+    # mycolors = ['k', 'r', 'g','c','m','lime','darkorange','sandybrown','hotpink']
+    mycolors = ['k', 'r', 'g','b','c','m','lime','darkorange','sandybrown','hotpink']
     ax1.set_prop_cycle(cycler('color',mycolors))
 
     # sys.exit()
-    for i in lst_forward:
+    names = []
+    for ci,i in enumerate(lst_sel):
 
         # print dir(mt_list[i])
         # mt_list[i].print_class()
         print 'name:',mt_list[i].name
+        build_mt(mt_list[i])
 
-        # fig = plt.figure(0)
-        # gs = GridSpec(1,1)
-        # ax1 = plt.subplot(gs[0,:])
-        # ax = [ax1]
-
-        plot_forceindentation(mt_list[i])
+        print i,type(mt_list[i]), mt_list[i]
         print i,mt_list[i].dirname
         print mt_list[i].name
         print mt_list[i].max_x20,mt_list[i].max_y20
 
-        result_type = 'fei' # sop | sopnucleo | gsop | namd
-        plot_type = mt_list[i].name # fe | tension | rmsd | rdf
-        data_name = 'one'
-# cd ~/ext2/completed_mt/ && ./plot_everything.py -psf ~/ext2/completed_mt/mt12_lev.psf -i 118,116,114,126 -nd 156
-    # 2:
-    lst_labels = ['1','2','3','5']
-    # lst_labels = ['1','2','3','4','2']
-    ax1.legend(lst_labels,loc=2,prop={'size':18})
+        mt_list[i].ext_raw = mt_list[i].ext_raw[dcuts[ci]:] - mt_list[i].ext_raw[dcuts[ci]]
+        mt_list[i].f_nano = mt_list[i].f_nano[dcuts[ci]:]
+
+        # # 150,150,120,100
+        # if 0:
+        #     if rnd == 17:
+        #         if i == 22:
+        #             dcut = 152
+        #             mt_list[i].ext_raw = mt_list[i].ext_raw[dcut:] - mt_list[i].ext_raw[dcut]
+        #             mt_list[i].f_nano = mt_list[i].f_nano[dcut:]
+        #         if i == 21:
+        #             dcut = 152
+        #             mt_list[i].ext_raw = mt_list[i].ext_raw[dcut:] - mt_list[i].ext_raw[dcut]
+        #             mt_list[i].f_nano = mt_list[i].f_nano[dcut:]
+        #         if i == 5:
+        #             dcut = 120
+        #             mt_list[i].ext_raw = mt_list[i].ext_raw[dcut:] - mt_list[i].ext_raw[dcut]
+        #             mt_list[i].f_nano = mt_list[i].f_nano[dcut:]
+        #         if i == 14:
+        #             dcut = 152
+        #             mt_list[i].ext_raw = mt_list[i].ext_raw[dcut:] - mt_list[i].ext_raw[dcut]
+        #             mt_list[i].f_nano = mt_list[i].f_nano[dcut:]
+        #         if i == 13:
+        #             dcut = 152
+        #             mt_list[i].ext_raw = mt_list[i].ext_raw[dcut:] - mt_list[i].ext_raw[dcut]
+        #             mt_list[i].f_nano = mt_list[i].f_nano[dcut:]
+        #     if rnd == 16:
+        #         dcut = 150
+        #         mt_list[i].ext_raw = mt_list[i].ext_raw[dcut:] - mt_list[i].ext_raw[dcut]
+        #         mt_list[i].f_nano = mt_list[i].f_nano[dcut:]
+
+
+        mt_list[i].plot_forceindentation_color(ax1,mycolors[ci])
+        names.append(mt_list[i].name)
+
+
+    for n in names:
+        print 'plotted: ',n
+
+    # if not lst_labels:
+    #     lst_labels = names
+
+
+    ax1.set_xticks([0,8,16,24,32])
+    ax1.set_xlim(-1,33)
+    ax1.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0])
+    ax1.set_ylim(-0.04,1.08)
+    ax1.legend(lst_labels,loc=2,prop={'size':20})
+    # ax1.legend(lst_labels,loc=4,prop={'size':18})
 
     leg = plt.gca().get_legend()
     for label in leg.get_lines():
         label.set_linewidth(2.5)
-    # ax1.set_ylim(-0.05,1.05)
-    save_fig(my_dir,0,'fig/forceI','%s_%s_%s' % (result_type,plot_type,data_name),None)
+
+
+    result_type = 'fei' # sop | sopnucleo | gsop | namd
+    # plot_type = mt_list[0].name # fe | tension | rmsd | rdf
+    plot_type = 'doz_positions' # fe | tension | rmsd | rdf
+    data_name = 'one_%s' % str(args['force'])
+    # Save a matplotlib figure.
+    # REQ:
+    # (1) cwd = saves here, else provide 'destdirname'
+    # (2) name = filename without suffix. eg. 'png' (def), 'svg'
+    # OPT:
+    # (3) destdirname: eg. 'fig/histograms'
+    # (4) dpi: (optional) 120 (default), 300, 600, 1200
+    # (5) filetypes: ['png','svg','eps','pdf']
+    # P = SaveFig(cwd,name,destdirname*,dpi*,filetypes*)
+    # print plt.gcf().canvas.get_supported_filetypes()
+    P = SaveFig(my_dir,
+                'fei_dozpositions_%s' % (str(args['force'])),
+                destdirname='fig/forceI')
+    # save_fig(my_dir,0,'fig/forceI','%s_%s_%s' % (result_type,plot_type,data_name),None)
     plt.clf()
     sys.exit()
-
-
-# sys.exit()
-# plt.cla()
 
 
 if 0:

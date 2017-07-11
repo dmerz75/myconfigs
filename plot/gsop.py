@@ -18,24 +18,31 @@ import time
 import numpy as np
 import pickle
 import re
+import glob
+import numpy.ma as ma
 
-def moving_average(x, n, type='simple'):
-    """ compute an n period moving average.
-    type is 'simple' | 'exponential'
-    """
-    x = np.asarray(x)
-    if type=='simple':
-        weights = np.ones(n)
-    else:
-        weights = np.exp(np.linspace(-1., 0., n))
-    weights /= weights.sum()
-    a =  np.convolve(x, weights, mode='full')[:len(x)]
-    # a[:n] = a[n]
-    ma = a[n:]
-    # print ma
-    # print len(ma)
-    # sys.exit()
-    return ma
+# mylib/faf
+my_library = os.path.expanduser('~/.pylib')
+sys.path.append(my_library)
+from mylib.moving_average import *
+
+# def moving_average(x, n, type='simple'):
+#     """ compute an n period moving average.
+#     type is 'simple' | 'exponential'
+#     """
+#     x = np.asarray(x)
+#     if type=='simple':
+#         weights = np.ones(n)
+#     else:
+#         weights = np.exp(np.linspace(-1., 0., n))
+#     weights /= weights.sum()
+#     a =  np.convolve(x, weights, mode='full')[:len(x)]
+#     # a[:n] = a[n]
+#     ma = a[n:]
+#     # print ma
+#     # print len(ma)
+#     # sys.exit()
+#     return ma
 
 class PlotSop():
     """ The plotting class for SOP,GSOP,and SOPNucleo trajectories.
@@ -371,5 +378,374 @@ class PlotSop():
 
             dct_barrier['frame']['start'] = self.frame[0] - p_frame
             dct_barrier['frame']['stop'] = self.frame[-1] + p_frame
-
             self.barrier = dct_barrier
+
+    def get_analysis(self,dirname,atype):
+        '''
+        Get analysis. Tension/CosTheta, Contacts, Chi.
+        '''
+
+        if atype == 'tension':
+            self.fp_tension =  glob.glob(os.path.join(dirname,'tension_*.dat'))[0]
+            self.data_tension = np.loadtxt(self.fp_tension)
+        if atype == 'costheta':
+            self.fp_costheta = glob.glob(os.path.join(dirname,'costheta_*.dat'))[0]
+            self.data_costheta = np.loadtxt(self.fp_costheta)
+        if atype == 'chi':
+            self.fp_chi = glob.glob(os.path.join(dirname,'chi_*.dat'))[0]
+            self.data_chi = np.loadtxt(self.fp_chi)
+        if atype == 'contacts':
+            self.fp_contacts_intra = glob.glob(os.path.join(dirname,'contacts_intra*.dat'))[0]
+            self.fp_contacts_residue = glob.glob(os.path.join(dirname,'contacts_by_residue*.dat'))[0]
+            self.data_contacts_intra = np.loadtxt(self.fp_contacts_intra)
+            self.data_contacts_residue = np.loadtxt(self.fp_contacts_residue)
+
+            # reshaping:
+            num_res = self.data_contacts_intra.shape[1] # 664
+            size_arr = self.data_contacts_residue.shape[0] # 1376472 / 664 = 2073
+            num_frames = self.data_contacts_residue.shape[0] / self.data_contacts_intra.shape[1] # 2073
+            last_dim = self.data_contacts_residue.shape[1] # 25
+
+            self.data_contacts_residue = self.data_contacts_residue.reshape(
+                num_frames,num_res,last_dim)
+
+            print 'reshaped:',self.data_contacts_residue.shape
+
+        # print dir(self)
+        # print F.data_chi.shape
+        # print F.data_tension.shape
+        # print F.data_costheta.shape
+        # print self.data_contacts_intra.shape
+        # print F.data_contacts_residue.shape
+        # (2073, 664)
+        # (2073, 663)
+        # (2073, 663)
+        # (2073, 664)
+        # (1376472, 25)
+
+
+
+    def Plot_FE(self,plot_type,color='k'):
+        '''
+        Plot FE.
+        '''
+        print "plotting FE."
+
+        if (plot_type == 'ext') or (plot_type == 'extension'):
+            plt.plot(self.extension,self.force,color=color)
+        elif plot_type == 'frame':
+            plt.plot(self.frame,self.force,color=color)
+        elif plot_type == 'time':
+            plt.plot(self.time_array_ms,self.force,color=color)
+        elif plot_type == 'indentation':
+            plt.plot(self.extension,self.force,color=color)
+
+    def Plot_Multi(self):
+        '''
+        Plot Multiple: FE, frame, time.
+        '''
+        fig = plt.figure(0)
+        fig.set_size_inches(8,7)
+        gs = GridSpec(1,1)
+        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+
+        ax1 = plt.subplot(gs[0,:])
+        ax2 = ax1.twiny()
+        ax3 = ax1.twiny()
+
+        gline = ax1.plot(self.ext_short,self.f70,'g-',linewidth=0.4)
+        eline = ax1.plot(self.ext_linear,self.force,'k-',linewidth=2.0)
+        tline = ax2.plot(self.time,self.force,'b')
+        fline = ax3.plot(self.frame,self.force,'m')
+
+        fig.text(0.01,0.16,'Time (ms)',color='b',size=16)
+        fig.text(0.01,0.075,'Frame #',color='m',size=16)
+
+        ax2.spines['bottom'].set_color('b')
+        ax2.spines['bottom'].set_position(('outward',65.0))
+        ax2.xaxis.set_ticks_position('bottom')
+        for tick in ax2.xaxis.get_major_ticks():
+            tick.label.set_fontsize(16)
+
+
+        ax3.spines['bottom'].set_color('m')
+        ax3.spines['bottom'].set_position(('outward',110.0))
+        ax3.xaxis.set_ticks_position('bottom')
+        for tick in ax3.xaxis.get_major_ticks():
+            tick.label.set_fontsize(16)
+
+        # print '--- --- --- --- --- ---'
+        # print self.barrier['ext']['start']
+        # print self.barrier['ext']['stop']
+        # print self.barrier['time']['start']
+        # print self.barrier['time']['stop']
+        # print self.barrier['frame']['start']
+        # print self.barrier['frame']['stop']
+
+        ax1.set_xlim(self.barrier['ext']['start'],self.barrier['ext']['stop'])
+        ax2.set_xlim(self.barrier['time']['start'],self.barrier['time']['stop'])
+        ax3.set_xlim(self.barrier['frame']['start'],self.barrier['frame']['stop'])
+
+    def Plot_Tension(self):
+        '''
+        Plot Multiple: FE, frame, time.
+        '''
+        data = self.data_tension
+        print data.shape
+
+        fig = plt.figure(0)
+        fig.set_size_inches(8,7)
+        gs = GridSpec(1,1)
+        ax1 = plt.subplot(gs[0,:])
+        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+
+        cmap = plt.get_cmap('YlOrRd') # seismic, bwr, summer, bwr_r
+        vmin = 0.0
+        vmax = 320.0
+
+        dm = ma.masked_less(data,vmin)
+        dn = dm.filled(vmin)
+        do = ma.masked_greater(dn,vmax)
+        dp = do.filled(vmax)
+        data = dp
+
+        # NEW: .pylib.mylib.moving_average_array
+        pdata = moving_average_array(data,5)
+
+        plt.imshow(pdata,cmap=cmap,aspect='auto',\
+                   extent=[0,
+                           data.shape[1],
+                           data.shape[0],
+                           0],\
+                   clim=(vmin,vmax),\
+                   interpolation='nearest')
+
+        v = np.linspace(vmin,vmax,6)
+        x = plt.colorbar(ticks=v)
+
+        # if args['fline'] != None:
+        #     flines = args['fline'].split(',')
+        #     fcolors = ['k','r','g','b']
+        #     for f,fl in enumerate(flines):
+        #         ax1.axhline(int(flines[f]),color=fcolors[f])
+
+
+        plt.tick_params(axis='x',which='major',width=6,length=14,color='r',labelsize=22,\
+                        direction='out')
+        plt.tick_params(axis='y',which='major',width=4,length=12,color='m',labelsize=20,\
+                        direction='out')
+
+
+        # xlim2 = ax1.get_xlim()[1]
+        # xticks = [x for x in [397,427,461,491,523] if (x < xlim2)]
+        # ax1.set_xticks(xticks)
+        # ax1.set_xticks([397,430,461,491,523])
+
+        ax1.set_ylabel('Frame #')
+        ax1.set_xlabel('Residue #')
+
+
+    def Plot_Chi(self):
+        '''
+        Plot Multiple: FE, frame, time.
+        '''
+        data = self.data_chi
+        print data.shape
+
+        fig = plt.figure(0)
+        fig.set_size_inches(8,7)
+        gs = GridSpec(1,1)
+        ax1 = plt.subplot(gs[0,:])
+        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+
+        cmap = plt.get_cmap('bwr') # seismic, bwr, summer, bwr_r
+        vmin = 0.5
+        vmax = 1.0
+
+        print 'ylimit:',data.shape[0]*2
+        plt.imshow(data,cmap=cmap,aspect='auto',\
+                   extent=[0,
+                           data.shape[1],
+                           data.shape[0],
+                           0],\
+                   clim=(vmin,vmax),\
+                   interpolation='nearest')
+
+        v = np.linspace(vmin,vmax,6)
+        x = plt.colorbar(ticks=v)
+
+        plt.tick_params(axis='x',which='major',width=6,length=14,color='r',labelsize=22,\
+                        direction='out')
+        plt.tick_params(axis='y',which='major',width=4,length=12,color='m',labelsize=20,\
+                        direction='out')
+
+        # ax1.set_xticks([397,430,461,491,523])
+        # xlim2 = data.shape[1] + 382
+        # xticks = [x for x in [397,427,461,491,523] if (x < xlim2)]
+        # ax1.set_xticks(xticks)
+
+
+        ax1.set_ylabel('Frame #')
+        ax1.set_xlabel('Residue #')
+
+    def Plot_Costheta(self):
+        '''
+        Plot Multiple: FE, frame, time.
+        '''
+        data = self.data_costheta
+        print data.shape
+
+        fig = plt.figure(0)
+        fig.set_size_inches(8,7)
+        gs = GridSpec(1,1)
+        ax1 = plt.subplot(gs[0,:])
+        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+
+        cmap = plt.get_cmap('summer')
+        vmin = -1
+        vmax = 1
+        v = np.linspace(-0.5,0.5,3)
+
+        # zmask1 = ma.masked_greater(data[i,::],vmax)
+        # z_corr = zmask1.filled(12)
+        # data[i,::] = z_corr
+
+        # try:
+        #     print max(data[5,::])
+        #     print max(data[72,::])
+        # except IndexError:
+        #     pass
+
+        # zmask1 = ma.masked_less(z_arr,vmin) # mask everything < -10
+        # z_corr = zmask1.filled(20)
+        # # print type(z_corr)
+        # zmask2 = ma.masked_greater(z_corr,vmax)
+        # z_corr = zmask2.filled(80)
+
+        # 20 - 80
+        # plt.pcolormesh(data, ylist, Z, cmap = plt.get_cmap('summer'),vmin=vmin,vmax=vmax)
+        # plt.colorbar()
+        # X
+        # print data.shape
+        # print data[0:5,0:5]
+        # sys.exit()
+
+        plt.imshow(data,aspect='auto',extent=[0,data.shape[1],data.shape[0],0],vmin=-1.0,vmax=1.0)
+        # plt.imshow(data,aspect='auto',extent=[0,data.shape[1],data.shape[0]*100,0],vmin=-1.0,vmax=1.0)
+        # imshow(random.rand(8, 90), interpolation='nearest', aspect='auto')
+        x = plt.colorbar(ticks=v)
+        # plt.colorbar()
+        # cmap.set_over('r',vmax)
+        # cmap.set_under('r',vmin)
+        ax1.set_ylabel('Frame',color='m',size=28.0)
+
+
+    def Plot_Contacts(self):
+        '''
+        Plot Multiple: FE, frame, time.
+        '''
+        data = self.data_contacts_residue
+        print data.shape
+
+        fig = plt.figure(0)
+        fig.set_size_inches(8,5)
+        gs = GridSpec(2,2,width_ratios=[11,1],height_ratios=[1,11])
+        ax1 = plt.subplot(gs[1,0])
+        ax2 = plt.subplot(gs[0,0])
+        ax3 = plt.subplot(gs[0,1])
+        ax4 = plt.subplot(gs[1,1])
+
+        new_stack = np.zeros((data.shape[0],data.shape[1]))
+        initial_contact_arr = np.zeros(data.shape[1])
+
+        for r in range(data.shape[1]):
+            concount0 = len([con for con in data[0,r,1::] if con != -1])
+            initial_contact_arr[r] = concount0
+            # print r,concount0
+
+        for f in range(data.shape[0]):
+            for r in range(data.shape[1]):
+                # print data9[f,r,::]
+
+                for con in data[f,r,1::]:
+                    if con != -1:
+                        # print f,r,con
+                        new_stack[f,r] += 1
+                        # new_stack[f,int(con-diff_resid-1)] +=1
+                        new_stack[f,int(con)] +=1
+
+        # range:
+        cmap = plt.get_cmap('jet') # red, yellow, green, blue
+        vmin = 0.0
+        vmax = 8.0
+
+        # plot:
+        iplot = ax1.imshow(new_stack,aspect='auto',
+                           extent=[0,
+                                   data.shape[1],
+                                   data.shape[0],
+                                   0],
+                           clim=(vmin,vmax),
+                           cmap=cmap)
+        # ticks:
+        v = np.linspace(vmin,vmax,(vmax * 0.5 + 1))
+        cbar = plt.colorbar(iplot,ticks=v,cax=ax4)
+
+        if 1:
+            alphal = 0.8
+            alphag = 0.6
+            alphah = 0.6
+            ax2.axvspan(0,170,color='orange',alpha=alphal)
+            ax2.axvspan(170,186,color='m',alpha=alphal)
+            ax2.axvspan(187,381,color='cyan',alpha=alphal)
+            # shifted -4
+            ax2.axvspan(382,393,color='m',alpha=alphal)
+            ax2.axvspan(394,415,color='lime',alpha=alphag)
+            ax2.axvspan(416,422,color=(0.0,0.9,0.5),alpha=alphag)
+            ax2.axvspan(423,456,color='lime',alpha=alphag)
+            ax2.axvspan(457,486,color=(0.0,0.9,0.5),alpha=alphag)
+            ax2.axvspan(487,496,color=(0.0,0.9,0.5),alpha=alphag)
+            ax2.axvspan(497,505,color='gray',alpha=alphah) # connecting loop
+            ax2.axvspan(506,518,color='r',alpha=alphah)
+            ax2.axvspan(519,552,color='r',alpha=alphal)
+            ax2.axvspan(553,575,color='r',alpha=alphah)
+            ax2.axvspan(576,591,color='r',alpha=alphal)
+            ax2.axvspan(592,599,color='r',alpha=alphah)
+            ax2.axvspan(600,664,color='gray',alpha=alphah)
+
+            tsize = 10.0
+            theight = 0.33
+            ax2.text(57,theight,"Lobe I",fontsize=tsize)
+            ax2.text(252,theight,"Lobe II",fontsize=tsize)
+
+            ax2.text(392,theight,"12",fontsize=tsize)
+            ax2.text(415,theight,"3",fontsize=tsize)
+            ax2.text(430,theight,"45",fontsize=tsize)
+            ax2.text(458,theight,"678",fontsize=tsize)
+            ax2.text(506,theight,"A  B   C",fontsize=tsize)
+            ax2.text(576,theight,"D",fontsize=tsize)
+            ax2.text(591,theight,"E",fontsize=tsize)
+
+
+
+        # Final:
+        ax1.set_ylabel('Frame #')
+        ax1.set_xlabel('Residue #')
+        plt.subplots_adjust(hspace=0.0,wspace=0.05,bottom=0.18,top=0.94,right=0.92,left=0.17)
+
+        ax3.axis('off')
+        xlim = ax1.get_xlim()
+        ax2.set_xlim(xlim[0],xlim[1])
+        ax2.axis('off')
+
+        # xticks = [170,385,461,510,602]
+        xticks = [170,385,496,598]
+        xlabels = ['170','385','500','602']
+        ax1.set_xticks(xticks)
+        ax1.set_xticklabels(xlabels)
+        ax1.tick_params(axis='x',which='major',width=5,length=12,color='r',labelsize=16,\
+                        direction='out',pad=0.0)
+        ax1.tick_params(axis='y',which='major',width=2,length=10,labelsize=18,\
+                        direction='out',pad=0.0)
+        ax1.xaxis.set_ticks_position('bottom')
+        ax1.yaxis.set_ticks_position('left')

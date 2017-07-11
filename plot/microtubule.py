@@ -90,7 +90,7 @@ class Microtubule():
     def find_psf(self,psfdir,psf):
         os.chdir(psfdir)
 
-        print self.rnd
+        # print self.rnd
         # sys.exit()
 
         if psf != None:
@@ -149,7 +149,7 @@ class Microtubule():
             print 'No dcddir loaded.'
             sys.exit(1)
         os.chdir(dcddir)
-        lst = glob('*.dcd')
+        lst = glob.glob('*.dcd')
 
         if len(lst) == 1:
             dcd = lst[0]
@@ -180,7 +180,7 @@ class Microtubule():
         except:
             framefile = 'FRAME.-1'
 
-        mdaframe = glob('MDAframe.*')
+        mdaframe = glob.glob('MDAframe.*')
 
         if len(mdaframe) == 1:
             mdaframefile = mdaframe[0]
@@ -225,33 +225,49 @@ class Microtubule():
 
     def get_analysis_file(self):
         os.chdir(self.dirname)
-        lst = glob('mt_analysis.dat')
+        lst = glob.glob('mt_analysis.dat')
         if len(lst) == 1:
             self.file_analysis = lst[0]
         else:
             print 'Analysis file not found.'
 
     def get_sop_file(self):
+        # self.sopfile = os.path.join(self.dirname,'mt.sop')
+        # self.sopfile = 'mt.sop'
+
         os.chdir(self.dirname)
-        lst = glob('mt.sop')
-        if not lst:
-            lst = glob('MT.sop')
-        if len(lst) == 1:
-            self.sopfile = lst[0]
-        else:
-            try:
-                self.sopfile = glob('*.sop')[0]
-            except:
-                print 'Analysis file not found.'
+
+        curfiles = os.listdir(os.getcwd())
+
+        for f in curfiles:
+            if re.search('.sop',f) != None:
+                self.sopfile = f
+                # print f
+                break
+        return
+        # sys.exit()
+
+        # lst = glob.glob('mt.sop')
+        # if len(lst) == 1:
+        #     self.sopfile = lst[0]
+        #     return
+        # else:
+        #     lst = glob.glob('MT.sop')
+        #     if len(lst) == 1:
+        #         self.sopfile = lst[0]
+        #         return
+        #     else:
+        #         try:
+        #             self.sopfile = glob('*.sop')[0]
+        #         except:
+        #             print 'Analysis file not found.'
 
     def get_indentation_file(self):
         os.chdir(self.indentationdir)
 
-
         # print 'indentationdir:',self.indentationdir
-
         try:
-            path = glob('*.npy')[0]
+            path = glob.glob('*.npy')[0]
         except IndexError:
             print 'saving npy ...'
             path = glob('*_indent.dat')[0]
@@ -266,19 +282,19 @@ class Microtubule():
 
     def get_pdbs(self):
         os.chdir(self.dirname)
-        self.ref = glob('*.ref.pdb')[0]
+        self.ref = glob.glob('*.ref.pdb')[0]
         # self.ref = glob('mt.ref.pdb')[0]
         # if not self.ref:
         #     self.ref = glob('*.ref.pdb')[0]
 
 
         try:
-            self.pdbref = glob('pdbref.ent')[0]
+            self.pdbref = glob.glob('pdbref.ent')[0]
         except IndexError:
             pass
 
         try:
-            self.pdb = glob('mt.pdb')[0]
+            self.pdb = glob.glob('mt.pdb')[0]
         except IndexError:
             pass
 
@@ -330,9 +346,12 @@ class Microtubule():
         '''
         get information from mt.sop.
         '''
+        if not os.path.exists(self.sopfile):
+            self.get_sop_file()
 
         pattern = re.compile(r"\d+\.\d*") # looking for a decimal.
         patternbead = re.compile(r"\d+")
+
 
         if self.sopfile == None:
             return
@@ -415,7 +434,7 @@ class Microtubule():
         e250 = self.data[::,10] * -0.1 + 250 # 11nd column A to nm
         eshifted = e250 - e250[0]
 
-        simple_ma = 10
+        simple_ma = 150
         e_ra = moving_average(eshifted,simple_ma)
         shift = np.linspace(0,0,simple_ma)
         self.end_to_end = np.concatenate((shift,e_ra))
@@ -1107,6 +1126,7 @@ of self.externalcontacts.
 
         x = self.ext_raw[1:]
         y = self.f_nano[1:]
+        # ax1.plot(x,y)
 
         if ((self.direction == 'forward') and (self.truncated == 'no')):
             ax1.plot(x,y,'k-',label='Full Indent')
@@ -1120,6 +1140,9 @@ of self.externalcontacts.
         else:
             ax1.plot(x,y,label=self.name)
 
+
+
+
         ax1.set_xlim(-1,31)
         ax1.set_xticks([0,10,20,30])
         ax1.set_ylim(-.20,.905)
@@ -1128,6 +1151,26 @@ of self.externalcontacts.
 
         ax1.set_xlabel('Indentation Depth X/nm',fontsize=20)
         ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
+
+        # legend
+        handles,labels = ax1.get_legend_handles_labels()
+        ax1.legend(handles,labels,prop={'size':12},loc=2)
+
+    def plot_forceindentation_color(self,ax1,color):
+        print "hello color plot"
+
+        x = self.ext_raw[1:]
+        y = self.f_nano[1:]
+        ax1.plot(x,y)
+
+        ax1.set_xlim(-1,31)
+        ax1.set_xticks([0,10,20,30])
+        ax1.set_ylim(-.20,.905)
+        ax1.set_yticks([0,.2,.4,.6,.8])
+        ax1.set_ylim(-0.04,0.94)
+
+        ax1.set_xlabel('Indentation Depth X/nm',fontsize=24)
+        ax1.set_ylabel('Indentation Force F/nN',fontsize=24)
 
         # legend
         handles,labels = ax1.get_legend_handles_labels()

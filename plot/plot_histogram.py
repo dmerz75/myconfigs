@@ -8,9 +8,9 @@ import glob
 import re
 import numpy as np
 
-
-
 my_dir = os.path.abspath(os.path.dirname(__file__))
+# print my_dir
+# sys.exit()
 
 #  ---------------------------------------------------------  #
 #  functions                                                  #
@@ -39,7 +39,6 @@ dct_font = {'family':'sans-serif',
             'size'  :'20'}
 matplotlib.rc('font',**dct_font)
 
-
 #  ---------------------------------------------------------  #
 #  Import Data! (2/4)                                         #
 #  ---------------------------------------------------------  #
@@ -63,6 +62,7 @@ def parse_arguments():
     parser.add_argument("-rnd","--rnd",help="round: 13, 14, 16, 17")
     parser.add_argument("-nb","--nbins",help="number of bins: 3,4,5,6..",type=int)
     parser.add_argument("-cdf","--cdf",help="cdf-line: 0-off, 1-on",type=int)
+    parser.add_argument("-sel","--sel",help="select: 100,101,102..",type=int)
     args = vars(parser.parse_args())
     return args
 
@@ -111,8 +111,6 @@ for k,v in dct_hist.iteritems():
     print k,v['filename']
 # sys.exit()
 
-
-
 def get_data(datafile,topology,position):
     print datafile
     lst_data = []
@@ -156,20 +154,41 @@ def get_cdf(data,color='b',fill=True,**kwargs):
     else:
         upper_limit = max(data)
 
+    if 'nbins' in kwargs:
+        nbins = kwargs['nbins']
+    else:
+        nbins = 3
 
+    if 'alpha' in kwargs:
+        alpha = kwargs['alpha']
+    else:
+        alpha = 1.0
+
+    if 'pattern' in kwargs:
+        pattern = kwargs['pattern']
+    else:
+        pattern = None
+
+    print 'nbins:',nbins
+    # sys.exit()
     cdf = myCDF(data)
     # cdf.print_class()
 
     # cdf.determine_bins(lower_limit=0.3,upper_limit=0.6,nbins=3) # set
+    # cdf.determine_bins_limits(lower_limit=0.3,upper_limit=0.6,nbins=)
     cdf.determine_bins_limits(lower_limit=lower_limit,
                               upper_limit=upper_limit,
                               nbins=nbins) # set
+
+
     # print cdf.bins
+    # print alpha
+    # sys.exit()
 
     # cdf.get_hist(bins=cdbins)
     cdf.get_hist()
     cdf.print_values()
-    cdf.plot_bars(color=color,fill=fill)
+    cdf.plot_bars(color=color,fill=fill,alpha=alpha,pattern=pattern)
 
     if cdf_on_off != None:
         cdf.plot_cdf(color=color)
@@ -191,16 +210,30 @@ def get_cdf(data,color='b',fill=True,**kwargs):
     #     data_name = data_name + '_1pts'
 
 
-def axis_settings():
-    try:
-        ax[0].set_xlim(0.18,1.2)
-        # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+def axis_settings(**kwargs):
+    xlim = ax[0].get_xlim()
+    ylim = ax[0].get_ylim()
+
+    ax[0].tick_params(axis='both',labelsize=18.0)
+    ax[0].set_xlabel('Forces (nN)',fontsize=20)
+    ax[0].set_ylabel('Norm. Freq.',fontsize=20)
+
+    if xlim[1] < 0.7:
+        ax[0].set_xlim(0.15,0.65)
         ax[0].set_ylim(-0.01,1.01)
-        ax[0].set_xlabel('Forces',fontsize=24)
-        # ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
-        ax[0].set_ylabel('Norm. Freq.',fontsize=24)
-    except NameError:
-        pass
+    else:
+        ax[0].set_xlim(0.49,1.01)
+        ax[0].set_ylim(-0.01,1.01)
+
+    # try:
+    #     ax[0].set_xlim(0.18,1.2)
+    #     # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+    #     ax[0].set_ylim(-0.01,1.01)
+    #     ax[0].set_xlabel('Forces',fontsize=24)
+    #     # ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+    #     ax[0].set_ylabel('Norm. Freq.',fontsize=24)
+    # except NameError:
+    #     pass
 
 def legend_settings(lst):
 
@@ -293,8 +326,100 @@ if 0:
 for k,v in dct_hist.iteritems():
     print k,v
 
-if 1:
-    data_name = data_name + '_8_12plate'
+
+# 0 rev_crit_breaks_mt8_combined.maxvalue.out
+# 1 rev_crit_breaks_mt8_combined.first.out
+# 2 rev_crit_breaks_mt12_np.maxvalue.out
+# 3 rev_crit_breaks_mt12_p.maxvalue.out
+# 4 rev_crit_breaks_mt12_p.first.out
+# 5 rev_crit_breaks_mt12_np.first.out
+# 6 rev_crit_breaks_13.maxvalue.out
+# 7 rev_crit_breaks_13.first.out
+# 8 rev_crit_breaks_14.2pts.first.out
+# 9 rev_crit_breaks_14.2pts.maxvalue.out
+# 10 rev_crit_breaks_14.1pts.maxvalue.out
+# 11 rev_crit_breaks_14.1pts.first.out
+# 12 rev_crit_breaks_16.first.final0.out
+# 13 rev_crit_breaks_16.maxvalue.final0.out
+# 14 rev_crit_breaks_17.maxvalue.final0.out
+# 15 rev_crit_breaks_17.first.final0.out
+
+if args['sel'] == 100:
+    data_name = data_name + '_812plate_main_first'
+    colors = ['r','b']
+    fillval= [False,False]
+
+    data = get_data(dct_hist[1]['file'],topology,position)
+    get_cdf(data,'r',True,
+            lower_limit=0.2,upper_limit=0.6,
+            nbins=6,alpha=0.6,pattern='--') # //
+
+    data = get_data(dct_hist[4]['file'],topology,position)
+    get_cdf(data,'b',True,
+            lower_limit=0.2,upper_limit=0.6,
+            nbins=6,alpha=0.4,pattern='\\')
+
+    axis_settings()
+    legend_settings(['8-dimer','12-dimer'])
+
+if args['sel'] == 101:
+    data_name = data_name + '_812plate_main_crit'
+    colors = ['r','b']
+    fillval= [False,False]
+
+    data = get_data(dct_hist[0]['file'],topology,position)
+    get_cdf(data,'r',True,
+            lower_limit=0.6,upper_limit=1.0,
+            nbins=6,alpha=0.6,pattern='--') # //
+
+    data = get_data(dct_hist[3]['file'],topology,position)
+    get_cdf(data,'b',True,
+            lower_limit=0.6,upper_limit=1.0,
+            nbins=6,alpha=0.4,pattern='\\')
+
+    axis_settings()
+    legend_settings(['8-dimer','12-dimer'])
+
+if args['sel'] == 102:
+    data_name = data_name + '_812noplate_main_first'
+    colors = ['r','b']
+    fillval= [False,False]
+
+    data = get_data(dct_hist[1]['file'],topology,position)
+    get_cdf(data,'r',True,
+            lower_limit=0.2,upper_limit=0.6,
+            nbins=6,alpha=0.6,pattern='--') # //
+
+    data = get_data(dct_hist[5]['file'],topology,position)
+    get_cdf(data,'b',True,
+            lower_limit=0.2,upper_limit=0.6,
+            nbins=6,alpha=0.4,pattern='\\')
+
+    axis_settings()
+    legend_settings(['8-dimer','12-dimer'])
+
+if args['sel'] == 103:
+    data_name = data_name + '_812noplate_main_crit'
+    colors = ['r','b']
+    fillval= [False,False]
+
+    data = get_data(dct_hist[0]['file'],topology,position)
+    get_cdf(data,'r',True,
+            lower_limit=0.6,upper_limit=1.0,
+            nbins=6,alpha=0.6,pattern='--') # //
+
+    data = get_data(dct_hist[2]['file'],topology,position)
+    get_cdf(data,'b',True,
+            lower_limit=0.6,upper_limit=1.0,
+            nbins=6,alpha=0.4,pattern='\\')
+
+    axis_settings()
+    legend_settings(['8-dimer','12-dimer'])
+
+
+
+if 0:
+    data_name = data_name + '_812plate_main'
     colors = ['g','b','orange','r']
     fillval= [False,False,True,True]
     limits = [(0.22,0.5),(0.48,0.9),(0.22,0.5),(0.48,0.9)]
@@ -306,7 +431,8 @@ if 1:
 
     axis_settings()
     legend_settings(['mt8-first','mt8-crit','mt12-plate-first','mt12-plate-crit'])
-else:
+# else:
+if 0:
     data_name = data_name + '_8_12noplate'
     colors = ['g','b','orange','r']
     fillval= [False,False,True,True]
@@ -323,7 +449,6 @@ else:
 
 
 if 0:
-
     for k in [1,0,5,2]: # 8 first, max, 12np first, max
         pass
 

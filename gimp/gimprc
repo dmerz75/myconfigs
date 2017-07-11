@@ -1,5 +1,5 @@
 # GIMP gimprc
-# 
+#
 # This is your personal gimprc file.  Any variable defined in this file takes
 # precedence over the value defined in the system-wide gimprc:
 # /etc/gimp/2.0/gimprc
@@ -9,15 +9,31 @@
 (default-image
     (width 4212)
     (height 2800)
-    (unit picas)
+    # (unit picas)
+    (unit pixels)
     (xresolution 600.000000)
     (yresolution 600.000000)
     (resolution-unit inches)
     (image-type rgb)
     (fill-type transparent-fill)
-    (comment "Created with GIMP"))
-(undo-size 256M)
-(max-new-image-size 300M)
+    (comment "Created with GIMP!
+			 By: Dale R. Merz Jr."))
 
+(default-fullscreen-view
+	(show-menubar yes)
+	(show-rulers yes)
+	(show-scrollbars yes)
+	(show-statusbar yes)
+	(show-selection yes)
+	(show-layer-boundary yes)
+	(show-guides yes)
+	(show-grid no)
+	(show-sample-points yes)
+	(padding-mode default)
+	(padding-color (color-rgb 1.000000 1.000000 1.000000)))
+
+(undo-size 512M)
+(max-new-image-size 350M)
+(num-processors 4)
 
 # end of gimprc
