@@ -44,6 +44,65 @@ from mylib.moving_average import *
 #     # sys.exit()
 #     return ma
 
+
+# def Apply_Residue_Layout():
+#     ''' Apply standard residue layout.
+#     '''
+#     alphal = 0.8
+#     alphag = 0.6
+#     alphah = 0.6
+#     ax2.axvspan(0,170,color='orange',alpha=alphal)
+#     ax2.axvspan(170,186,color='m',alpha=alphal)
+#     ax2.axvspan(187,380,color='cyan',alpha=alphal)
+#     # shifted -4
+#     ax2.axvspan(381,393,color='m',alpha=alphal)
+#     ax2.axvspan(394,415,color='lime',alpha=alphag)
+#     ax2.axvspan(416,422,color=(0.0,0.9,0.5),alpha=alphag)
+#     ax2.axvspan(423,456,color='lime',alpha=alphag)
+#     ax2.axvspan(457,486,color=(0.0,0.9,0.5),alpha=alphag)
+#     ax2.axvspan(487,496,color=(0.0,0.9,0.5),alpha=alphag)
+#     ax2.axvspan(497,505,color='gray',alpha=alphah) # connecting loop
+#     ax2.axvspan(506,518,color='r',alpha=alphah)
+#     ax2.axvspan(519,552,color='r',alpha=alphal)
+#     ax2.axvspan(553,575,color='r',alpha=alphah)
+#     ax2.axvspan(576,591,color='r',alpha=alphal)
+#     ax2.axvspan(592,599,color='r',alpha=alphah)
+#     ax2.axvspan(600,664,color='gray',alpha=alphah)
+
+#     tsize = 10.0
+#     theight = 0.33
+#     ax2.text(57,theight,"Lobe I",fontsize=tsize)
+#     ax2.text(252,theight,"Lobe II",fontsize=tsize)
+
+#     ax2.text(392,theight,"12",fontsize=tsize)
+#     ax2.text(415,theight,"3",fontsize=tsize)
+#     ax2.text(430,theight,"45",fontsize=tsize)
+#     ax2.text(458,theight,"678",fontsize=tsize)
+#     ax2.text(506,theight,"A  B   C",fontsize=tsize)
+#     ax2.text(576,theight,"D",fontsize=tsize)
+#     ax2.text(591,theight,"E",fontsize=tsize)
+
+
+#     # Final:
+#     ax1.set_ylabel('Frame #')
+#     ax1.set_xlabel('Residue #')
+#     plt.subplots_adjust(hspace=0.0,wspace=0.05,bottom=0.18,top=0.94,right=0.92,left=0.17)
+
+
+#     # xticks = [170,385,461,510,602]
+#     xticks = [170,385,496,598]
+#     xlabels = ['170','385','500','602']
+#     ax1.set_xticks(xticks)
+#     ax1.set_xticklabels(xlabels)
+#     ax1.tick_params(axis='x',which='major',width=5,length=12,color='r',labelsize=16,\
+#                     direction='out',pad=0.0)
+#     ax1.tick_params(axis='y',which='major',width=2,length=10,labelsize=18,\
+#                     direction='out',pad=0.0)
+#     ax1.xaxis.set_ticks_position('bottom')
+#     ax1.yaxis.set_ticks_position('left')
+
+
+
 class PlotSop():
     """ The plotting class for SOP,GSOP,and SOPNucleo trajectories.
     """
@@ -425,7 +484,7 @@ class PlotSop():
 
 
 
-    def Plot_FE(self,plot_type,color='k'):
+    def Plot_Fext(self,plot_type,color='k'):
         '''
         Plot FE.
         '''
@@ -447,7 +506,7 @@ class PlotSop():
         fig = plt.figure(0)
         fig.set_size_inches(8,7)
         gs = GridSpec(1,1)
-        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+        plt.subplots_adjust(left=0.210,right=0.930,top=0.940,bottom=0.32)
 
         ax1 = plt.subplot(gs[0,:])
         ax2 = ax1.twiny()
@@ -458,8 +517,10 @@ class PlotSop():
         tline = ax2.plot(self.time,self.force,'b')
         fline = ax3.plot(self.frame,self.force,'m')
 
-        fig.text(0.01,0.16,'Time (ms)',color='b',size=16)
-        fig.text(0.01,0.075,'Frame #',color='m',size=16)
+        ax1.set_ylabel('Force (pN)',size=24,labelpad=8.0)
+        fig.text(0.01,0.26,'Ext. (nm)',color='g',size=18)
+        fig.text(0.01,0.18,'Time (ms)',color='b',size=18)
+        fig.text(0.01,0.095,'Frame #',color='m',size=18)
 
         ax2.spines['bottom'].set_color('b')
         ax2.spines['bottom'].set_position(('outward',65.0))
@@ -494,10 +555,13 @@ class PlotSop():
         print data.shape
 
         fig = plt.figure(0)
-        fig.set_size_inches(8,7)
-        gs = GridSpec(1,1)
-        ax1 = plt.subplot(gs[0,:])
-        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+        fig.set_size_inches(8,5)
+        gs = GridSpec(2,2,width_ratios=[11,1],height_ratios=[1,11])
+        ax1 = plt.subplot(gs[1,0]) # main
+        ax2 = plt.subplot(gs[0,0]) # res_layout
+        ax3 = plt.subplot(gs[0,1])
+        ax4 = plt.subplot(gs[1,1]) # colorbar
+        ax = [ax1,ax2,ax3,ax4]
 
         cmap = plt.get_cmap('YlOrRd') # seismic, bwr, summer, bwr_r
         vmin = 0.0
@@ -512,37 +576,42 @@ class PlotSop():
         # NEW: .pylib.mylib.moving_average_array
         pdata = moving_average_array(data,5)
 
-        plt.imshow(pdata,cmap=cmap,aspect='auto',\
-                   extent=[0,
-                           data.shape[1],
-                           data.shape[0],
-                           0],\
-                   clim=(vmin,vmax),\
-                   interpolation='nearest')
-
+        iplot = ax1.imshow(pdata,cmap=cmap,aspect='auto',\
+                           extent=[0,
+                                   data.shape[1],
+                                   data.shape[0],
+                                   0],\
+                           clim=(vmin,vmax),\
+                           interpolation='nearest')
         v = np.linspace(vmin,vmax,6)
-        x = plt.colorbar(ticks=v)
 
+        cbar = plt.colorbar(iplot,ticks=v,cax=ax4)
+        cbar.ax.tick_params(labelsize=16)
+        ax3.axis('off')
+        xlim = ax1.get_xlim()
+        ax2.set_xlim(xlim[0],xlim[1])
+        ax2.axis('off')
+        self.Apply_Residue_Layout(ax)
+
+        # x = plt.colorbar(ticks=v)
         # if args['fline'] != None:
         #     flines = args['fline'].split(',')
         #     fcolors = ['k','r','g','b']
         #     for f,fl in enumerate(flines):
         #         ax1.axhline(int(flines[f]),color=fcolors[f])
 
-
-        plt.tick_params(axis='x',which='major',width=6,length=14,color='r',labelsize=22,\
-                        direction='out')
-        plt.tick_params(axis='y',which='major',width=4,length=12,color='m',labelsize=20,\
-                        direction='out')
+        # plt.tick_params(axis='x',which='major',width=6,length=14,color='r',labelsize=22,\
+        #                 direction='out')
+        # plt.tick_params(axis='y',which='major',width=4,length=12,color='m',labelsize=20,\
+        #                 direction='out')
 
 
         # xlim2 = ax1.get_xlim()[1]
         # xticks = [x for x in [397,427,461,491,523] if (x < xlim2)]
         # ax1.set_xticks(xticks)
         # ax1.set_xticks([397,430,461,491,523])
-
-        ax1.set_ylabel('Frame #')
-        ax1.set_xlabel('Residue #')
+        # ax1.set_ylabel('Frame #')
+        # ax1.set_xlabel('Residue #')
 
 
     def Plot_Chi(self):
@@ -553,40 +622,47 @@ class PlotSop():
         print data.shape
 
         fig = plt.figure(0)
-        fig.set_size_inches(8,7)
-        gs = GridSpec(1,1)
-        ax1 = plt.subplot(gs[0,:])
-        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
+        fig.set_size_inches(8,5)
+        gs = GridSpec(2,2,width_ratios=[11,1],height_ratios=[1,11])
+        ax1 = plt.subplot(gs[1,0]) # main
+        ax2 = plt.subplot(gs[0,0]) # res_layout
+        ax3 = plt.subplot(gs[0,1])
+        ax4 = plt.subplot(gs[1,1]) # colorbar
+        ax = [ax1,ax2,ax3,ax4]
 
         cmap = plt.get_cmap('bwr') # seismic, bwr, summer, bwr_r
         vmin = 0.5
         vmax = 1.0
 
         print 'ylimit:',data.shape[0]*2
-        plt.imshow(data,cmap=cmap,aspect='auto',\
-                   extent=[0,
-                           data.shape[1],
-                           data.shape[0],
-                           0],\
-                   clim=(vmin,vmax),\
-                   interpolation='nearest')
-
+        iplot = ax1.imshow(data,cmap=cmap,aspect='auto',\
+                           extent=[0,
+                                   data.shape[1],
+                                   data.shape[0],
+                                   0],\
+                           clim=(vmin,vmax),\
+                           interpolation='nearest')
         v = np.linspace(vmin,vmax,6)
-        x = plt.colorbar(ticks=v)
+        # x = plt.colorbar(ticks=v)
 
-        plt.tick_params(axis='x',which='major',width=6,length=14,color='r',labelsize=22,\
-                        direction='out')
-        plt.tick_params(axis='y',which='major',width=4,length=12,color='m',labelsize=20,\
-                        direction='out')
+        cbar = plt.colorbar(iplot,ticks=v,cax=ax4)
+        cbar.ax.tick_params(labelsize=16)
+        ax3.axis('off')
+        xlim = ax1.get_xlim()
+        ax2.set_xlim(xlim[0],xlim[1])
+        ax2.axis('off')
+        self.Apply_Residue_Layout(ax)
 
+        # plt.tick_params(axis='x',which='major',width=6,length=14,color='r',labelsize=22,\
+        #                 direction='out')
+        # plt.tick_params(axis='y',which='major',width=4,length=12,color='m',labelsize=20,\
+        #                 direction='out')
         # ax1.set_xticks([397,430,461,491,523])
         # xlim2 = data.shape[1] + 382
         # xticks = [x for x in [397,427,461,491,523] if (x < xlim2)]
         # ax1.set_xticks(xticks)
-
-
-        ax1.set_ylabel('Frame #')
-        ax1.set_xlabel('Residue #')
+        # ax1.set_ylabel('Frame #')
+        # ax1.set_xlabel('Residue #')
 
     def Plot_Costheta(self):
         '''
@@ -595,49 +671,42 @@ class PlotSop():
         data = self.data_costheta
         print data.shape
 
-        fig = plt.figure(0)
-        fig.set_size_inches(8,7)
-        gs = GridSpec(1,1)
-        ax1 = plt.subplot(gs[0,:])
-        plt.subplots_adjust(left=0.190,right=0.950,top=0.950,bottom=0.3)
 
-        cmap = plt.get_cmap('summer')
+        fig = plt.figure(0)
+        fig.set_size_inches(8,5)
+        gs = GridSpec(2,2,width_ratios=[11,1],height_ratios=[1,11])
+        ax1 = plt.subplot(gs[1,0]) # main
+        ax2 = plt.subplot(gs[0,0]) # res_layout
+        ax3 = plt.subplot(gs[0,1])
+        ax4 = plt.subplot(gs[1,1]) # colorbar
+        ax = [ax1,ax2,ax3,ax4]
+
+
+        cmap = plt.get_cmap('jet')
         vmin = -1
         vmax = 1
-        v = np.linspace(-0.5,0.5,3)
+        v = np.linspace(-1.0,1.0,5)
 
-        # zmask1 = ma.masked_greater(data[i,::],vmax)
-        # z_corr = zmask1.filled(12)
-        # data[i,::] = z_corr
+        for i,d in enumerate(data):
+            zmask1 = ma.masked_greater(data[i,::],vmax)
+            z_corr = zmask1.filled(12)
+            data[i,::] = z_corr
 
-        # try:
-        #     print max(data[5,::])
-        #     print max(data[72,::])
-        # except IndexError:
-        #     pass
+        iplot = ax1.imshow(data,cmap=cmap,aspect='auto',extent=[0,data.shape[1],data.shape[0],0],vmin=-1.0,vmax=1.0)
+
+        cbar = plt.colorbar(iplot,ticks=v,cax=ax4)
+        cbar.ax.tick_params(labelsize=16)
+        ax3.axis('off')
+        xlim = ax1.get_xlim()
+        ax2.set_xlim(xlim[0],xlim[1])
+        ax2.axis('off')
+        self.Apply_Residue_Layout(ax)
 
         # zmask1 = ma.masked_less(z_arr,vmin) # mask everything < -10
         # z_corr = zmask1.filled(20)
         # # print type(z_corr)
         # zmask2 = ma.masked_greater(z_corr,vmax)
         # z_corr = zmask2.filled(80)
-
-        # 20 - 80
-        # plt.pcolormesh(data, ylist, Z, cmap = plt.get_cmap('summer'),vmin=vmin,vmax=vmax)
-        # plt.colorbar()
-        # X
-        # print data.shape
-        # print data[0:5,0:5]
-        # sys.exit()
-
-        plt.imshow(data,aspect='auto',extent=[0,data.shape[1],data.shape[0],0],vmin=-1.0,vmax=1.0)
-        # plt.imshow(data,aspect='auto',extent=[0,data.shape[1],data.shape[0]*100,0],vmin=-1.0,vmax=1.0)
-        # imshow(random.rand(8, 90), interpolation='nearest', aspect='auto')
-        x = plt.colorbar(ticks=v)
-        # plt.colorbar()
-        # cmap.set_over('r',vmax)
-        # cmap.set_under('r',vmin)
-        ax1.set_ylabel('Frame',color='m',size=28.0)
 
 
     def Plot_Contacts(self):
@@ -650,10 +719,11 @@ class PlotSop():
         fig = plt.figure(0)
         fig.set_size_inches(8,5)
         gs = GridSpec(2,2,width_ratios=[11,1],height_ratios=[1,11])
-        ax1 = plt.subplot(gs[1,0])
-        ax2 = plt.subplot(gs[0,0])
+        ax1 = plt.subplot(gs[1,0]) # main
+        ax2 = plt.subplot(gs[0,0]) # res_layout
         ax3 = plt.subplot(gs[0,1])
-        ax4 = plt.subplot(gs[1,1])
+        ax4 = plt.subplot(gs[1,1]) # colorbar
+        ax = [ax1,ax2,ax3,ax4]
 
         new_stack = np.zeros((data.shape[0],data.shape[1]))
         initial_contact_arr = np.zeros(data.shape[1])
@@ -689,63 +759,68 @@ class PlotSop():
                            cmap=cmap)
         # ticks:
         v = np.linspace(vmin,vmax,(vmax * 0.5 + 1))
+
         cbar = plt.colorbar(iplot,ticks=v,cax=ax4)
-
-        if 1:
-            alphal = 0.8
-            alphag = 0.6
-            alphah = 0.6
-            ax2.axvspan(0,170,color='orange',alpha=alphal)
-            ax2.axvspan(170,186,color='m',alpha=alphal)
-            ax2.axvspan(187,381,color='cyan',alpha=alphal)
-            # shifted -4
-            ax2.axvspan(382,393,color='m',alpha=alphal)
-            ax2.axvspan(394,415,color='lime',alpha=alphag)
-            ax2.axvspan(416,422,color=(0.0,0.9,0.5),alpha=alphag)
-            ax2.axvspan(423,456,color='lime',alpha=alphag)
-            ax2.axvspan(457,486,color=(0.0,0.9,0.5),alpha=alphag)
-            ax2.axvspan(487,496,color=(0.0,0.9,0.5),alpha=alphag)
-            ax2.axvspan(497,505,color='gray',alpha=alphah) # connecting loop
-            ax2.axvspan(506,518,color='r',alpha=alphah)
-            ax2.axvspan(519,552,color='r',alpha=alphal)
-            ax2.axvspan(553,575,color='r',alpha=alphah)
-            ax2.axvspan(576,591,color='r',alpha=alphal)
-            ax2.axvspan(592,599,color='r',alpha=alphah)
-            ax2.axvspan(600,664,color='gray',alpha=alphah)
-
-            tsize = 10.0
-            theight = 0.33
-            ax2.text(57,theight,"Lobe I",fontsize=tsize)
-            ax2.text(252,theight,"Lobe II",fontsize=tsize)
-
-            ax2.text(392,theight,"12",fontsize=tsize)
-            ax2.text(415,theight,"3",fontsize=tsize)
-            ax2.text(430,theight,"45",fontsize=tsize)
-            ax2.text(458,theight,"678",fontsize=tsize)
-            ax2.text(506,theight,"A  B   C",fontsize=tsize)
-            ax2.text(576,theight,"D",fontsize=tsize)
-            ax2.text(591,theight,"E",fontsize=tsize)
-
-
-
-        # Final:
-        ax1.set_ylabel('Frame #')
-        ax1.set_xlabel('Residue #')
-        plt.subplots_adjust(hspace=0.0,wspace=0.05,bottom=0.18,top=0.94,right=0.92,left=0.17)
-
+        cbar.ax.tick_params(labelsize=16)
         ax3.axis('off')
         xlim = ax1.get_xlim()
         ax2.set_xlim(xlim[0],xlim[1])
         ax2.axis('off')
+        self.Apply_Residue_Layout(ax)
+
+
+    def Apply_Residue_Layout(self,ax):
+        ''' Apply standard residue layout.
+        '''
+        alphal = 0.8
+        alphag = 0.6
+        alphah = 0.6
+        ax[1].axvspan(0,170,color='orange',alpha=alphal)
+        ax[1].axvspan(170,186,color='m',alpha=alphal)
+        ax[1].axvspan(187,380,color='cyan',alpha=alphal)
+        # shifted -4
+        ax[1].axvspan(381,393,color='m',alpha=alphal)
+        ax[1].axvspan(394,415,color='lime',alpha=alphag)
+        ax[1].axvspan(416,422,color=(0.0,0.9,0.5),alpha=alphag)
+        ax[1].axvspan(423,456,color='lime',alpha=alphag)
+        ax[1].axvspan(457,486,color=(0.0,0.9,0.5),alpha=alphag)
+        ax[1].axvspan(487,496,color=(0.0,0.9,0.5),alpha=alphag)
+        ax[1].axvspan(497,505,color='gray',alpha=alphah) # connecting loop
+        ax[1].axvspan(506,518,color='r',alpha=alphah)
+        ax[1].axvspan(519,552,color='r',alpha=alphal)
+        ax[1].axvspan(553,575,color='r',alpha=alphah)
+        ax[1].axvspan(576,591,color='r',alpha=alphal)
+        ax[1].axvspan(592,599,color='r',alpha=alphah)
+        ax[1].axvspan(600,664,color='gray',alpha=alphah)
+
+        tsize = 10.0
+        theight = 0.33
+        ax[1].text(57,theight,"Lobe I",fontsize=tsize)
+        ax[1].text(252,theight,"Lobe II",fontsize=tsize)
+
+        ax[1].text(392,theight,"12",fontsize=tsize)
+        ax[1].text(415,theight,"3",fontsize=tsize)
+        ax[1].text(430,theight,"45",fontsize=tsize)
+        ax[1].text(458,theight,"678",fontsize=tsize)
+        ax[1].text(506,theight,"A  B   C",fontsize=tsize)
+        ax[1].text(576,theight,"D",fontsize=tsize)
+        ax[1].text(591,theight,"E",fontsize=tsize)
+
+
+        # Final:
+        ax[0].set_ylabel('Frame #')
+        ax[0].set_xlabel('Residue #')
+        plt.subplots_adjust(hspace=0.0,wspace=0.05,bottom=0.18,top=0.94,right=0.90,left=0.17)
+
 
         # xticks = [170,385,461,510,602]
         xticks = [170,385,496,598]
         xlabels = ['170','385','500','602']
-        ax1.set_xticks(xticks)
-        ax1.set_xticklabels(xlabels)
-        ax1.tick_params(axis='x',which='major',width=5,length=12,color='r',labelsize=16,\
+        ax[0].set_xticks(xticks)
+        ax[0].set_xticklabels(xlabels)
+        ax[0].tick_params(axis='x',which='major',width=5,length=12,color='r',labelsize=16,\
                         direction='out',pad=0.0)
-        ax1.tick_params(axis='y',which='major',width=2,length=10,labelsize=18,\
+        ax[0].tick_params(axis='y',which='major',width=2,length=10,labelsize=18,\
                         direction='out',pad=0.0)
-        ax1.xaxis.set_ticks_position('bottom')
-        ax1.yaxis.set_ticks_position('left')
+        ax[0].xaxis.set_ticks_position('bottom')
+        ax[0].yaxis.set_ticks_position('left')

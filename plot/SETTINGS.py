@@ -133,6 +133,9 @@ class SaveFig():
         Save the figure.
         '''
 
+        if not os.path.exists(self.destdir):
+            os.makedirs(self.destdir)
+
         fp = os.path.join(self.destdir,self.name)
 
         for suffix in self.filetypes:
