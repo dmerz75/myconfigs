@@ -1,12 +1,12 @@
 ;; To change the default font for new (non special-display) frames,
 ;; put either of these in your init file:
-(add-to-list 'default-frame-alist '(font .  "Mono-10" ))
-(set-face-attribute 'default t :font  "Mono-10" )
+(add-to-list 'default-frame-alist '(font .  "Mono-11" ))
+(set-face-attribute 'default t :font  "Mono-11" )
 
 ;; To change the default font for the current frame, as well as future frames,
 ;; put either of these in your init file:
-(set-face-attribute 'default nil :font  "Mono-10" )
-(set-frame-font   "Mono-10" nil t)
+(set-face-attribute 'default nil :font  "Mono-11" )
+(set-frame-font   "Mono-11" nil t)
 
 ;; (print (font-family-list))
 ;; Mono-10

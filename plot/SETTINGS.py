@@ -49,7 +49,7 @@ class SaveFig():
         # self.print_class()
 
 
-        print self.__doc__
+        print(self.__doc__)
 
         # self.print_class()
 
@@ -71,7 +71,7 @@ class SaveFig():
         '''
 
         for key in dir(self):
-            print key,getattr(self,key)
+            print(key,getattr(self,key))
 
     def set_destdir(self):
 
@@ -110,8 +110,8 @@ class SaveFig():
                              (self.name,
                               suffix))))
 
-            print 'found: '
-            print dct[suffix][-3:]
+            print('found: ')
+            print(dct[suffix][-3:])
             # print dct.keys()
 
             # if len(lst) == 0:
@@ -143,14 +143,14 @@ class SaveFig():
             fps = fp + '.%s' % suffix
 
             if not os.path.exists(fps):
-                print 'Saving: ',fps,' dpi: ',self.dpi
+                print('Saving: ',fps,' dpi: ',self.dpi)
 
                 # if ((suffix == 'svg') and (self.dpi < 1000)):
                 #     self.dpi = 1000
                 plt.savefig(fps,format=suffix,dpi=self.dpi)
 
             else:
-                print 'File already exists! ',fps
+                print('File already exists! ',fps)
 
 
 
@@ -162,18 +162,18 @@ def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
     Make subdir if necessary, dir_bac levels...
     use fname-0.type, or fname-0.type
     '''
-    print "saving figure in dir...",savedir
-    print 'dir_bac:(0)',dir_bac
-    print "SUBDIR:",subdir
-    print 'FNAME:',fname
-    print 'OPTION:',option
+    print("saving figure in dir...",savedir)
+    print('dir_bac:(0)',dir_bac)
+    print("SUBDIR:",subdir)
+    print('FNAME:',fname)
+    print('OPTION:',option)
     if dir_bac == 0:
         # print 'DIR_BAC = 0'
         content_dir = os.path.join(savedir,subdir)
     else:
         content_dir = os.path.join('/'.join(savedir.split('/')[0:dir_bac]),subdir)
-    print 'savedir:',savedir
-    print 'content_dir:',content_dir
+    print('savedir:',savedir)
+    print('content_dir:',content_dir)
 
     if not os.path.exists(content_dir):
         os.makedirs(content_dir)
@@ -182,7 +182,7 @@ def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
         fp_filename = os.path.join(content_dir,'%s_pub' % fname,fname)
     else:
         fp_filename = os.path.join(content_dir,fname)
-    print "FP:",fp_filename
+    print("FP:",fp_filename)
 
     # Save in PNG,EPS,SVG,PDF,TIFF,JPG formats
     # PIL, wxpython2.8, QT5Agg may be necessary
@@ -191,15 +191,15 @@ def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
     # matplotlib.rcParams['figure.dpi'] = 900
 
     if 'dpi' in kwargs.keys():
-        print 'Setting dpi:',kwargs['dpi']
+        print('Setting dpi:',kwargs['dpi'])
         dpi = kwargs['dpi']
     else:
         dpi = matplotlib.rcParams['figure.dpi']
     # sys.exit()
 
-    print 'searching %s ....' % fp_filename
+    print('searching %s ....' % fp_filename)
     if option == 'show':
-        print 'showing...'
+        print('showing...')
         plt.show(block=True)
         # plt.show()
         # sys.wait()
@@ -229,21 +229,21 @@ def save_fig(savedir,dir_bac,subdir,fname,option,**kwargs):
 
         # do matching
         if len(files) == 0:
-            print 'no files were found. saving %s' % fp_filename
+            print('no files were found. saving %s' % fp_filename)
             fp_filename = fp_filename + '-0'
             plt.savefig('%s.png' % fp_filename,dpi=dpi)
         else:
-            print 'fname:',fname
-            print 'files:',files
+            print('fname:',fname)
+            print('files:',files)
             try:
                 files_num_counted = [int(re.sub('.png','',f.split('-')[-1])) for f in files]
-                print 'ints found:',files_num_counted
+                print('ints found:',files_num_counted)
                 high_num = max(files_num_counted)
                 high_num += 1
-                print 'new high number:',high_num
+                print('new high number:',high_num)
                 fp_filename = fp_filename + '-' + str(high_num)
             except IndexError:
-                print 'zeroeth image printed!'
+                print('zeroeth image printed!')
                 fp_filename = fp_filename + '-0'
             # except ValueError:
             #     print 'zeroeth image printed!'
