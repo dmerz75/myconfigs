@@ -1,2 +1,1 @@
-;; eproject:
-;; (load-file "/path/to/eproject.el")
+../personal_unstable/config_eproject.el

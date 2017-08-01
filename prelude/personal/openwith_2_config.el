@@ -1,10 +1,1 @@
-(require 'openwith)
-;;; openwith.el ends here
-;; (add-to-list 'load-path "/path/to/downloaded/openwith.el")
-;; (setq openwith-associations '(("\\.pdf\\'" "evince" (file))))
-(setq openwith-associations '(("\\.gif\\'" "gwenview" (file))
-                              ("\\.pdf\\'" "evince" (file))
-                              ;; ("\\.png\\'" "geeqie" (file))
-                              ("\\.png\\'" "Geeqie" (file))
-                              ))
-(openwith-mode t)
+../personal_unstable/openwith_2_config.el

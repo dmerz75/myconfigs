@@ -1,1 +1,1 @@
-(load-theme 'tango-2 t)
+../personal_unstable/config_theme.el

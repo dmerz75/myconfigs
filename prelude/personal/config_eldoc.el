@@ -1,8 +1,1 @@
-;;; package --- Summary
-;; To do:
-
-;;; Code:
-(add-hook 'cider-mode-hook 'eldoc-mode)
-
-
-;;; Commentary:
+../personal_unstable/config_eldoc.el

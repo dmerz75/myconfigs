@@ -1,4 +1,1 @@
-;; company
-(global-company-mode)
-
-;; (global-set-key (kbd "TAB") #'company-indent-or-complete-common)
+../personal_unstable/config_company.el

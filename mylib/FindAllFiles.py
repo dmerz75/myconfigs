@@ -28,15 +28,15 @@ class FindAllFiles():
     def print_class(self):
         keys = dir(self)
         for key in keys:
-            print key,':\t',getattr(self,key)
+            print(key,':\t',getattr(self,key))
 
     def print_query(self,dct=None):
         if dct == None:
             dct = self.dct
-        print len(dct.keys()),'of',self.total
-        for k,v in dct.iteritems():
+        print(len(dct.keys()),'of',self.total)
+        for k,v in dct.items():
             # print k,' type:',v['type']
-            print k,v['dirname'],v['filename']
+            print(k,v['dirname'],v['filename'])
 
     def get_files(self):
         count = 0
@@ -105,10 +105,10 @@ class FindAllFiles():
         return dct_r
 
         # print sorted(dlist)
-        print dlist
-        print dlist2
-        print dct.keys()
-        print slist
+        print(dlist)
+        print(dlist2)
+        print(dct.keys())
+        print(slist)
 
         return dct
         # print klist
@@ -133,33 +133,33 @@ class FindAllFiles():
     def query_file(self,searchstring,dct=None):
         if dct == None:
             dct = self.dct
-        return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['file']) != None}
+        return {k:v for k,v in dct.items() if re.search(searchstring,v['file']) != None}
     def query_filename(self,searchstring,dct=None):
         if dct == None:
             dct = self.dct
-        return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['filename']) != None}
+        return {k:v for k,v in dct.items() if re.search(searchstring,v['filename']) != None}
     def query_dirname(self,searchstring,pos=None,dct=None):
         if dct == None:
             dct = self.dct
         if (pos == None) or (pos == -1):
-            return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['dirname']) != None}
+            return {k:v for k,v in dct.items() if re.search(searchstring,v['dirname']) != None}
         else:
-            return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['dirname'].split('/')[pos]) != None}
+            return {k:v for k,v in dct.items() if re.search(searchstring,v['dirname'].split('/')[pos]) != None}
     def remove_file(self,searchstring,dct=None):
         if dct == None:
             dct = self.dct
-        return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['file']) == None}
+        return {k:v for k,v in dct.items() if re.search(searchstring,v['file']) == None}
     def remove_filename(self,searchstring,dct=None):
         if dct == None:
             dct = self.dct
-        return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['filename']) == None}
+        return {k:v for k,v in dct.items() if re.search(searchstring,v['filename']) == None}
     def remove_dirname(self,searchstring,pos=None,dct=None):
         if dct == None:
             dct = self.dct
         if pos == None:
-            return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['dirname']) == None}
+            return {k:v for k,v in dct.items() if re.search(searchstring,v['dirname']) == None}
         else:
-            return {k:v for k,v in dct.iteritems() if re.search(searchstring,v['dirname'].split('/')[pos]) == None}
+            return {k:v for k,v in dct.items() if re.search(searchstring,v['dirname'].split('/')[pos]) == None}
 
     def from_dirs_get_files(self,searchstring,dct=None):
         lst_empty = []
@@ -184,7 +184,7 @@ class FindAllFiles():
             dct_new[i]['filename'] = os.path.basename(lst_files[i])
             dct_new[i]['dirname'] = os.path.dirname(lst_files[i])
         x = len(dct_new.keys())
-        print 'returning',len(dct_new.keys()),searchstring,'files;','empty dirs:',len(lst_empty)
+        print('returning',len(dct_new.keys()),searchstring,'files;','empty dirs:',len(lst_empty))
         return dct_new,lst_empty
 
     def rename_file(self,dct=None,modstring=None):
@@ -206,14 +206,14 @@ class FindAllFiles():
             # get dirs (were "emptied")
             # list_dirs.append(dct[k]['dirname'])
 
-            print 'renaming:',dct[k]['filename']
+            print('renaming:',dct[k]['filename'])
             newfile = dct[k]['filename'] + '.' + modstring
             # print newfile
             while os.path.exists(newfile):
                 modstring = str(int(modstring) + 1).zfill(2)
-                print 'mod:',modstring
+                print('mod:',modstring)
                 newfile = dct[k]['filename'] + '.' + modstring
-            print newfile
+            print(newfile)
             os.rename(dct[k]['filename'],newfile)
 
             # while os.path.exists(dct[k]['filename']):
@@ -238,5 +238,5 @@ class FindAllFiles():
             dct = self.dct
         for k in dct.keys():
             os.chdir(dct[k]['dirname'])
-            print dct[k]['filename']
+            print(dct[k]['filename'])
             os.remove(dct[k]['filename'])

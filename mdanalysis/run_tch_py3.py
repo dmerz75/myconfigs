@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+# #!/usr/bin/env python
 import sys
 import os
 import time
@@ -127,14 +128,14 @@ if option == 'clean':
     for path in os.listdir('interim_coord'):
         fp_path = os.path.join(my_dir,'interim_coord',path)
         os.remove(fp_path)
-    print "cleaned tension_output, interim_coord"
+    print("cleaned tension_output, interim_coord")
     sys.exit()
 
-print args['psf']
+print(args['psf'])
 
 if args['psf'] != None:
     psf = os.path.normpath(os.path.join(my_dir,args['psf']))
-    print 'the psf is now:',psf
+    print('the psf is now:',psf)
 if args['dcd'] != None:
     dcd = os.path.normpath(os.path.join(my_dir,args['dcd']))
 # sys.exit()
@@ -143,32 +144,32 @@ if args['hresid1'] == None and args['hresid2'] == None:
     hresid_first = args['resid1']
     hresid_last  = args['resid2']
     try:
-        print 'using resid1,2 %d,%d instead of hresid1,2 ...' % (args['resid1'],args['resid2'])
+        print('using resid1,2 %d,%d instead of hresid1,2 ...' % (args['resid1'],args['resid2']))
     except TypeError:
         pass
 
 
 # debug
 if option == 'debug':
-    print 'frame_first:',frame_first
-    print 'frame_last:',frame_last
-    print 'resid_first:',resid_first
-    print 'resid_last:',resid_last
-    print 'hresid_first:',hresid_first
-    print 'hresid_last:',hresid_last
-    print 'nucleotide:',nucleotide
-    print 'seed:',seed
-    print 'run_type:',run_type
-    print 'pdb:',pdb
-    print 'step:',step
-    print 'psf:',psf
-    print 'dcd:',dcd
-    print 'exiting ...'
+    print('frame_first:',frame_first)
+    print('frame_last:',frame_last)
+    print('resid_first:',resid_first)
+    print('resid_last:',resid_last)
+    print('hresid_first:',hresid_first)
+    print('hresid_last:',hresid_last)
+    print('nucleotide:',nucleotide)
+    print('seed:',seed)
+    print('run_type:',run_type)
+    print('pdb:',pdb)
+    print('step:',step)
+    print('psf:',psf)
+    print('dcd:',dcd)
+    print('exiting ...')
     sys.exit()
 else:
     try:
-        print psf
-        print dcd
+        print(psf)
+        print(dcd)
     except NameError:
         pass
 
@@ -194,8 +195,8 @@ def call_write_coords():
     # dcd = os.path.expanduser('~/ext/completed_sbd/gsop/5.alpha158/sbd_a158__2khosbd__153_1635976__01-26-2015_1834/dcd/2khosbd_D30_pull.dcd')
     # psf = os.path.expanduser('~/ext/completed_sbd/gsop/sbd_gsop.psf')
     # ~/ext/completed_sbd/gsop/sbd_gsop.psf
-    print psf
-    print dcd
+    print(psf)
+    print(dcd)
     x = MoleculeUniverse(my_dir,psf,dcd,my_dir,option)
     x.write_coords(resid_first,resid_last,frame_first,frame_last,step,sel)
     # if (option != 'mtcon'):
@@ -224,7 +225,7 @@ def call_pulchra(code=0):
     Writes interim_f1_r-4-385.pdb -> interim_f1_r-4-385.rebuilt.pdb if rebuilt has not been written.
     '''
     # print sys.args[::]
-    print args
+    print(args)
     # sys.exit()
     if os.getcwd().split('/')[-1] != 'interim_coord':
         os.chdir('interim_coord')
@@ -237,7 +238,7 @@ def call_pulchra(code=0):
         lst_interim_coords = ['interim_f%d_r-%d-%d.pdb' % (i,389,604) for i in range(frame_first,frame_last+1,step)]
     else:
         # print '<call_pulchra>',resid_first,resid_last
-        print '<call_pulchra>',resid_first,resid_last
+        print('<call_pulchra>',resid_first,resid_last)
         lst_interim_coords = ['interim_f%d_r-%d-%d.pdb' % (i,resid_first,resid_last) for i in range(frame_first,frame_last+1,step)]
         # print lst_interim_coords
 
@@ -268,12 +269,12 @@ def call_pulchra(code=0):
         # os.remove(rebuilt_coord)
         # if 1:
             run_command(['which','pulchra'])
-            print 'building with pulchra..',rebuilt_coord
+            print('building with pulchra..',rebuilt_coord)
             # print i,os.getcwd()
             run_command(['pulchra','-v',coord])
         else:
             run_command(['which','pulchra'])
-            print 'previously built:',rebuilt_coord
+            print('previously built:',rebuilt_coord)
 
 
 def call_run_contacts():
@@ -313,11 +314,11 @@ def call_run_new_contacts():
         # print i
         os.chdir(contact_dir)
         cp_file(interim_dir,coord,contact_dir,coord)
-        print "check the call_run_new_contacts function for the correct reference coords"
+        print("check the call_run_new_contacts function for the correct reference coords")
         # run_command(['run_contacts_new','pdbref.ent',coord]) # MAY 28th.
         # run_command(['run_analyze','pdbref.ent',coord]) # August 8, 2015.
         run_command(['run_segment_contact','pdbref.ent',coord,str(num_chains),str(num_chains_i)])
-        print coord
+        print(coord)
         os.remove(coord)
         # cp_file(os.getcwd(),'Contact_map_residue_index_array.dat',os.path.join(my_dir,'contact_maps'),\
         #         'Contact_map_residue_index_array_f%d.dat' % i)
@@ -343,7 +344,7 @@ def call_bond_vector_angle():
         # print "check the call_run_new_contacts function for the correct reference coords"
         # run_command(['run_contacts_bond_vector_angle','pdbref.ent',coord]) # May 28th.
         run_command(['run_analyze_orig','pdbref.ent',coord])
-        print coord
+        print(coord)
         os.remove(coord)
         # cp_file(os.getcwd(),'Contact_map_residue_index_array.dat',os.path.join(my_dir,'contact_maps'),\
         #         'Contact_map_residue_index_array_f%d.dat' % i)
@@ -369,7 +370,7 @@ def call_proto_angle():
         # print "check the call_run_new_contacts function for the correct reference coords"
         # run_command(['run_contacts_bond_vector_angle','pdbref.ent',coord]) # May 28th.
         run_command(['run_analyze_proto',coord,'14','2','14','257'])
-        print coord
+        print(coord)
         os.remove(coord)
         # cp_file(os.getcwd(),'Contact_map_residue_index_array.dat',os.path.join(my_dir,'contact_maps'),\
         #         'Contact_map_residue_index_array_f%d.dat' % i)
@@ -390,7 +391,7 @@ def call_mtcon():
         # print i
         os.chdir(contact_dir)
         cp_file(interim_dir,coord,contact_dir,'timelater.pdb')
-        print coord
+        print(coord)
         run_command(['run_segment_mtcon','ref.pdb','timelater.pdb',str(num_chains),str(num_chains_i)])
         # os.remove(coord)
 
@@ -430,7 +431,7 @@ def call_run_area(code=0):
             #     run_command(['run_area',coord,str(hresid_first-resid_first+1),str(hresid_last-resid_first+1)])
     else:
         # lst_interim_coords = ['interim_f%d_r-%d-%d.rebuilt.pdb' % (i,resid_first,resid_last) for i in range(frame_first,frame_last+1,step)]
-        print 'trying to run on non-rebuilt structures??'
+        print('trying to run on non-rebuilt structures??')
         sys.exit(1)
         # lst_interim_coords = ['interim_f%d_r-%d-%d.pdb' % (i,resid_first,resid_last) for i in range(frame_first,frame_last+1,step)]
 
@@ -452,17 +453,17 @@ def call_run_area(code=0):
         area_aa = 'Area_aa.' + coord
         ratio_aa = 'Ratio_aa.1.%s.' % (str(resid_last-resid_first+1)) + coord
         #           Ratio_aa.1.65.interim_f8805_r-397-461.rebuilt.pdb
-        print ratio_aa
-        print resid_last,resid_last - resid_first
+        print(ratio_aa)
+        print(resid_last,resid_last - resid_first)
         # sys.exit()
         # if (not os.path.exists(area_atom) or not os.path.exists(area_aa) or not os.path.exists(ratio_aa)):
         if not os.path.exists(ratio_aa):
-            print 'run_area:',coord
+            print('run_area:',coord)
             # run_command(['run_area',coord]) # run_area_orig
             # has the 4 385 (NBD) -> 1 382 effect 4-4+1, 385-4+1
             run_command(['run_area',coord,str(hresid_first-resid_first+1),str(hresid_last-resid_first+1)])
         else:
-            print 'run_area:',coord,'done previously.'
+            print('run_area:',coord,'done previously.')
 
     # for coord in lst_interim_coords:
     #     rebuilt_coord = re.sub('pdb','rebuilt.pdb',coord)
@@ -499,11 +500,11 @@ def get_hsa(code):
         #                         CHANGE!!!
     # print lst_ratios
     for i,ratio in enumerate(lst_ratios,frame_first):
-        print i,ratio
+        print(i,ratio)
         o = open(ratio,'r+')
         final_line = o.readlines()[-1]
         hydrophobes_exposed = final_line.split()[-1]
-        print final_line,hydrophobes_exposed,'\n'
+        print(final_line,hydrophobes_exposed,'\n')
         o.close()
         frame = int(re.search('_f(\d+)',ratio).groups(1)[0])
         lst_frames.append(frame)
@@ -573,7 +574,7 @@ def get_tension(fn_tension):
             #                 '~/sop_dev/tension/2kho_sbd.pdb',coord]
                     # 2kho_sbd.pdb
 
-        print 'tension_command_list:',command_list
+        print('tension_command_list:',command_list)
         # print os.getcwd()
         run_command(command_list)
         os.remove(coord)
@@ -588,7 +589,7 @@ def get_tension(fn_tension):
     # print len(lst_tensions)
     # sys.exit()
     if len(lst_tensions) == 0:
-        print 'no tension files found!'
+        print('no tension files found!')
         sys.exit()
         # for path in sorted(glob(os.path.join(my_dir,'tension_output/*.dat'))):
     # print sorted(lst_tensions)
@@ -619,11 +620,11 @@ def get_tension(fn_tension):
 #  Chi_analysis                                               #
 #  ---------------------------------------------------------  #
 def run_chi_analysis(tup_resids):
-    print 'running chi_analysis'
+    print('running chi_analysis')
 
     fn_chi = 'chi_%s_frames_%d_%d_resids_%d_%d.dat' % (run_type,frame_first,frame_last,tup_resids[0],tup_resids[1])
     if os.path.exists(fn_chi):
-        print fn_chi,'exists!!'
+        print(fn_chi,'exists!!')
         return
 
     # lst_interim_coords = glob('interim_coord/interim_*')
@@ -646,7 +647,7 @@ def run_chi_analysis(tup_resids):
 
 
         if run_type == 'sopnucleo':
-            print 'need right molecule!?'
+            print('need right molecule!?')
             # find the molecule
             sys.exit()
             command_list = ['run_chi',str(tup_resids[0]),str(tup_resids[1]), \
@@ -681,7 +682,7 @@ def run_chi_analysis(tup_resids):
         os.remove(os.path.join(my_dir,fn_molecule))
 
 
-    print 'ran chi_analysis for %d to %d' % (tup_resids[0],tup_resids[1])
+    print('ran chi_analysis for %d to %d' % (tup_resids[0],tup_resids[1]))
 
     # All Chi_residue files used in calculation but they get deleted in next for loop!
     # Chi_residue_117.dat*  Chi_residue_144.dat*  Chi_residue_18.dat*   Chi_residue_45.dat*
@@ -692,12 +693,12 @@ def run_chi_analysis(tup_resids):
     dct_chi_files = {}
     for path in lst_chi_files:
         fn_base = os.path.basename(path)
-        print fn_base
+        print(fn_base)
         result = re.search('(?<=_)\d+',fn_base)
         num = int(result.group(0))
-        print num,type(num)
+        print(num,type(num))
         data = np.loadtxt(path)
-        print data.shape
+        print(data.shape)
 
         # average computed
         avg_chi_value = np.mean(data)
@@ -711,13 +712,11 @@ def run_chi_analysis(tup_resids):
     lst_chi_avg = []
     for k,v in sorted(dct_chi_files.iteritems()):
         # print k,v['fp'],v['fn']
-        print k,v['fn'],v['chi']
+        print(k,v['fn'],v['chi'])
         lst_chi_avg.append(v['chi'])
     chi = np.array(lst_chi_avg)
 
     np.savetxt(fn_chi,chi,fmt='%0.6f')
-
-
 
 def compute_tension():
     call_write_coords()
@@ -732,7 +731,7 @@ def compute_tension():
     if not os.path.exists(fn_tension):
         get_tension(fn_tension)
     else:
-        print 'tension already computed!'
+        print('tension already computed!')
 
 
 def compute_chi():
@@ -762,20 +761,20 @@ def compute_hsa():
     get_hsa(0)
 
 def compute_csu():
-    print pdb
+    print(pdb)
     # print psf
     # x = MoleculeUniverse(my_dir,psf,pdb,my_dir,option)
     # x.print_resids(resid_first,resid_last,1)
     for i in range(resid_first,resid_last+1,1):
-        print i
+        print(i)
         command_list = ["resc",pdb,str(i),"Y"]
-        print '\n--------',command_list,'-----\n'
+        print('\n--------',command_list,'-----\n')
         run_command(command_list)
 
 
-print 'option:',option
+print('option:',option)
 if option == 'all':
-    print 'running tension, chi and hsa'
+    print('running tension, chi and hsa')
     compute_tension()
     compute_chi()
     compute_hsa()

@@ -1,2 +1,1 @@
-;; (require 'disaster)
-;; (define-key c-mode-base-map (kbd "C-c d") 'disaster)
+../personal_unstable/config_disaster.el

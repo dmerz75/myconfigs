@@ -1,4 +1,1 @@
-;; auctex
-;;
-(load "auctex.el" nil t t)
-(load "preview-latex.el" nil t t)
+../personal_unstable/config_auctex.el

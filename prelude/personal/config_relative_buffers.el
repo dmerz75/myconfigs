@@ -1,7 +1,1 @@
-;;; Commentary:
-
-;;; package --- Summary
-
-;;; Code:
-;; relative-buffers
-;; (global-relative-buffers-mode)
+../personal_unstable/config_relative_buffers.el
