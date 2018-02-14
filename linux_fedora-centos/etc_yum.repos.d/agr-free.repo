@@ -1,0 +1,17 @@
+[agr-free]
+name=AgResearch RPMs - x86_64
+baseurl=http://rpm.agresearch.co.nz/agr-free/6/x86_64
+failovermethod=priority
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-agresearch
+
+[agr-free-source]
+name=AgResearch SRPMs - x86_64
+baseurl=http://rpm.agresearch.co.nz/agr-free/6/SRPMS
+failovermethod=priority
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-agresearch

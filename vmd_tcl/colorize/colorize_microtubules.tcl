@@ -313,10 +313,12 @@ proc see_cantilever { {id 0} { res1 -1 } { res2 -1 } } {
     mol selection resid $res1 and chain T
     # mol representation VDW 33.000 40.0000
     mol representation Beads 10.00000 30.000000
-    mol color ColorID 11
+    # white: 8, purple-11. black-16
+    mol color ColorID 16
     # Gray
     # mol material Opaque
-    mol material Transparent
+    # mol material Transparent
+    mol material EdgyGlass
     mol addrep $id
 
     # mol addrep 0
@@ -324,10 +326,8 @@ proc see_cantilever { {id 0} { res1 -1 } { res2 -1 } } {
     # mol representation VDW 79.0000 40.0000
     mol representation Beads 99.00000 30.000000
     # mol modstyle 1 0 Beads 10.000000 30.000000
-    mol color ColorID 2
-    # Blue
-    # mol material Opaque
-    mol material Transparent
+    mol color ColorID 8
+    mol material EdgyGlass
     mol addrep $id
 }
 

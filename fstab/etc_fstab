@@ -1,0 +1,15 @@
+#
+# /etc/fstab
+# Created by anaconda on Wed Oct 25 16:08:38 2017
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+/dev/mapper/cl_dhcp--10--43--254--161-root /                       xfs     defaults        0 0
+UUID=0c3257dc-4c20-41ea-a53b-58b5c42d9eab /boot                   xfs     defaults        0 0
+/dev/mapper/cl_dhcp--10--43--254--161-home /home                   xfs     defaults        0 0
+/dev/mapper/cl_dhcp--10--43--254--161-swap swap                    swap    defaults        0 0
+
+/dev/sda1 /home/dmerz3/ext1  ext4 auto,nofail 0 2
+/dev/sdc1 /home/dmerz3/ext2  ext4 auto,nofail 0 2
+

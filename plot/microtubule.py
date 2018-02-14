@@ -28,7 +28,9 @@ import MDAnalysis
 
 from cycler import cycler
 # print matplotlib.rcParams['axes.prop_cycle']
-mycolors = ['k', 'r', 'g', 'b','c','m','lime','darkorange','sandybrown','hotpink']
+mycolors = ['k', 'r', 'g', 'b','c','m','lime',
+            'darkorange','sandybrown','hotpink',
+            'mediumseagreen','crimson','slategray']
 # ax1.set_prop_cycle(cycler('color',mycolors))
 
 
@@ -87,8 +89,16 @@ class Microtubule():
             self.outputdir = os.path.join(self.dirname,'output')
             self.topdir = os.path.join(self.dirname,'topologies')
 
+    # def find_psf(self,psfdir,psf,x):
     def find_psf(self,psfdir,psf):
         os.chdir(psfdir)
+
+        # lst = ['mt.psf','mt_noplate.psf','mt12_lev.psf',
+        #        'mt12_rev.psf','mt12_plate.psf']
+        # psf = lst[x]
+        # self.psf = os.path.join(psfdir,psf)
+        # return
+
 
         # print self.rnd
         # sys.exit()
@@ -96,8 +106,6 @@ class Microtubule():
         if psf != None:
             self.psf = os.path.join(psfdir,psf)
             return
-
-
         # if ((not re.search('nop',self.name)) and (not re.search('rev',self.name))):
 
         if ((self.rnd != 16) and (self.rnd != 17)):
@@ -107,7 +115,8 @@ class Microtubule():
                 lst = glob('mt.psf')
         else:
             if self.rnd == 16:
-                lst = glob('mt12_lev.psf')
+                # lst = glob('mt12_lev.psf')
+                lst = glob.glob('mt12_lev.psf')
             elif self.rnd == 17:
                 if re.search("rev",self.name) != None:
                     lst = glob('mt12_rev.psf')
@@ -199,7 +208,11 @@ class Microtubule():
                 print self.psf
                 print self.dcd
                 print "check load value error."
-                sys.exit(1)
+                print "using default. (600)"
+                run_command(['touch','MDAframe.%d' % 602])
+                self.total_frames = 602
+                return
+                # sys.exit(1)
 
             # for fr in self.u.trajectory:
             #     pass
@@ -270,7 +283,7 @@ class Microtubule():
             path = glob.glob('*.npy')[0]
         except IndexError:
             print 'saving npy ...'
-            path = glob('*_indent.dat')[0]
+            path = glob.glob('*_indent.dat')[0]
             npy = re.sub('.dat','.npy',path)
             print path
             x = np.loadtxt(path)
@@ -398,24 +411,121 @@ class Microtubule():
     # contacts.
     # angles.
     # curvature.
-    def get_dimers(self):
+    def get_dimers(self,threshold1=0.7,threshold2=0.9):
         '''
         Get the dimers from a Microtubule Class.
         Return a tuple.
         '''
         y = self.contacts
+        frameinitial = int(y.shape[0] * 0.0)
+        frametested1 = int(y.shape[0] * threshold1)
+        frametested2 = int(y.shape[0] * threshold2)
+        print "Frames: %d is initial 10%% of the total number of frames: %d." % (frameinitial,
+                                                                                 y.shape[0])
+        print "Frames: %d is 70%% of the total number of frames: %d." % (frametested1,y.shape[0])
+        print "Frames: %d is 90%% of the total number of frames: %d." % (frametested2,y.shape[0])
+
+        # tuples:
         dimers = []
+        dimers70p = []
+
+        # final lists:
+        lst_dimers = []
+        lst_dimers70p = []
+        lst_combined = []
+
         # print y.shape
 
         for c in range(self.contacts.shape[1]):
-            diff = y[0,c] - y[-1,c]
+            # diff = y[0,c] - y[-1,c]
+            diff = y[frameinitial,c] - y[frametested2,c]
             dimers.append((c,diff))
 
-        # Sort, last 10nnnn.
-        mod_dimers = sorted(dimers, key=lambda x: x[1])[-10:]
-        # print mod_dimers,len(mod_dimers)
+        for c in range(self.contacts.shape[1]):
+            # print c # 0 - 103 (104 dimers)
+            # print y.shape
+            # print y.shape[0] # number of frames.
+            # diff = y[0,c] - y[frametested,c]
+            diff = y[frameinitial,c] - y[frametested1,c]
+            dimers70p.append((c,diff))
 
-        self.dimers = [x[0] for x in mod_dimers]
+        # Sort, last 10nnnn.
+        # mod_dimers = sorted(dimers, key=lambda x: x[1])[-10:]
+        # print mod_dimers,len(mod_dimers)
+        # self.dimers = [x[0] for x in mod_dimers]
+
+        # List of Reversed of Sorted.
+        # [(39, 0.7109375),
+        #  (26, 0.7109375),
+        #  (50, 0.68384879725085912),
+        #  (51, 0.59649122807017552),
+        sort_num = 10
+        mod_dimers    = list(reversed(sorted(dimers, key=lambda x: x[1])[-sort_num:]))
+        mod_dimers70p = list(reversed(sorted(dimers70p, key=lambda x: x[1])[-sort_num:]))
+
+        print "mod_dimers/70p:"
+        print mod_dimers
+        print mod_dimers70p
+        # sys.exit()
+
+        # integers of dimers only
+        lst_dimers = [x[0] for x in mod_dimers if x[1] > 0.32]
+        print 'Selected laters, > 0.35:',len(lst_dimers),lst_dimers
+        if len(lst_dimers) < 10:
+            lst_dimers =  [x[0] for x in mod_dimers[0:10]]
+        # elif len(lst_dimers) > 8:
+        #     lst_dimers =  [x[0] for x in mod_dimers[0:8]]
+        lst_dimers = lst_dimers[0:10]
+        print "The Length of lst_dimers_late is: %d." % len(lst_dimers)
+
+
+        lst_dimers70p = [x[0] for x in mod_dimers70p if x[1] > 0.03]
+        print 'Selected earlies, > 0.051:',len(lst_dimers70p),lst_dimers70p
+        if len(lst_dimers70p) < 10:
+            lst_dimers70p = [x[0] for x in mod_dimers70p[0:10]]
+        # elif len(lst_dimers70p) > 8:
+        #     lst_dimers70p = [x[0] for x in mod_dimers70p[0:6]]
+        lst_dimers70p = lst_dimers70p[0:10]
+        print "The length of lst_dimers_early is: 70%% is: %d." % len(lst_dimers70p)
+        # sys.exit()
+
+        # num_of_breakingdimers = len(lst_dimers) + len(lst_dimers70p)
+        # if num_of_breakingdimers <= 8:
+        #     lst_dimers = [x[0] for x in mod_dimers if x[1] > 0.4]
+        #     lst_dimers70p = [x[0] for x in mod_dimers70p if x[1] > 0.1]
+
+
+        # print "from end evaluation:"
+        # for i in range(10):
+        #     print mod_dimers[i]
+
+        # print "from 70%% evaluation:"
+        # for i in range(10):
+        #     print mod_dimers70p[i]
+
+        print "length_late:",len(lst_dimers),lst_dimers
+        print "length_early:",len(lst_dimers70p),lst_dimers70p
+
+        # combining lst_dimers with lst_dimers70p
+        lst_combined = lst_dimers70p
+        for d in lst_dimers:
+            if d not in lst_combined:
+                lst_combined.append(d)
+            # if len(lst_combined) >= 14:
+                # break
+
+        # if lst_combined < 14:
+
+
+
+        # + lst_dimers70p[0:6]
+        # print "Currently using most broken at 70%% frame. Frame: %d" % frametested
+
+        print "Using the combining dimers approach: %f, %f" % (threshold1, threshold2)
+        print [x*2 for x in lst_combined]
+        self.dimers = lst_combined
+        # sys.exit()
+
 
     def get_forceindentation(self):
 
@@ -1186,6 +1296,8 @@ of self.externalcontacts.
         ax1.plot(x,y,label=self.name)
 
         ax1.set_xlim(x[0],x[-1])
+
+        # ax1.set_xticks(size=20)
         # ax1.set_xticks([0,10,20,30])
         # ax1.set_ylim(-.20,.905)
         ax1.set_yticks([0,.2,.4,.6,.8])
@@ -1193,6 +1305,8 @@ of self.externalcontacts.
         # ax1.set_xlabel('Indentation Depth X/nm')
         # ax1.set_xlabel('Frame #')
         ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
+
+        ax1.tick_params(axis='both',labelsize=20)
 
         # legend
         handles,labels = ax1.get_legend_handles_labels()
@@ -1252,6 +1366,7 @@ of self.externalcontacts.
 
         ax1.set_xlabel("Frame #",fontsize=20)
         ax1.set_ylabel("Qn",fontsize=20)
+        ax1.tick_params(axis='both',labelsize=20)
 
         ax1.set_xlim(x1[0],x1[-1])
 
@@ -1283,3 +1398,334 @@ of self.externalcontacts.
 
         for i,line in enumerate(lstlines):
             ax1.axvline(line,color=mycolors[i],linestyle='--',linewidth=1.5)
+
+    def get_mtpf(self):
+        """
+        Plot bending angle.
+        """
+        print "getting mtpf."
+        # ax.cla()
+
+
+        #  ---------------------------------------------------------  #
+        #  Start matplotlib (1/4)                                     #
+        #  ---------------------------------------------------------  #
+        import matplotlib
+        # default - Qt5Agg
+        # print matplotlib.rcsetup.all_backends
+        # matplotlib.use('GTKAgg')
+        # matplotlib.use('TkAgg')
+        # print 'backend:',matplotlib.get_backend()
+        import matplotlib.pyplot as plt
+        from matplotlib.gridspec import GridSpec
+        fig = plt.figure(0)
+        fig.set_size_inches(10.0,8.0)
+
+        gs = GridSpec(2,4)
+        ax1 = plt.subplot(gs[0,0])
+        ax2 = plt.subplot(gs[0,1])
+        ax3 = plt.subplot(gs[0,2])
+        ax4 = plt.subplot(gs[0,3])
+
+        ax5 = plt.subplot(gs[1,0])
+        ax6 = plt.subplot(gs[1,1])
+        ax7 = plt.subplot(gs[1,2])
+        ax8 = plt.subplot(gs[1,3])
+
+        ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7,ax8]
+        # ax2 = plt.subplot(gs[1,:-1])
+        # ax = [ax1]
+        # ax1 = plt.subplot(gs[0,:])
+        # ax2 = plt.subplot(gs[1,:])
+        # ax = [ax1,ax2]
+
+        plt.subplots_adjust(left=0.1,right=0.9,top=0.960,bottom=0.10,hspace=0.4,wspace=0.4)
+
+
+        print self.dirname
+
+        fp = os.path.join(self.dirname,"emol_mtpfbending_angle.dat")
+        x = np.loadtxt(fp)
+        data = np.reshape(x,(13,x.shape[0]/13,x.shape[1]))
+        print x.shape
+        print data.shape
+
+        frames = np.linspace(0,self.total_frames,data.shape[1])
+
+
+        for p in range(data.shape[0]):
+
+            for i in range(data.shape[2]):
+
+                ax[i].set_xlim(frames[0],frames[-1])
+                ax[i].set_ylim(-5,185)
+
+                ax[i].plot(frames,data[p,::,i])
+
+
+
+
+        # sys.exit()
+
+
+    def plot_mtpf(self):
+        """
+        Plot bending angle.
+        """
+        print "getting mtpf."
+
+        #  ---------------------------------------------------------  #
+        #  Start matplotlib (1/4)                                     #
+        #  ---------------------------------------------------------  #
+        import numpy.ma as ma
+        import matplotlib
+        import matplotlib.pyplot as plt
+        from matplotlib.gridspec import GridSpec
+        fig = plt.figure(0)
+        fig.set_size_inches(15.0,3.0)
+        plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.05)
+
+        # font_prop_large = matplotlib.font_manager.FontProperties(size='large')
+
+        # for k in matplotlib.rcParams.keys():
+        #     print k
+        # dct_font = {'family':'sans-serif',
+        #             'weight':'normal',
+        #             'size'  :'12'}
+        dct_font = {'size'  :'12'}
+        matplotlib.rc('font',**dct_font)
+        # matplotlib.rcParams['legend.frameon'] = False
+        # matplotlib.rcParams['figure.dpi'] = 900
+        # print matplotlib.rcParams['figure.dpi']
+        # plt.tick_params(labelsize=10)
+        # plt.tick_params()
+
+        gs = GridSpec(1,7)
+        ax1 = plt.subplot(gs[0,0])
+        ax2 = plt.subplot(gs[0,1])
+        ax3 = plt.subplot(gs[0,2])
+        ax4 = plt.subplot(gs[0,3])
+        ax5 = plt.subplot(gs[0,4])
+        ax6 = plt.subplot(gs[0,5])
+        ax7 = plt.subplot(gs[0,6])
+        ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
+
+
+        # ax[0].set_yticklabels(np.linspace(1,14,2))
+        # ax[0].set_yticklabels(np.linspace(1,14,2))
+
+        ylocs = np.linspace(0,12,7)
+        ylabels = [int(x) for x in np.linspace(1,13,7)]
+        print ylabels
+        ax[0].set_yticks(ylocs)
+        ax[0].set_yticklabels(ylabels)
+
+
+        for i in range(len(ax)):
+            # ax[i].axis('off')
+            # ax[i].set_xticks([])
+            # ax[i].
+            if i != 0:
+                ax[i].set_yticks([])
+
+
+        print self.dirname
+
+        fp = os.path.join(self.dirname,"emol_mtpfbending_angle.dat")
+        x = np.loadtxt(fp) # 858, 14
+        # data = np.reshape(x,(13,x.shape[0]/13,x.shape[1]))
+        data = np.reshape(x,(x.shape[0]/13,13,x.shape[1])) # 66, 13, 14
+
+
+        # cumulative data
+        pdata = data[::,::,::2] # 66, 13, 7
+        cdata = data[::,::,1::2] # 66, 13, 7
+        mdata = np.zeros(data.shape)
+
+
+        for a in range(cdata.shape[0]):
+            for b in range(cdata.shape[1]):
+                # print cdata[a,b,::]
+                for index,c in enumerate(cdata[a,b,::]):
+                    if c > 55:
+                        print index,c
+                        i2 = (index - 1) * 2 + 1
+                        print data[a,b,::]
+                        mdata[a,b,0:i2] = data[a,b,0:i2]
+                        break
+                        # print mdata[a,b,::]
+
+                # for c in range(data.shape[2]):
+                    # print data[a,b,c]
+                    # if data[a,b,c] >
+
+        # cumulative data (round 2)
+        pdata = mdata[::,::,::2] # 66, 13, 7
+        cdata = mdata[::,::,1::2] # 66, 13, 7
+        # sys.exit()
+
+        # cdata = np.cumsum(pdata,axis=2)
+        # cdata = np.zeros(pdata.shape)
+        # zdata = np.zeros(data.shape)
+
+
+        # print pdata.shape
+        # sys.exit()
+        # print x.shape
+        # print data.shape
+
+
+        # for a in range(pdata.shape[2]):
+            # a2 = a * 2 + 1
+            # for i in data[]
+            # print pdata[10,11,::]
+            # print data[10,11,::]
+
+
+        # sys.exit()
+
+        # cumulative, transpose, remove centroids
+        udata = np.cumsum(pdata,axis=2)
+        ctdata = np.transpose(udata)
+
+
+        frames = np.linspace(0,self.total_frames,data.shape[1])
+        # xticks = np.linspace(,frames[])
+
+        # 7 angles in 12 dimer.
+        for a in range(len(ax)):
+            #                   13 :: 7
+            # ax[a].imshow(data[::,::,a],aspect='auto',cmap='plasma',vmin=8,vmax=38)
+            # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=15,vmax=80)
+            ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=15,vmax=90)
+            # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=10,vmax=180)
+            # print data[::,::,a]
+            # ax[a].set_xticks()
+            # break
+
+
+        self.mtpfcentroids = pdata
+        self.mtpfbending = ctdata
+
+
+    def plot_mtpf_local(self):
+        """
+        Plot pf bending angle, local.
+        """
+        #  ---------------------------------------------------------  #
+        #  Start matplotlib (1/4)                                     #
+        #  ---------------------------------------------------------  #
+        import matplotlib
+        # import seaborn as sns
+        # default - Qt5Agg
+        # print matplotlib.rcsetup.all_backends
+        # matplotlib.use('GTKAgg')
+        # matplotlib.use('TkAgg')
+        print 'backend:',matplotlib.get_backend()
+        import matplotlib.pyplot as plt
+        from matplotlib.gridspec import GridSpec
+        # import pylab
+
+        fig = plt.figure(0)
+        fig.set_size_inches(15.0,3.0)
+        plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.12)
+        dct_font = {'size':'12'}
+        matplotlib.rc('font',**dct_font)
+
+        gs = GridSpec(1,23)
+        ax1 = plt.subplot(gs[0,0:3])
+        ax2 = plt.subplot(gs[0,3:6])
+        ax3 = plt.subplot(gs[0,6:9])
+        ax4 = plt.subplot(gs[0,9:12])
+        ax5 = plt.subplot(gs[0,12:15])
+        ax6 = plt.subplot(gs[0,15:18])
+        ax7 = plt.subplot(gs[0,18:21])
+        ax8 = plt.subplot(gs[0,22:23])
+        # gs = GridSpec(1,7)
+        # ax1 = plt.subplot(gs[0,0])
+        # ax2 = plt.subplot(gs[0,1])
+        # ax3 = plt.subplot(gs[0,2])
+        # ax4 = plt.subplot(gs[0,3])
+        # ax5 = plt.subplot(gs[0,4])
+        # ax6 = plt.subplot(gs[0,5])
+        # ax7 = plt.subplot(gs[0,6])
+
+        ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
+        cr = np.linspace(1,0,self.mtpfbending.shape[1])
+        cmap = matplotlib.cm.get_cmap("rainbow")
+
+
+
+
+
+        for i in range(len(ax)):
+            if i != 0:
+                ax[i].set_yticks([])
+
+        for a in ax:
+            a.set_ylim(-5,100)
+
+        print self.mtpfbending.shape
+        frames = np.linspace(0,self.total_frames,self.mtpfbending.shape[2])
+
+        for i in range(self.mtpfbending.shape[0]):
+            # 7
+            i2 = i*2 + 1
+
+            for p in range(self.mtpfbending.shape[1]):
+                # 13
+                # print np.var(self.mtpfbending[i,p,::])
+
+                if np.var(self.mtpfbending[i,p,::]) > 80.0:
+                    # print cr
+                    # print cr[p]
+                    ax[i].plot(frames,self.mtpfbending[i,p,::],color=cmap(cr[p]))
+
+
+        # plt.colorbar(ax8,ticks=[0,1])
+        cb1 = matplotlib.colorbar.ColorbarBase(ax8,
+                                               cmap=cmap,
+                                               orientation='vertical')
+        # ax[0].plot()
+        # sys.exit()
+
+
+
+        #  ---------------------------------------------------------  #
+        #  Make final adjustments: (4/4)                              #
+        #  mpl - available expansions                                 #
+        #  ---------------------------------------------------------  #
+        # mpl_rc
+        # mpl_font
+        # mpl_label
+        # mpl_xy
+        # mpl_ticks
+        # mpl_tick
+        # mpl_minorticks
+        # mpl_legend
+        # combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
+        # from plot.SETTINGS import *
+
+        # Save a matplotlib figure.
+        # REQ:
+        # (1) cwd = saves here, else provide 'destdirname'
+        # (2) name = filename without suffix. eg. 'png' (def), 'svg'
+        # OPT:
+        # (3) destdirname: eg. 'fig/histograms'
+        # (4) dpi: (optional) 120 (default), 300, 600, 1200
+        # (5) filetypes: ['png','svg','eps','pdf']
+
+        # P = SaveFig(cwd,name,destdirname*,dpi*,filetypes*)
+        # print plt.gcf().canvas.get_supported_filetypes()
+        # P = SaveFig(my_dir,
+        #             'hist_%s_%s' % (result_type,data_name),
+        #             destdirname='fig/histogramCDF')
+        # mpl_myargs_end
+
+    def isolate_contact_losstype_from_dimers(self):
+        """
+        """
+        print "hello isolate Contacts!"
+
+        print self.contacts.shape
+        print self.dimers

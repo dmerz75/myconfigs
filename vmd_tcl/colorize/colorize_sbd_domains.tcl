@@ -607,20 +607,24 @@ proc colorize_tube { {id 0} resid1 resid2 {color 0} } {
     # set molreps [molinfo $id get numreps]
     # set newrep1 [expr $molreps]
 
-
     set molreps [molinfo $id get numreps]
     set newrep [expr $molreps + 1]
     # puts "molreps: $molreps"
     # puts "residues: $resid1 $resid2"
 
-    # puts $color_num
-    mol material Opaque
-    mol representation Tube 0.6 50.0
-    mol color ColorID $color
-    mol selection resid $resid1 to $resid2
-    mol modstyle $newrep $id Tube 0.6 100.0
-    mol addrep $id
+    # mol color ColorID 20
+    # mol representation Tube 0.600000 50.000000
+    # mol selection resid 449 to 457
+    # mol material Opaque
+    # mol addrep 1
 
+    # puts $color_num
+    mol color ColorID $color
+    mol representation Tube 0.6 50.0
+    mol selection resid $resid1 to $resid2
+    # mol modstyle $newrep $id Tube 0.6 100.0
+    mol material Opaque
+    mol addrep $id
 };  #
 
 
@@ -633,79 +637,48 @@ proc colorize_hsp70_newcartoon { {id 0} } {
 
 proc colorize_hsp70_tube { {id 0} } {
 
-    # colorize_nbd_domains_NewCartoon $id
-    # colorize_sbd_newcartoon $id
-    # colorize_tube $id 603 663 0
-
-    # set lst_resids {{383 396} {397 412} {413 419} {420 427} {428 432} {433 443} {444 450} {451 460} {461 470} {471 500} {501 509} {510 522} {523 556} {557 579} {580 595} {596 603}}
-    # set lst_colors {13 18 13 17 13 12 13 12 13 3 1 0 10 0 10 1 0}
-
     # list of resids, colors
     set lst_nbd {}
     set lst_sbd {}
     set lst_nbdc {}
     set lst_sbdc {}
 
-    # mol modselect 1 $id resid 1 to 39 112 to 170
-    # mol modcolor 1 $id ColorID 7
-    # mol modselect 2 $id resid 40 to 111
-    # mol modcolor 2 $id ColorID 10
-    # mol modselect 3 $id resid 187 to 228 310 to 383
-    # mol modcolor 3 $id ColorID 3
-    # mol modselect 4 $id resid 229 to 309
-    # mol modcolor 4 $id ColorID 11
-    # mol modselect 5 $id "protein and resid 170 to 186"
-    # mol modcolor 5 $id ColorID 1
-
+    # residues:
     set lst_nbd {
         {0 39} {112 170} {40 111} {187 228} \
             {310 385} {229 309} {170 186} \
-    }
-    set lst_nbdc { 7 7 10 3 3 11 1}
-
+        }
     set lst_beta {
         {382 391} {392 411} {412 415} \
-        {416 424} {425 429} \
+            {416 424} {425 429} \
             {430 438} {439 448} \
             {449 457} {458 466} \
             {467 500} {501 505} }
-
-    set lst_betac { 13 20 13 \
-                        19 13 \
-                        20 13 \
-                        20 13 \
-                        19 2}
-
     set lst_alpha {
         {506 518} {519 552} {553 575} {576 591} \
             {592 598} {599 663}
     }
+
+    # colors:
+    set lst_nbdc { 7 7 10 3 3 11 1}
+    # set lst_betac { 13 20 13 19 13 \
+    #                     20 13 20 13 \
+    #                     19 2}
+    set lst_betac { 13 19 13 20 13 \
+                        19 13 19 13 \
+                        20 2}
     set lst_alphac {30 29 30 29 30 0}
 
-    # set lst_sbd {
-    #     {385 392} {393 408} {409 415} {416 423} {424 428} \
-    #         {429 436} {440 446} {447 456} {457 466} {467 496} \
-    #         {497 505} {506 518} {519 552} {553 575} {576 591} \
-    #         {592 598} {599 663}
-    # }
-    # set lst_sbdc {        13        20        13        19        13        19    \
-    #                         13       20        20        20         2         \
-    #                         30       29         30        29        30        \
-    #                         0 \
-    # }
-
-    # set lst_sbd $lst_beta
-    # set lst_sbdc $lst_betac
-
+    # concat:residues
     set lst_sbd [concat $lst_beta $lst_alpha]
-    set lst_sbdc [concat $lst_betac $lst_alphac]
-
     set len_nbd [llength $lst_nbd]
+    # concat:colors
+    set lst_sbdc [concat $lst_betac $lst_alphac]
     set len_sbd [llength $lst_sbd]
 
     puts "NBD: $len_nbd   SBD: $len_sbd"
 
-
+    # concat:total combination.
     set lst_resids [concat $lst_nbd $lst_sbd]
     set lst_colors [concat $lst_nbdc $lst_sbdc]
 
@@ -719,15 +692,13 @@ proc colorize_hsp70_tube { {id 0} } {
         return
     }
 
-    for {set i 1} {$i <= $len_resids} {incr i} {
 
+    for {set i 1} {$i <= $len_resids} {incr i} {
         set index [expr $i - 1]
         set resid1 [expr [lindex $lst_resids $index 0]]
         set resid2 [expr [lindex $lst_resids $index 1]]
         set color_num [lindex $lst_colors $index]
-        puts "$i $index $resid1 $resid2 $color_num"
-
+        puts "colorize(i): index res1 res2 color): ($i)  $index  $resid1 $resid2  $color_num"
         colorize_tube $id $resid1 $resid2 $color_num
-
     }
 }

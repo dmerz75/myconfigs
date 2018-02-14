@@ -106,12 +106,13 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     return set9
     # return x.dct
 
-dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'rev_*.out')
+# dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'rev_*.out')
+dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'pname_*.out')
 for k,v in dct_hist.iteritems():
     print k,v['filename']
 # sys.exit()
 
-def get_data(datafile,topology,position):
+def get_data(datafile,topology,position=None):
     print datafile
     lst_data = []
     with open(datafile,'r+') as fp:
@@ -199,6 +200,8 @@ def get_cdf(data,color='b',fill=True,**kwargs):
     # stats:
     cdf.print_stats()
 
+    return cdf
+
     # if re.search('max',v['file']) != None:
     #     data_name = data_name + '_max'
     # elif re.search('first',v['file']) != None:
@@ -235,7 +238,15 @@ def axis_settings(**kwargs):
     # except NameError:
     #     pass
 
-def legend_settings(lst):
+def legend_settings(lst,**kwargs):
+
+    print 'Legend_settings:'
+    for k,v in kwargs.iteritems():
+        print k,v
+    if 'location' in kwargs:
+        loc = kwargs['location']
+    # if 'upper_limit' in kwargs:
+    #     upper_limit = kwargs['upper_limit']
 
     # legend
     # 1:
@@ -243,7 +254,7 @@ def legend_settings(lst):
     # ax1.legend(handles, labels,prop={'size':10})
     # 2:
     # lst_labels = ['','',]
-    ax1.legend(lst,loc=1,prop={'size':18})
+    ax1.legend(lst,loc=loc,prop={'size':18})
     # 3:
     # lst_labels = ['','',]
     leg = plt.gca().get_legend()
@@ -343,6 +354,8 @@ for k,v in dct_hist.iteritems():
 # 13 rev_crit_breaks_16.maxvalue.final0.out
 # 14 rev_crit_breaks_17.maxvalue.final0.out
 # 15 rev_crit_breaks_17.first.final0.out
+# sys.exit()
+
 
 if args['sel'] == 100:
     data_name = data_name + '_812plate_main_first'
@@ -467,7 +480,6 @@ if 0:
     # data_name =
 
     # Plot Adjustments:
-
     try:
         ax[0].set_xlim(0.18,1.2)
         # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
@@ -483,6 +495,344 @@ if 0:
     # lst_labels = ['NoPlate-1st','NoPlate-Crit','Plate-1st','Plate-Crit']
     # ax[0].legend(lst_labels,loc=1,prop={'size':16})
 
+if args['sel'] == 170:
+    # RUN
+    # cd ~/ext2/completed_mt/ && ./plot_histogram.py -fn 13 -p doz5 -sel 170
+    # 13 rev_crit_breaks_16.maxvalue.final0.out nop   magenta
+    # 14 rev_crit_breaks_17.maxvalue.final0.out plate green
+
+    # for k,v in dct_hist.iteritems():
+    #     print k,v
+    # print 'selected:',fnum,dct_hist[fnum].items()
+    # sys.exit()
+
+    # 16-nop-magenta
+    # 17-plate-green
+    data1 = get_data(dct_hist[13]['file'],topology,position)
+    data2 = get_data(dct_hist[14]['file'],topology,position)
+    # get_cdf(data1,'g',False)
+    # get_cdf(data2,'m',False)
+
+    cdf1 = get_cdf(data1,'m',True,
+                   lower_limit=0.44,upper_limit=0.85,
+                   nbins=6,alpha=0.6,pattern='--') # //
+    cdf2 = get_cdf(data2,'g',True,
+                   lower_limit=0.44,upper_limit=0.85,
+                   nbins=6,alpha=0.6,pattern='\\') # //
+
+    # axis_settings()
+    legend_settings(['No Plate','Plate'],location=2)
+
+    cdf1.plot_cdf(color='m')
+    cdf2.plot_cdf(color='g')
+
+    ax[0].set_xlim(0.31,.88)
+    # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+    ax[0].set_ylim(-0.02,1.05)
+    ax[0].set_xlabel('Forces (nN)',fontsize=24)
+    # ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+    ax[0].set_ylabel('Norm. Freq.',fontsize=24)
+
+    data_name = data_name + '_%s' % args['sel']
+
+
+    if topology != None:
+        data_name = data_name + '_%s' % topology
+    if position != None:
+            data_name = data_name + '_%s' % position
+    data_name = data_name + '_rnd%s' % rnd
+
+    from plot.SETTINGS import *
+
+    P = SaveFig(my_dir,
+                'hist_%s_%s' % (result_type,data_name),
+                destdirname='fig/histogramCDF/compare16nop17plateg-2')
+    sys.exit()
+
+if args['sel'] == 171:
+    # RUN
+    # cd ~/ext2/completed_mt/ && ./plot_histogram.py -fn 13 -p doz5 -sel 170
+    # 12 rev_crit_breaks_16.first.final0.out nop   magenta
+    # 15 rev_crit_breaks_17.first.final0.out plate green
+
+    # for k,v in dct_hist.iteritems():
+    #     print k,v
+    # print 'selected:',fnum,dct_hist[fnum].items()
+    # sys.exit()
+
+    # 16-nop-magenta
+    # 17-plate-green
+    data1 = get_data(dct_hist[12]['file'],topology,position)
+    data2 = get_data(dct_hist[15]['file'],topology,position)
+    # get_cdf(data1,'g',False)
+    # get_cdf(data2,'m',False)
+
+    cdf1 = get_cdf(data1,'m',True,
+                   lower_limit=0.20,upper_limit=0.60,
+                   nbins=6,alpha=0.6,pattern='--') # //
+    cdf2 = get_cdf(data2,'g',True,
+                   lower_limit=0.20,upper_limit=0.60,
+                   nbins=6,alpha=0.6,pattern='\\') # //
+
+    # axis_settings()
+    legend_settings(['No Plate','Plate'],location=2)
+
+    cdf1.plot_cdf(color='m')
+    cdf2.plot_cdf(color='g')
+
+    ax[0].set_xlim(0.18,.62)
+    # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+    ax[0].set_ylim(-0.02,1.05)
+    ax[0].set_xlabel('Forces (nN)',fontsize=24)
+    # ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+    ax[0].set_ylabel('Norm. Freq.',fontsize=24)
+
+    data_name = data_name + '_%s' % args['sel']
+
+
+    if topology != None:
+        data_name = data_name + '_%s' % topology
+    if position != None:
+            data_name = data_name + '_%s' % position
+    data_name = data_name + '_rnd%s' % rnd
+
+    from plot.SETTINGS import *
+
+    P = SaveFig(my_dir,
+                'hist_%s_%s' % (result_type,data_name),
+                destdirname='fig/histogramCDF/compare16nop17plateg-2')
+    sys.exit()
+
+
+if args['sel'] >= 2000:
+    # RUN
+    # 0 pname_framebreaks_13.maxvalue.out
+    # 1 pname_framebreaks_13.first.out
+    # 2 pname_framebreaks_14.first.out
+    # 3 pname_framebreaks_14.maxvalue.out
+    # 4 pname_framebreaks_17.maxvalue.out
+    # 5 pname_framebreaks_17.first.out       # plate
+    # 6 pname_framebreaks_1626.first.out     # no plate
+    # 7 pname_framebreaks_1626.maxvalue.out
+
+    # cd ~/ext2/completed_mt/ && ./plot_histogram.py -fn 13 -p doz5 -sel 170
+    # 12 rev_crit_breaks_16.first.final0.out nop   magenta
+    # 15 rev_crit_breaks_17.first.final0.out plate green
+
+    # for k,v in dct_hist.iteritems():
+    #     print k,v
+    # print 'selected:',fnum,dct_hist[fnum].items()
+    # sys.exit()
+
+    # 16-nop-magenta
+    # 17-plate-green
+    # 0 pname_framebreaks_13.maxvalue.out
+    # 1 pname_framebreaks_13.first.out
+    # 2 pname_framebreaks_14.first.out
+    # 3 pname_framebreaks_14.maxvalue.out
+    # 4 pname_framebreaks_16.first.out
+    # 5 pname_framebreaks_16.maxvalue.out
+    # 6 pname_framebreaks_17.maxvalue.out
+    # 7 pname_framebreaks_17.first.out
+    # 8 pname_framebreaks_26.first.out
+    # 9 pname_framebreaks_26.maxvalue.out
+    # 10 pname_framebreaks_1626.first.out
+    # 11 pname_framebreaks_1626.maxvalue.out
+    # round_13_freeplus
+    # round_14_pushmid
+    # round_16_mtdoz_complete_nop
+    # round_17_mtdozplate
+    # round_26_mtdoz
+    # round_27_mtdozplate
+    if args['sel'] == 2001:
+        data1 = get_data(dct_hist[2]['file'],topology)
+        data2 = get_data(dct_hist[7]['file'],topology,position)
+        name1 = '8-dimer (1st)'
+        name2 = '12-dimer, with plate'
+        lower_limit = 0.20
+        upper_limit = 0.60
+        nbins = 6
+    elif args['sel'] == 2002:
+        data1 = get_data(dct_hist[2]['file'],topology)
+        data2 = get_data(dct_hist[10]['file'],topology,position)
+        name1 = '8-dimer (1st)'
+        name2 = '12-dimer, no plate'
+        lower_limit = 0.20
+        upper_limit = 0.60
+        nbins = 6
+    elif args['sel'] == 2005:
+        data1 = get_data(dct_hist[3]['file'],topology)
+        data2 = get_data(dct_hist[6]['file'],topology,position)
+        name1 = '8-dimer (crit)'
+        name2 = '12-dimer, with plate'
+        lower_limit = 0.40
+        upper_limit = 0.90
+        nbins = 6
+    elif args['sel'] == 2006:
+        data1 = get_data(dct_hist[3]['file'],topology)
+        data2 = get_data(dct_hist[11]['file'],topology,position)
+        name1 = '8-dimer (crit)'
+        name2 = '12-dimer, no plate'
+        lower_limit = 0.40
+        upper_limit = 0.90
+        nbins = 6
+
+        # FEBRUARY 10th.
+    elif args['sel'] == 2007:
+        # 10: 0,1 - plate  8s
+        # 11: 3,2 - noplate 8s
+        desc = 'nop-plate-8s'
+        data1 = get_data(dct_hist[3]['file'],topology)
+        data2 = get_data(dct_hist[0]['file'],topology,position)
+        name1 = '8-dimer (no plate)'
+        name2 = '8-dimer (plate)'
+        lower_limit = 0.20
+        upper_limit = 0.60
+        nbins = 10
+    elif args['sel'] == 2008:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        desc = 'nop-plate-8s'
+        data1 = get_data(dct_hist[2]['file'],topology)
+        data2 = get_data(dct_hist[1]['file'],topology,position)
+        name1 = '8-dimer (no plate)'
+        name2 = '8-dimer (plate)'
+        lower_limit = 0.50
+        upper_limit = 0.95
+        nbins = 9
+        # sys.exit()
+    elif args['sel'] == 2009:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        # 17: 10,11 - plate       (12s)
+        # 1626: 14, 15 - noplate  (12s)
+        # second: plate
+        desc = 'nop-plate-12s'
+        data1 = get_data(dct_hist[14]['file'],topology)
+        data2 = get_data(dct_hist[10]['file'],topology,position)
+        name1 = '12-dimer (no plate)'
+        name2 = '12-dimer (plate)'
+        lower_limit = 0.20
+        upper_limit = 0.60
+        nbins = 10
+        # sys.exit()
+    elif args['sel'] == 2010:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        # 17: 10,11 - plate       (12s)
+        # 1626: 14, 15 - noplate  (12s)
+        # second: plate
+        desc = 'nop-plate-12s'
+        data1 = get_data(dct_hist[15]['file'],topology)
+        data2 = get_data(dct_hist[11]['file'],topology,position)
+        name1 = '12-dimer (no plate)'
+        name2 = '12-dimer (plate)'
+        lower_limit = 0.50
+        upper_limit = 0.95
+        nbins = 9
+        # sys.exit()
+    elif args['sel'] == 2011:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        # 17: 10,11 - plate       (12s)
+        # 1626: 14, 15 - noplate  (12s)
+        # second: plate
+        desc = 'plate-first-8v12s'
+        data1 = get_data(dct_hist[0]['file'],topology)
+        data2 = get_data(dct_hist[10]['file'],topology,position)
+        name1 = '8-dimer (plate)'
+        name2 = '12-dimer (plate)'
+        lower_limit = 0.20
+        upper_limit = 0.60
+        nbins = 10
+    elif args['sel'] == 2012:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        # 17: 10,11 - plate       (12s)
+        # 1626: 14, 15 - noplate  (12s)
+        # second: plate
+        desc = 'plate-crit-8v12s'
+        data1 = get_data(dct_hist[1]['file'],topology)
+        data2 = get_data(dct_hist[11]['file'],topology,position)
+        name1 = '8-dimer (plate)'
+        name2 = '12-dimer (plate)'
+        lower_limit = 0.50
+        upper_limit = 0.95
+        nbins = 9
+    elif args['sel'] == 2013:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        # 17: 10,11 - plate       (12s)
+        # 1626: 14, 15 - noplate  (12s)
+        # second: plate
+        desc = 'nop-first-8v12s'
+        data1 = get_data(dct_hist[14]['file'],topology)
+        data2 = get_data(dct_hist[3]['file'],topology,position)
+        name1 = '8-dimer (no plate)'
+        name2 = '12-dimer (no plate)'
+        lower_limit = 0.20
+        upper_limit = 0.60
+        nbins = 10
+    elif args['sel'] == 2014:
+        # 10: 0,1 - plate
+        # 11: 3,2 - noplate
+        # 17: 10,11 - plate       (12s)
+        # 1626: 14, 15 - noplate  (12s)
+        # second: plate
+        desc = 'nop-crit-8v12s'
+        data1 = get_data(dct_hist[15]['file'],topology)
+        data2 = get_data(dct_hist[2]['file'],topology,position)
+        name1 = '8-dimer (no plate)'
+        name2 = '12-dimer (no plate)'
+        lower_limit = 0.50
+        upper_limit = 0.95
+        nbins = 9
+        # sys.exit()
+
+    # def plot_distributions(**kwargs):
+    #     data1 = get_data(dct_hist[kwargs['nop']],topology,position)
+    #     data2 = get_data(dct_hist[kwargs['plate']],topology,position)
+        # name1 = '12-dimer
+
+
+
+    # get_cdf(data1,'g',False)
+    # get_cdf(data2,'m',False)
+
+    cdf1 = get_cdf(data1,'m',True,
+                   lower_limit=lower_limit,upper_limit=upper_limit,
+                   nbins=nbins,alpha=0.6,pattern='--') # //
+    cdf2 = get_cdf(data2,'g',True,
+                   lower_limit=lower_limit,upper_limit=upper_limit,
+                   nbins=nbins,alpha=0.6,pattern='\\') # //
+
+    cdf1.plot_cdf(color='m')
+    cdf2.plot_cdf(color='g')
+
+    # axis_settings()
+    legend_settings([name1,name2],location=2)
+
+    ax[0].set_xlim(lower_limit - 0.05,upper_limit + 0.05)
+    # ax[0].set_xlim(cdf.lower_limit,cdf.upper_limit)
+    ax[0].set_ylim(-0.02,1.05)
+    ax[0].set_xlabel('Forces (nN)',fontsize=24)
+    # ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+    ax[0].set_ylabel('Norm. Freq.',fontsize=24)
+
+    data_name = data_name + '_%s' % args['sel']
+
+    if topology != None:
+        data_name = data_name + '_%s' % topology
+    if position != None:
+        data_name = data_name + '_%s' % position
+    data_name = data_name + '_d%s' % desc
+
+    from plot.SETTINGS import *
+
+    P = SaveFig(my_dir,
+                'hist_%s_%s' % (result_type,data_name),
+                destdirname='fig/histogramCDF')
+    sys.exit()
 
 
 #  ---------------------------------------------------------  #

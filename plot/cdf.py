@@ -83,7 +83,7 @@ class myCDF():
         '''
         Determine bins.
         '''
-        print min(self.data),max(self.data)
+        # print min(self.data),max(self.data)
 
         # for obj in kwargs:
         #     print obj

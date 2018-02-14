@@ -19,4 +19,4 @@ query:
 	$(NVCC65) $(CFILES) -o devicequery.exe
 
 optcuda:
-	$(OPTCUDA) $(CFILES) -o devicequery-optcuda.exe
+	$(OPTCUDA) $(CFILES) -o devicequery-optcuda2.exe

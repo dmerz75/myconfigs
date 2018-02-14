@@ -694,12 +694,14 @@ def plot_forceindentation(mt):
     ax1.set_yticks([0,.2,.4,.6,.8])
     ax1.set_ylim(-0.04,0.94)
 
-    ax1.set_xlabel('Indentation Depth X/nm')
-    ax1.set_ylabel('Indentation Force F/nN')
+    ax1.set_xlabel('Indentation Depth X/nm',size=20)
+    ax1.set_ylabel('Indentation Force F/nN',size=20)
 
     # legend
     handles,labels = ax1.get_legend_handles_labels()
     ax1.legend(handles,labels,prop={'size':14},loc=2)
+
+    ax1.tick_params(axis='both',labelsize=18)
 
 def plot_forceframe(mt):
     '''
@@ -1518,9 +1520,9 @@ def plot_contacts(mt,dimers=mt.dimers,shift=0,limit=None):
     #     ax1.axvline(mt.reversal_time,color='r',linestyle='-',linewidth=1.5)
     # sys.exit()
 
-    ax2.set_xlabel("Frame #")
+    ax2.set_xlabel("Frame #",size=20)
     # ax1.set_ylabel("Contacts")
-    ax2.set_ylabel("Qn")
+    ax2.set_ylabel("Qn",size=20)
 
     # ax2.set_xlim(x1[0],x1[-1])
     # if limit:
@@ -1542,7 +1544,6 @@ def plot_contacts(mt,dimers=mt.dimers,shift=0,limit=None):
     # 1:
     handles, labels = ax2.get_legend_handles_labels()
     # ax2.legend(loc='upper right',bbox_to_anchor=(1,1))
-
     # ax2.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=2,
     #        ncol=2, mode="expand", borderaxespad=0.)
 
@@ -1566,6 +1567,8 @@ def plot_contacts(mt,dimers=mt.dimers,shift=0,limit=None):
     #     print lst_labels[i]
     #     line.set_label(lst_labels[i])
     # ax1.legend()
+
+    ax2.tick_params(axis='both',labelsize=18)
 
 
 def plot_nesw_contacts(mt,obj,dimers=mt.dimers,shift=0):
@@ -1947,22 +1950,6 @@ if ((args['forceframecontacts'])):
                 print 'Max value obtained:',dct_plot[i]['max']
 
 
-                        # for z in range(len(line.split())):
-                        # try:
-                        #     dct_plot[i]['first'] = int(line.split()[1])
-                        # except:
-                        #     pass
-                        # try:
-                        #     dct_plot[i]['second'] = int(line.split()[2])
-                        # except:
-                        #    pass
-                        # try:
-                        #     dct_plot[i]['third'] = int(line.split()[3])
-                        # except:
-                        #     pass
-
-
-    # sys.exit()
     get_crit_breaks(os.path.join(my_dir,args['forceframecontacts']))
     print dct_plot.keys()
     # sys.exit()
@@ -2046,6 +2033,8 @@ if ((args['forceframecontacts'])):
     # sys.exit()
 
 
+
+    # Truncation occurs.
     for k,v in dct_plot.iteritems():
         print k,v
         # print dct_traj[k]
@@ -2442,7 +2431,7 @@ if ((args['force'] >= 200) and (args['force'] <= 299)):
         # bad
         # 1,2,3,4,5
         # lst_sel = [4,10,5,13,0]
-        lst_sel = [32,22,5,17,0] # decent (round 17)
+        lst_sel = [32,22,5,17,0] # decent (round 17/plate)
         lst_labels = ['1','2','3','4','5']
         dcuts = [150,150,150,10,10]
     if args['force'] == 202:
@@ -2458,6 +2447,47 @@ if ((args['force'] >= 200) and (args['force'] <= 299)):
         lst_sel = [3,22,2,21,28] # decent
         lst_labels = ['1','2','3','4','5']
         dcuts = [150,150,150,10,10]
+
+    if args['force'] == 204: # many of 16-nop,17-plate.
+        # cd ~/ext2/completed_mt/ && ./plot_everything.py -f 204 -rnd 16
+        # -psf ~/ext2/completed_mt/structural/mt12_rev.psf -nd 156
+        # lst_sel = [3,22,2,21,28] # decent
+
+        # Round 16.
+        # 1-A: 17, 19, 20
+        # 1-R: 39, 42, 51
+        # lst_sel = [17,19,20,39,42,51]
+        # 2-A: 22, 27
+        # 2-R: 52, 57
+        # lst_sel = [22,27,52,57]
+        # 3-A: 18, 29
+        # 3-R: 33, 44, 50
+        # lst_sel = [18,29,33,44,50] # 3-ahm,reg all
+        # 4-A: 21, 24, 26
+        # 4-R: 32, 48,
+        # lst_sel = [21,24,26,32,48]
+        # 5-A: 23, 25, 28
+        # 5-R: 38, 43, 49
+        # lst_sel = [23,25,28,38,43,49]
+
+        # 17:
+        #    A          R
+        # 1: 4 25     | 32 34 59 60
+        # 2: 10 22    | 27 33 36 37 53
+        # 3: 5 14 21  | 30 31 40 41 42 47 49 52
+        # 4: 13 17 19 | 28 29 56 58
+        # 5: 0 9 26   | 44 48 51 62 64
+        # lst_sel = [4,25,32,34,59,60]
+        lst_sel = [10,22,27,33,36,37,53]
+        # lst_sel = [5,14,21,30,31,40,41,42,47] #,49,52]
+        # lst_sel = [13,17,19,28,29,56,58]
+        # lst_sel = [0,9,26,44,48,51,62,64]
+
+
+        # lst_labels = ['1','2','3','4','5']
+        lst_labels = []
+        dcuts = [150,150,150,10,10,10,10,10,10,10,10,10]
+
 
 
     # print ''

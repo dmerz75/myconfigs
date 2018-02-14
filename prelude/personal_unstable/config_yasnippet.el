@@ -3,7 +3,8 @@
 ;;; Code:
 (setq yas-snippet-dirs
       '(;; "~/mount1/snippets"
-        "~/ext2/snippets"
+        ;; "~/ext2/snippets"
+        "~/ext/snippets"
         ;; "~/.emacs.d/snippets"
         ;; "/home/dale/.emacs.d/personal/yasnippet/yasmate/snippets"
         ))

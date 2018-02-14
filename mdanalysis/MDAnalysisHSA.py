@@ -10,7 +10,14 @@ import re
 import glob
 
 import numpy as np
-import mdtraj as md
+# import mdtraj as md
+# import
+
+import MDAnalysis
+from MDAnalysis.analysis.align import *
+from MDAnalysis.lib.distances import *
+import MDAnalysis.units
+
 
 # mylib/faf
 my_library = os.path.expanduser('~/.pylib')
@@ -28,17 +35,20 @@ from mylib.run_command import run_command
 
 # my_dir = os.path.abspath(os.path.dirname(__file__))
 
-class MDTraj3():
+class MDAnalysisHSA():
     ''' The new MDTraj3 class.
     '''
-    def __init__(self,pdb,dcd,workdir):
+    def __init__(self,pdb,dcd,psf,workdir):
         self.pdb = pdb
         self.dcd = dcd
         self.workdir = workdir
         self.coord_dir = os.path.join(workdir,'interim_coord')
 
-        self.traj = md.load(dcd,top=pdb)
-        self.top = self.traj.topology
+        # self.traj = md.load(dcd,top=pdb) # MDTraj
+        # self.top = self.traj.topology # MDTraj
+
+        self.dcd = MDAnalysis.coordinates.DCD.DCDReader(dcd)
+        self.u = MDAnalysis.Universe(psf,dcd) # universe
 
 
     def print_class(self):
@@ -46,8 +56,10 @@ class MDTraj3():
         for key in keys:
             print(key,getattr(self,key))
 
-
-    def write_pdb(self,start=0,stop=100000,step=1):
+    def write_pdb(self,start=0,stop=100000,step=1,sel=None):
+        ''' Write out Coord/interim_0.pdb
+        (need to make this a kwargs function)
+        '''
 
         try:
             print(self.sel)
@@ -61,7 +73,86 @@ class MDTraj3():
         if not os.path.exists(self.coord_dir):
             os.makedirs(self.coord_dir)
 
-        selection = self.top.select(self.sel)
+        selection = self.sel
+
+        print("selection:")
+        print(selection)
+
+        digits = [int(i) for i in re.findall('\\b\\d+\\b',self.sel)]
+        tag = ('-').join(re.findall('\\b\\d+\\b',self.sel))
+
+
+        if selection != 'all':
+            resid1 = digits[0]
+            resid2 = digits[1]
+            self.resid1 = resid1
+            self.resid2 = resid2
+
+        print('resid1:',self.resid1)
+        print('resid2:',self.resid2)
+        # sys.exit()
+
+
+        print(digits)
+        print(tag)
+
+        # selection = "resid %d:%d" % (resid_first,resid_last)
+        # tag = "%d-%d" % (resid_first,resid_last)
+
+        print('tag:',tag,selection)
+        print('Start|stop|step:',start,stop,step)
+        print('Selection:(in)',sel,'selection(out):',selection)
+        system = self.u.select_atoms(selection)
+        print('system.atoms:',system.atoms)
+        # system = self.u.select_atoms("all")
+        # system = self.u.select_atoms("bynum %d:%d" % (resid_first,resid_last))
+
+
+        # # Successfully writes dcd.
+        # with MDAnalysis.Writer("mdanalysis.dcd", system.n_atoms) as W:
+        #     for ts in self.u.trajectory:
+        #         W.write(system)
+
+        # for ts in self.dcd[start:stop:step]:
+
+        arr_frames = []
+        for ts in self.u.trajectory[start:stop:step]:
+
+            num_frame = ts.frame
+            # num_frame = ts.frame + 1
+            str_frame = str(num_frame)
+            coord_file = "interim_coord/interim_f%s.pdb" % str_frame
+
+            arr_frames.append(num_frame)
+
+            if not os.path.exists(coord_file):
+                print('writing frame',ts.frame,'of',len(self.dcd))
+                print(type(ts))
+                print(ts)
+                print(ts.frame)
+                W = MDAnalysis.Writer(coord_file,system.n_atoms)
+                W.write(system)
+
+        self.frames = np.array(arr_frames)
+
+
+    def write_pdb_dep(self,start=0,stop=100000,step=1):
+        ''' Deprecated, from MDTraj
+        '''
+
+        try:
+            print(self.sel)
+            print('start:',start,'stop:',stop,'step:',step)
+        except AttributeError:
+            print("No selection made, cannot write pdb's.")
+            return
+
+        self.coord_dir = os.path.join(self.workdir,'interim_coord')
+
+        if not os.path.exists(self.coord_dir):
+            os.makedirs(self.coord_dir)
+
+        selection = self.sel
 
         print("selection:")
         print(selection)
@@ -93,10 +184,13 @@ class MDTraj3():
         # sys.exit()
 
 
-        print(len(self.traj))
-        print('frames:',self.traj.n_frames)
-        print('n_atoms:',self.traj.n_atoms)
-        print('n_residues:',self.traj.n_residues)
+        # From MDTraj.
+        # print(len(self.traj))
+        # print('frames:',self.traj.n_frames)
+        # print('n_atoms:',self.traj.n_atoms)
+        # print('n_residues:',self.traj.n_residues)
+
+
 
         # def write(self, positions, topology, modelIndex=None, unitcell_lengths=None,
         #           unitcell_angles=None, bfactors=None):
@@ -124,6 +218,7 @@ class MDTraj3():
             # X.write(self.traj.xyz[frame],self.sel) # fails
 
         self.frames = np.array(lst_frames)
+
 
 
     def remove_interim_coords(self,pdbtype='rebuilt'):
@@ -288,16 +383,21 @@ class MDTraj3():
 
         for f in fp_ratios:
             print(f)
-            o = open(f,'r+')
-            final_line = o.readlines()[-1]
-            hydrophobes_exposed = final_line.split()[-1]
-            print(final_line,hydrophobes_exposed)
-            o.close()
-            frame = int(re.search('_f(\d+)',f).groups(1)[0])
-            lst_frames.append(frame)
-            lst_hydro.append(float(hydrophobes_exposed))
-            lst_zipped = zip(lst_frames,lst_hydro)
+            try:
+                o = open(f,'r+')
+                final_line = o.readlines()[-1]
+                hydrophobes_exposed = final_line.split()[-1]
+                print(final_line,hydrophobes_exposed)
+                o.close()
+                frame = int(re.search('_f(\d+)',f).groups(1)[0])
+                lst_frames.append(frame)
+                lst_hydro.append(float(hydrophobes_exposed))
+            except IOError:
+                print('No Ratio_aa file.')
+                pass
 
+
+        lst_zipped = zip(lst_frames,lst_hydro)
         hsa_data = np.array(sorted(lst_zipped))
         script_args = (' ').join(sys.argv)
 
@@ -305,11 +405,20 @@ class MDTraj3():
         if not os.path.exists('hsa_current'):
             os.makedirs('hsa_current')
 
-        np.savetxt('hsa_current/hsa_r%d-%d_f%d-%d.dat' % (self.resid1,
-                                              self.resid2,
-                                              self.frames[0],
-                                              self.frames[-1]),\
-                   hsa_data,fmt='%0.0f %0.3f',header=script_args)
+        # print(hsa_data.shape)
+        # print(hsa_data)
+        # hsa_data = np.array([15,1.0])
+        # print(hsa_data.shape)
+        # print(hsa_data)
+        # print(hsa_data.size)
+        # sys.exit()
+        if hsa_data.size > 0:
+            fn_hsa = 'hsa_current/hsa_r%d-%d_f%d-%d.dat' % (self.resid1,
+                                                            self.resid2,
+                                                            self.frames[0],
+                                                            self.frames[-1])
+            print("Writing:",fn_hsa,self.workdir)
+            np.savetxt(fn_hsa,hsa_data,fmt='%5d %5.3f',header=script_args)
 
 
 
