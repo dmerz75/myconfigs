@@ -17,7 +17,7 @@ from mylib.moving_average import *
 # from mylib.cp import *
 # from mylib.FindAllFiles import *
 # from mylib.highway_check import *
-# from mylib.moving_average import *
+from mylib.moving_average import *
 # from mylib.regex import reg_ex
 from mylib.run_command import run_command
 from plot.SETTINGS import *
@@ -30,7 +30,9 @@ from cycler import cycler
 # print matplotlib.rcParams['axes.prop_cycle']
 mycolors = ['k', 'r', 'g', 'b','c','m','lime',
             'darkorange','sandybrown','hotpink',
-            'mediumseagreen','crimson','slategray']
+            'mediumseagreen','crimson','slategray',
+            'orange','orchid','darkgrey','indianred',
+            'tan','cadetblue']
 # ax1.set_prop_cycle(cycler('color',mycolors))
 
 
@@ -754,6 +756,13 @@ class Microtubule():
         self.econtacts = datax[::,::,9] / east_contacts[0,::]
         self.wcontacts = datax[::,::,10] / west_contacts[0,::]
 
+        arr_ma = 10
+        self.ncontacts = moving_average_array(self.ncontacts,arr_ma)
+        self.wcontacts = moving_average_array(self.wcontacts,arr_ma)
+        self.econtacts = moving_average_array(self.econtacts,arr_ma)
+        self.scontacts = moving_average_array(self.scontacts,arr_ma)
+
+
         # print self.contacts.shape
         # print self.contacts[::,45]
         # sys.exit()
@@ -826,26 +835,13 @@ class Microtubule():
         '''
         Arrange Analysis(contacts) vs. ITF (indentation,time,frame), also angles/curvature.
         (contacts, indentation, time, frame, angles, curvature)
-        at the length
-
-
-
-
-
-
-
-
-
-of self.externalcontacts.
-
+        at the length of self.externalcontacts.
         Currently, empty, not being used.
         '''
-
         # contacts or externalcontacts
         # time = self.steps * self.deltax * 0.001
         # time = self.steps * 0.001
         # avtime = np.linspace(0,time,len(self.contacts))
-
         pass
         return
 
@@ -857,9 +853,7 @@ of self.externalcontacts.
         self.analysis[::,1] = avtime
         self.analysis[::,2] = avframe
 
-
         # self.analysis[::,0] = self.contacts (101,104)
-
         # self.analysis[::,4] = self.angles
         # self.analysis[::,5] = self.curvature
         # print dir(self)
@@ -951,10 +945,6 @@ of self.externalcontacts.
         # self.force[::,1] = self.ext_raw
         # self.force[::,2] = fvtime
         # self.force[::,3] = fvframe
-
-
-
-
 
         # self.reversal_frame
         # self.analysis[::,1] = avtime
@@ -1313,7 +1303,6 @@ of self.externalcontacts.
         ax1.legend(handles,labels,prop={'size':14},loc=2)
 
 
-    # def plot_contacts(self):
     def plot_contacts(self,ax1,dimers,shift=0,limit=None):
         '''
         Provide n the index in mt_list for plotting.
@@ -1722,10 +1711,131 @@ of self.externalcontacts.
         #             destdirname='fig/histogramCDF')
         # mpl_myargs_end
 
-    def isolate_contact_losstype_from_dimers(self):
+    def isolate_contact_losstype_from_dimers(self,fig):
         """
         """
-        print "hello isolate Contacts!"
+        #  ---------------------------------------------------------  #
+        #  functions                                                  #
+        #  ---------------------------------------------------------  #
+        # my_library = os.path.expanduser('~/.pylib')
+        # sys.path.append(my_library)
+        # mpl_moving_average
+        # mpl_forcequench
+        # mpl_worm
 
-        print self.contacts.shape
-        print self.dimers
+        #  ---------------------------------------------------------  #
+        #  Start matplotlib (1/4)                                     #
+        #  ---------------------------------------------------------  #
+        import matplotlib
+        import matplotlib.pyplot as plt
+        from matplotlib.gridspec import GridSpec
+
+        # default - Qt5Agg
+        # print matplotlib.rcsetup.all_backends
+        # matplotlib.use('GTKAgg')
+        # matplotlib.use('TkAgg')
+        # print 'backend:',matplotlib.get_backend()
+
+        # font_prop_large = matplotlib.font_manager.FontProperties(size='large')
+
+        # for k in matplotlib.rcParams.keys():
+        #     print k
+        dct_font = {'family':'sans-serif',
+                    'weight':'normal',
+                    'size'  :'18'}
+        matplotlib.rc('font',**dct_font)
+        # matplotlib.rcParams['legend.frameon'] = False
+        # matplotlib.rcParams['figure.dpi'] = 900
+        # print matplotlib.rcParams['figure.dpi']
+
+        # fig = plt.figure(0)
+        fig.set_size_inches(12.0,12.0)
+        plt.subplots_adjust(left=0.180,right=0.960,top=0.950,bottom=0.10,
+                            wspace=0.4,hspace=0.3)
+
+        gs = GridSpec(3,3)
+        ax1 = plt.subplot(gs[0,0])
+        ax2 = plt.subplot(gs[0,1])
+        ax3 = plt.subplot(gs[0,2])
+
+        ax4 = plt.subplot(gs[1,0])
+        ax5 = plt.subplot(gs[1,1])
+        ax6 = plt.subplot(gs[1,2])
+
+        ax7 = plt.subplot(gs[2,0])
+        ax8 = plt.subplot(gs[2,1])
+        ax9 = plt.subplot(gs[2,2])
+        # ax2 = plt.subplot(gs[1,:-1])
+        ax = [ax1,ax2,ax3,
+              ax4,ax5,ax6,
+              ax7,ax8,ax9]
+
+        for axes in [ax1,ax3,ax7,ax9]:
+            axes.axis('off')
+
+
+        #  ---------------------------------------------------------  #
+        #  Import Data! (2/4)                                         #
+        #  ---------------------------------------------------------  #
+        print "hello isolate Contacts!"
+        print self.contacts.shape # only goes dimers.
+        print self.dimers # need to be doubled.
+
+        # def plot_contacts(self,ax1,dimers,shift=0,limit=None):
+
+        ax2.set_prop_cycle(cycler('color',mycolors))
+        ax4.set_prop_cycle(cycler('color',mycolors))
+        ax5.set_prop_cycle(cycler('color',mycolors))
+        ax6.set_prop_cycle(cycler('color',mycolors))
+        ax8.set_prop_cycle(cycler('color',mycolors))
+
+        self.plot_contacts(ax5,self.dimers)
+
+        ax5.tick_params(axis='both',labelsize=10)
+        ax5.legend(loc=3,fontsize=6)
+        # print ax5.get_xlim()
+
+
+        print "NS"
+        print self.ncontacts.shape
+        print self.scontacts.shape
+
+        print "WE"
+        print self.wcontacts.shape
+        print self.econtacts.shape
+
+
+        # print ran.shape
+        # sys.exit()
+
+        # ax5.set_prop_cycle(cycler('color',mycolors))
+
+        for i,d in enumerate(self.dimers):
+            print d
+            if i > 18:
+                break
+            ax2.plot(self.ncontacts[::,d],color=mycolors[i])
+            ax4.plot(self.wcontacts[::,d],color=mycolors[i])
+            ax6.plot(self.econtacts[::,d],color=mycolors[i])
+            ax8.plot(self.scontacts[::,d],color=mycolors[i])
+
+        for axes in [ax2,ax4,ax6,ax8]:
+            axes.set_xlim(ax5.get_xlim())
+
+
+        #  ---------------------------------------------------------  #
+        #  Make final adjustments: (4/4)                              #
+        #  mpl - available expansions                                 #
+        #  ---------------------------------------------------------  #
+        # mpl_rc
+        # mpl_font
+        # mpl_label
+        # mpl_xy
+        # mpl_ticks
+
+        from plot.SETTINGS import *
+        savedir = os.path.join(self.my_dir,'contacts_iso/%s' % (self.rnd))
+        # P = SaveFig(savedir,self.name,
+        #             destdirname='fig/contacts_iso/%s' % self.rnd)
+        P = SaveFig(self.my_dir,self.name,
+                    destdirname='fig/contacts_iso/%s' % self.rnd)

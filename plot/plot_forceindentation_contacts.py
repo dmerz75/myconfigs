@@ -197,6 +197,8 @@ with open(os.path.join(my_dir,ffile)) as fp:
         # print line
 
         fig = plt.figure(0)
+        fig1 = plt.figure(1)
+
         gs = GridSpec(2,1)
         ax1 = plt.subplot(gs[0,:])
         ax2 = plt.subplot(gs[1,:])
@@ -219,9 +221,8 @@ with open(os.path.join(my_dir,ffile)) as fp:
             mt.get_mtanalysis(num_dimers)
             # mt.get_dimers(0.33,0.70)
             # mt.get_dimers(0.48,0.68)
-            mt.get_dimers(0.05,0.1)
-
-            # mt.get_dimers(0.40,0.70)
+            # mt.get_dimers(0.05,0.1)
+            mt.get_dimers(0.45,0.70)
 
             mt.get_forceindentation()
             mt.get_force_by_time_series()
@@ -231,15 +232,17 @@ with open(os.path.join(my_dir,ffile)) as fp:
             mt.plot_vertlines(ax1,[frame1,frame2])
             mt.plot_vertlines(ax2,[frame1,frame2])
 
-            mt.isolate_contact_losstype_from_dimers()
-            sys.exit()
-
             # mt.get_mtpf(ax2)
-
-
 
             e1,f1 = mt.get_force_at_frame(frame1)
             e2,f2 = mt.get_force_at_frame(frame2)
+
+            save_fig(my_dir,0,'fig/both_fi_contact_dim12vert/%s' % rnd,
+                     '%s_%s_%s_rnd%d_total' % (result_type,plot_type,
+                                               mtname,rnd),option)
+
+            mt.isolate_contact_losstype_from_dimers(fig1)
+
 
             print frame1,e1,f1
             print frame2,e2,f2
@@ -256,20 +259,17 @@ with open(os.path.join(my_dir,ffile)) as fp:
             firsts.append(f1)
             criticals.append(f2)
 
-        save_fig(my_dir,0,'fig/both_fi_contact_dim12vert/%s' % rnd,
-                 '%s_%s_%s_rnd%d_total' % (result_type,plot_type,
-                                           mtname,rnd),option)
 
-        plt.clf()
+        # save_fig(my_dir,0,'fig/both_fi_contact_dim12vert/%s' % rnd,
+        #          '%s_%s_%s_rnd%d_total' % (result_type,plot_type,
+        #                                    mtname,rnd),option)
+        # plt.clf()
 
         # # MTPF
         # mt.get_mtpf()
         # save_fig(my_dir,0,'fig/both_fi_contact_dim12vert/%s' % rnd,
         #          '%s_%s_%s_rnd%d_mtpf' % (result_type,plot_type,
         #                                    data_name,rnd),option)
-
-
-
     # end of line loop.
 
     for i in range(len(firsts)):
