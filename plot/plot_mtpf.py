@@ -21,6 +21,10 @@ from mylib.FindAllFiles import *
 # from mylib.run_command import run_command
 from plot.microtubule import *
 from plot.SETTINGS import *
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
 
 #  ---------------------------------------------------------  #
 #  argparse                                                   #
@@ -167,10 +171,6 @@ mt_list = build_mt(dct_dat)
 # for i,mt in enumerate(mt_list):
 #     print i,mt.name
 
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-
 
 with open(os.path.join(my_dir,ffile)) as fp:
 
@@ -209,6 +209,8 @@ with open(os.path.join(my_dir,ffile)) as fp:
             # mt.get_mtpf(ax2)
             # mt.get_mtpf()
             mt.plot_mtpf()
+
+
             P = SaveFig(my_dir,
                         '%s_%s' % (mt.name,mt.rnd),
                         destdirname='fig/mtpfbending_global')

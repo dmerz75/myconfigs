@@ -22,6 +22,12 @@ from mylib.FindAllFiles import *
 from plot.microtubule import *
 from plot.SETTINGS import *
 
+# Figures:
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+
 #  ---------------------------------------------------------  #
 #  argparse                                                   #
 #  ---------------------------------------------------------  #
@@ -53,6 +59,33 @@ num_dimers = int(args['num_dimers'])
 option = None
 result_type = 'gsop'
 plot_type = 'ffc'
+
+
+def write_crit_file(dct,suffix='.out',value='firstvalue'):
+
+    lst_stat = []
+
+    for k,v in dct.iteritems():
+        print k
+        try:
+            lst_stat.append((k,v[value]))
+        except:
+            pass
+
+    for stat in lst_stat:
+        print stat[0],stat[1]
+        lst_stat.sort(key=lambda x: x[1])
+
+    outfile = os.path.join(my_dir,args['forceframecontacts'] + suffix)
+    print "Writing:",outfile
+
+    with open(outfile,'w+') as fp:
+        # for k,v in dct_sortedstat.iteritems():
+        # print k,v
+        for stat in lst_stat:
+            print stat[0],stat[1]
+            fp.write("%s   %7.5f\n" % (stat[0],stat[1]))
+
 
 #  ---------------------------------------------------------  #
 #  sorting                                                    #
@@ -86,8 +119,6 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
 
 dct_dat = load_dct(my_dir,'mt_analysis.dat')
 print 'dict obtained',len(dct_dat.keys())
-
-
 
 def build_mt(dct):
     mt_list = []
@@ -171,9 +202,6 @@ for i,mt in enumerate(mt_list):
 # /home/dmerz3/ext2/completed_mt/results.crit_breaks/rev_crit_breaks_13
 # print ffile
 
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
 
 # plt.clf()
 # fig = plt.figure(0)
@@ -197,19 +225,51 @@ with open(os.path.join(my_dir,ffile)) as fp:
         # print line
 
         fig = plt.figure(0)
-        fig1 = plt.figure(1)
+        plt.title(mt.name)
+        dct_font = {'family':'sans-serif',
+                    'weight':'normal',
+                    'size'  :'16'}
+        matplotlib.rc('font',**dct_font)
+        gs = GridSpec(8,24)
+        fig.set_size_inches(15.0,10.0)
+        plt.subplots_adjust(left=0.12,right=0.96,top=0.930,bottom=0.08,hspace=1.3,wspace=0.3)
 
-        gs = GridSpec(2,1)
-        ax1 = plt.subplot(gs[0,:])
-        ax2 = plt.subplot(gs[1,:])
-        ax = [ax1,ax2]
-        fig.set_size_inches(8.0,10.0)
-        plt.subplots_adjust(left=0.2,right=0.78,top=0.960,bottom=0.10,hspace=0.4)
+        # Row 1: Force-Indentation, N,S
+        ax1 = plt.subplot(gs[0:2,0:8])
+        ax3 = plt.subplot(gs[0:2,10:16])
+        ax5 = plt.subplot(gs[0:2,18:24])
+
+        # Row 2: Contacts, W,E
+        ax2 = plt.subplot(gs[2:4,0:8])
+        ax4 = plt.subplot(gs[2:4,10:16])
+        ax6 = plt.subplot(gs[2:4,18:24])
+
+        # Row 3,4: PFBend, Angles
+        ax71 = plt.subplot(gs[4:6,0:3])
+        ax72 = plt.subplot(gs[4:6,3:6])
+        ax73 = plt.subplot(gs[4:6,6:9])
+        ax74 = plt.subplot(gs[4:6,9:12])
+        ax75 = plt.subplot(gs[4:6,12:15])
+        ax76 = plt.subplot(gs[4:6,15:18])
+        ax77 = plt.subplot(gs[4:6,18:21])
+        ax78 = plt.subplot(gs[4:6,23:24]) # colorbar
+        ax7 = [ax71,ax72,ax73,ax74,ax75,ax76,ax77,ax78]
+
+        ax81 = plt.subplot(gs[6:8,0:3])
+        ax82 = plt.subplot(gs[6:8,3:6])
+        ax83 = plt.subplot(gs[6:8,6:9])
+        ax84 = plt.subplot(gs[6:8,9:12])
+        ax85 = plt.subplot(gs[6:8,12:15])
+        ax86 = plt.subplot(gs[6:8,15:18])
+        ax87 = plt.subplot(gs[6:8,18:21])
+        ax88 = plt.subplot(gs[6:8,23:24]) # colorbar
+        ax8 = [ax81,ax82,ax83,ax84,ax85,ax86,ax87,ax88]
+
+        axes_all = [ax1,ax2,ax3,ax4,ax5,ax6] + ax7 + ax8
+        axes_lower = ax7 + ax8
 
         print line
-        # mtname = line.split(' ')[0]
         mtname = line.split()[0]
-        # data_name = mt.name
         frame1 = int(line.split()[1])
         frame2 = int(line.split()[2])
         print mtname,frame1,frame2
@@ -226,26 +286,50 @@ with open(os.path.join(my_dir,ffile)) as fp:
 
             mt.get_forceindentation()
             mt.get_force_by_time_series()
+            e1,f1 = mt.get_force_at_frame(frame1)
+            e2,f2 = mt.get_force_at_frame(frame2)
+            print frame1,e1,f1
+            print frame2,e2,f2
+
             # mt.plot_forceindentation(ax1) # with "Full indent," "partial"
             mt.plot_forceframe(ax1)
             mt.plot_contacts(ax2,mt.dimers)
-            mt.plot_vertlines(ax1,[frame1,frame2])
-            mt.plot_vertlines(ax2,[frame1,frame2])
-
             # mt.get_mtpf(ax2)
 
-            e1,f1 = mt.get_force_at_frame(frame1)
-            e2,f2 = mt.get_force_at_frame(frame2)
+            # plot N,S,E,W contacts.
+            minfn = mt.plot_contact_interface(ax3,'n')
+            minfs = mt.plot_contact_interface(ax4,'s')
+            minfw = mt.plot_contact_interface(ax5,'w')
+            minfe = mt.plot_contact_interface(ax6,'e')
+            mt.plot_vertlines(ax1,[minfn,minfw])
+            mt.plot_vertlines(ax2,[minfn,minfw])
 
-            save_fig(my_dir,0,'fig/both_fi_contact_dim12vert/%s' % rnd,
-                     '%s_%s_%s_rnd%d_total' % (result_type,plot_type,
-                                               mtname,rnd),option)
+            # plot the mtpf global, local.
+            # mt.get_mtpf()
+            # mt.plot_mtpf(ax7)
+            # mt.plot_mtpf_local(ax8)
 
-            mt.isolate_contact_losstype_from_dimers(fig1)
+            # Now..
+            # Get the frame of first lateral break,
+            # frame of the first significant longitudinal break.
+            # save_fig(my_dir,0,'fig/both_fi_contact_dim12vert/%s' % rnd,
+            #          '%s_%s_%s_rnd%d_total' % (result_type,plot_type,
+            #                                    mtname,rnd),option)
 
+            # savedir = os.path.join(self.my_dir,'contacts_full/%s' % (self.rnd))
 
-            print frame1,e1,f1
-            print frame2,e2,f2
+            for ax in axes_all[2:]:
+                # ax.axis('off')
+                # ax.tick_params('')
+                # ax.tick_params()
+                ax.tick_params(axis='both',labelsize=12)
+
+            # for ax in axes_lower:
+                # ax.
+
+            P = SaveFig(mt.my_dir,mt.name,
+                        destdirname='fig/contacts_full/%s' % mt.rnd)
+
             # mt1 = mt
             # mt2 = mt
             # mt1.reversal_frame = frame1
@@ -278,31 +362,6 @@ with open(os.path.join(my_dir,ffile)) as fp:
     for k,v in dct_stat.iteritems():
         print k,v['first'],v['second']
 
-
-    def write_crit_file(dct,suffix='.out',value='firstvalue'):
-
-        lst_stat = []
-
-        for k,v in dct.iteritems():
-            print k
-            try:
-                lst_stat.append((k,v[value]))
-            except:
-                pass
-
-        for stat in lst_stat:
-            print stat[0],stat[1]
-        lst_stat.sort(key=lambda x: x[1])
-
-        outfile = os.path.join(my_dir,args['forceframecontacts'] + suffix)
-        print "Writing:",outfile
-
-        with open(outfile,'w+') as fp:
-            # for k,v in dct_sortedstat.iteritems():
-            # print k,v
-            for stat in lst_stat:
-                print stat[0],stat[1]
-                fp.write("%s   %7.5f\n" % (stat[0],stat[1]))
 
     # Write First, and Maxvalue:
     write_crit_file(dct_stat,'.first.out','first')

@@ -25,6 +25,11 @@ from plot.SETTINGS import *
 import MDAnalysis
 # from mdanalysis.MoleculeUniverse import MoleculeUniverse
 
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+
 
 from cycler import cycler
 # print matplotlib.rcParams['axes.prop_cycle']
@@ -1074,14 +1079,14 @@ class Microtubule():
         #  ---------------------------------------------------------  #
         #  Start matplotlib (1/4)                                     #
         #  ---------------------------------------------------------  #
-        import matplotlib
+        # import matplotlib
         # default - Qt5Agg
         # print matplotlib.rcsetup.all_backends
         # matplotlib.use('GTKAgg')
         # matplotlib.use('TkAgg')
-        print 'backend:',matplotlib.get_backend()
-        import matplotlib.pyplot as plt
-        from matplotlib.gridspec import GridSpec
+        # print 'backend:',matplotlib.get_backend()
+        # import matplotlib.pyplot as plt
+        # from matplotlib.gridspec import GridSpec
         plt.clf()
         fig = plt.figure(0)
 
@@ -1216,7 +1221,14 @@ class Microtubule():
         # mpl_legend
         # combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
         # save_fig
-        from plot.SETTINGS import *
+        # from plot.SETTINGS import *
+
+
+        print "Need to write the new save setting."
+        print __debug__,__doc__
+        print __main__
+        print "plot_emoltop3n"
+        sys.exit()
         save_fig(my_dir,0,'fig/%s' % result_type,'%s_%s' % (plot_type,data_name),option)
 
         # mpl_myargs_end
@@ -1241,20 +1253,23 @@ class Microtubule():
             ax1.plot(x,y,label=self.name)
 
 
-
-
         ax1.set_xlim(-1,31)
         ax1.set_xticks([0,10,20,30])
+
         ax1.set_ylim(-.20,.905)
         ax1.set_yticks([0,.2,.4,.6,.8])
         ax1.set_ylim(-0.04,0.94)
 
-        ax1.set_xlabel('Indentation Depth X/nm',fontsize=20)
-        ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
+        # ax1.set_xlabel('Indentation Depth X/nm',fontsize=16)
+        # ax1.set_ylabel('Indentation Force F/nN',fontsize=16)
+        ax1.set_xlabel('Indentation Depth X/nm')
+        # ax1.set_ylabel('Indentation Force F/nN')
+        ax1.set_ylabel('Indentation Force (nN)')
+        # ax1.title(self.name)
 
         # legend
-        handles,labels = ax1.get_legend_handles_labels()
-        ax1.legend(handles,labels,prop={'size':12},loc=2)
+        # handles,labels = ax1.get_legend_handles_labels()
+        # ax1.legend(handles,labels,prop={'size':12},loc=2)
 
     def plot_forceindentation_color(self,ax1,color):
         print "hello color plot"
@@ -1285,54 +1300,51 @@ class Microtubule():
 
         ax1.plot(x,y,label=self.name)
 
-        ax1.set_xlim(x[0],x[-1])
+        # ax1.set_xlim(x[0],x[-1])
+        ax1.set_xlim(self.frames[0],self.frames[-1])
 
         # ax1.set_xticks(size=20)
-        # ax1.set_xticks([0,10,20,30])
+
         # ax1.set_ylim(-.20,.905)
-        ax1.set_yticks([0,.2,.4,.6,.8])
-        ax1.set_ylim(-0.04,0.94)
+        # ax1.set_yticks([0,.2,.4,.6,.8])
+        # ax1.set_yticks([0,.25,.50,.75,1.0])
+        ax1.set_yticks([0,0.3,0.6,0.9])
+        ax1.set_ylim(-0.04,0.96)
+        # ax1.set_xticks([0,200,400,600])
         # ax1.set_xlabel('Indentation Depth X/nm')
         # ax1.set_xlabel('Frame #')
-        ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
-
-        ax1.tick_params(axis='both',labelsize=20)
+        # ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
+        ax1.set_ylabel('Indentation Force F/nN')
+        # ax1.tick_params(axis='both',labelsize=20)
 
         # legend
-        handles,labels = ax1.get_legend_handles_labels()
-        ax1.legend(handles,labels,prop={'size':14},loc=2)
+        # handles,labels = ax1.get_legend_handles_labels()
+        # ax1.legend(handles,labels,prop={'size':14},loc=2)
 
 
-    def plot_contacts(self,ax1,dimers,shift=0,limit=None):
+    def plot_contacts(self,ax,dimers,shift=0,limit=None):
         '''
         Provide n the index in mt_list for plotting.
         Provide dimers, a list from "get_dimers."
         limit = 1320
         '''
         print 'plotting contacts'
-        ax1.set_prop_cycle(cycler('color',mycolors))
-        ax = [ax1]
-
-        # print 'shape:'
-        # shape:
-        # (348,)
-        # (348, 104)
-        # print self.frames.shape
-        # print self.contacts.shape
-        # sys.exit()
+        ax.set_prop_cycle(cycler('color',mycolors))
 
         x1 = self.frames[1::]
         x1 = x1 + shift
-
         y1 = self.contacts[1::,::]
+
+        arr_ma = 10
+        x1 = moving_average(x1,arr_ma)
+        y1 = moving_average_array(y1,arr_ma)
 
         print dimers
         for d in dimers:
             # print d
             # ax1.plot(self.frames[1::],self.contacts[1::,d])
-
             try:
-                ax1.plot(x1,y1[::,d],label=str(d*2))
+                ax.plot(x1,y1[::,d],label=str(d*2))
             except Exception as inst:
                 # x1 = x1[x1.shape - y1.shape::]
                 # print Exception
@@ -1341,7 +1353,7 @@ class Microtubule():
                 # x1 = x1[xdiff::]
                 x1 = x1[:xdiff]
                 print x1.shape
-                ax1.plot(x1,y1[::,d],label=str(d*2))
+                ax.plot(x1,y1[::,d],label=str(d*2))
                 # sys.exit()
 
             # if ((rnd == 16) or (rnd == 17)):
@@ -1353,29 +1365,41 @@ class Microtubule():
             #     print 'couldn\'t plot dimers.'
             #     sys.exit()
 
-        ax1.set_xlabel("Frame #",fontsize=20)
-        ax1.set_ylabel("Qn",fontsize=20)
-        ax1.tick_params(axis='both',labelsize=20)
+        # ax.set_xlabel("Frame #",fontsize=20)
+        # ax.set_ylabel("Qn",fontsize=20)
+        # ax.tick_params(axis='both',labelsize=20)
+        # ax.set_xlim(x1[0],x1[-1])
 
-        ax1.set_xlim(x1[0],x1[-1])
+        # ax.set_xlabel("Frame #")
+        ax.set_ylabel(r"$Q_{n}$")
+        # ax.tick_params(axis='both')
+        # ax.set_xlim(x1[0],x1[-1])
+        ax.set_xlim(self.frames[0],self.frames[-1])
+        ax.set_ylim(0.36,1.03)
+        # ax.set_ylim(-0.03,1.03)
+
+        ax.set_yticks([0.40,0.55,0.70,0.85,1.00])
 
         # if limit != None:
         #     ax1.set_xlim(x1[0],1320)
         #     ax1.set_xticks([0,200,400,600,800,1000,1200])
         # else:
         #     ax1.set_xlim(x1[0],limit)
-
-        ax1.set_ylim(0.36,1.02)
-        ax1.set_yticks([0.40,0.55,0.70,0.85,1.00])
-
         # legend
         # 1:
-        handles, labels = ax1.get_legend_handles_labels()
-        ax1.legend(bbox_to_anchor=(1.02, 1),loc=2,borderaxespad=0.0,fontsize=12)
+        # handles, labels = ax.get_legend_handles_labels()
+        # ax.legend(bbox_to_anchor=(1.02, 1),loc=2,borderaxespad=0.0,fontsize=12)
+
+        # ax.legend(loc=2)
+        # handles, labels = ax.get_legend_handles_labels()
+        # ax.legend(bbox_to_anchor=(1.02, 1),loc=2,borderaxespad=0.0,fontsize=12)
+
 
         if hasattr(self,'reversal_frame'):
             print 'reversal_frame:',self.reversal_frame
-            ax1.axvline(self.reversal_frame,color='r',linestyle='-',linewidth=1.5)
+            ax.axvline(self.reversal_frame,color='r',linestyle='-',linewidth=1.5)
+
+
 
     def plot_vertlines(self,ax1,lstlines):
         '''
@@ -1388,76 +1412,63 @@ class Microtubule():
         for i,line in enumerate(lstlines):
             ax1.axvline(line,color=mycolors[i],linestyle='--',linewidth=1.5)
 
-    def get_mtpf(self):
+    def get_mtpf_dep(self):
         """
         Plot bending angle.
         """
         print "getting mtpf."
         # ax.cla()
-
-
         #  ---------------------------------------------------------  #
         #  Start matplotlib (1/4)                                     #
         #  ---------------------------------------------------------  #
-        import matplotlib
+        # import matplotlib
         # default - Qt5Agg
         # print matplotlib.rcsetup.all_backends
         # matplotlib.use('GTKAgg')
         # matplotlib.use('TkAgg')
         # print 'backend:',matplotlib.get_backend()
-        import matplotlib.pyplot as plt
-        from matplotlib.gridspec import GridSpec
-        fig = plt.figure(0)
-        fig.set_size_inches(10.0,8.0)
+        # import matplotlib.pyplot as plt
+        # from matplotlib.gridspec import GridSpec
+        # fig = plt.figure(0)
+        # fig.set_size_inches(10.0,8.0)
 
-        gs = GridSpec(2,4)
-        ax1 = plt.subplot(gs[0,0])
-        ax2 = plt.subplot(gs[0,1])
-        ax3 = plt.subplot(gs[0,2])
-        ax4 = plt.subplot(gs[0,3])
+        # gs = GridSpec(2,4)
+        # ax1 = plt.subplot(gs[0,0])
+        # ax2 = plt.subplot(gs[0,1])
+        # ax3 = plt.subplot(gs[0,2])
+        # ax4 = plt.subplot(gs[0,3])
+        # ax5 = plt.subplot(gs[1,0])
+        # ax6 = plt.subplot(gs[1,1])
+        # ax7 = plt.subplot(gs[1,2])
+        # ax8 = plt.subplot(gs[1,3])
 
-        ax5 = plt.subplot(gs[1,0])
-        ax6 = plt.subplot(gs[1,1])
-        ax7 = plt.subplot(gs[1,2])
-        ax8 = plt.subplot(gs[1,3])
-
-        ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7,ax8]
+        # ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7,ax8]
         # ax2 = plt.subplot(gs[1,:-1])
         # ax = [ax1]
         # ax1 = plt.subplot(gs[0,:])
         # ax2 = plt.subplot(gs[1,:])
         # ax = [ax1,ax2]
 
-        plt.subplots_adjust(left=0.1,right=0.9,top=0.960,bottom=0.10,hspace=0.4,wspace=0.4)
-
-
+        # plt.subplots_adjust(left=0.1,right=0.9,top=0.960,bottom=0.10,hspace=0.4,wspace=0.4)
         print self.dirname
-
         fp = os.path.join(self.dirname,"emol_mtpfbending_angle.dat")
         x = np.loadtxt(fp)
         data = np.reshape(x,(13,x.shape[0]/13,x.shape[1]))
         print x.shape
         print data.shape
-
         frames = np.linspace(0,self.total_frames,data.shape[1])
 
 
+
         for p in range(data.shape[0]):
-
             for i in range(data.shape[2]):
-
                 ax[i].set_xlim(frames[0],frames[-1])
                 ax[i].set_ylim(-5,185)
-
                 ax[i].plot(frames,data[p,::,i])
-
-
-
-
         # sys.exit()
 
 
-    def plot_mtpf(self):
+    def get_mtpf(self):
         """
         Plot bending angle.
         """
@@ -1466,65 +1477,63 @@ class Microtubule():
         #  ---------------------------------------------------------  #
         #  Start matplotlib (1/4)                                     #
         #  ---------------------------------------------------------  #
-        import numpy.ma as ma
-        import matplotlib
-        import matplotlib.pyplot as plt
-        from matplotlib.gridspec import GridSpec
-        fig = plt.figure(0)
-        fig.set_size_inches(15.0,3.0)
-        plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.05)
+        # import numpy.ma as ma
+        # import matplotlib
+        # import matplotlib.pyplot as plt
+        # from matplotlib.gridspec import GridSpec
+        # fig = plt.figure(0)
+        # fig.set_size_inches(15.0,3.0)
+        # plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.05)
 
         # font_prop_large = matplotlib.font_manager.FontProperties(size='large')
-
         # for k in matplotlib.rcParams.keys():
         #     print k
         # dct_font = {'family':'sans-serif',
         #             'weight':'normal',
         #             'size'  :'12'}
-        dct_font = {'size'  :'12'}
-        matplotlib.rc('font',**dct_font)
+        # dct_font = {'size'  :'12'}
+        # matplotlib.rc('font',**dct_font)
         # matplotlib.rcParams['legend.frameon'] = False
         # matplotlib.rcParams['figure.dpi'] = 900
         # print matplotlib.rcParams['figure.dpi']
         # plt.tick_params(labelsize=10)
         # plt.tick_params()
 
-        gs = GridSpec(1,7)
-        ax1 = plt.subplot(gs[0,0])
-        ax2 = plt.subplot(gs[0,1])
-        ax3 = plt.subplot(gs[0,2])
-        ax4 = plt.subplot(gs[0,3])
-        ax5 = plt.subplot(gs[0,4])
-        ax6 = plt.subplot(gs[0,5])
-        ax7 = plt.subplot(gs[0,6])
-        ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
+        # gs = GridSpec(1,7)
+        # ax1 = plt.subplot(gs[0,0])
+        # ax2 = plt.subplot(gs[0,1])
+        # ax3 = plt.subplot(gs[0,2])
+        # ax4 = plt.subplot(gs[0,3])
+        # ax5 = plt.subplot(gs[0,4])
+        # ax6 = plt.subplot(gs[0,5])
+        # ax7 = plt.subplot(gs[0,6])
+        # ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
 
 
         # ax[0].set_yticklabels(np.linspace(1,14,2))
         # ax[0].set_yticklabels(np.linspace(1,14,2))
 
-        ylocs = np.linspace(0,12,7)
-        ylabels = [int(x) for x in np.linspace(1,13,7)]
-        print ylabels
-        ax[0].set_yticks(ylocs)
-        ax[0].set_yticklabels(ylabels)
+        # ylocs = np.linspace(0,12,7)
+        # ylabels = [int(x) for x in np.linspace(1,13,7)]
+        # print ylabels
+        # ax[0].set_yticks(ylocs)
+        # ax[0].set_yticklabels(ylabels)
 
 
-        for i in range(len(ax)):
-            # ax[i].axis('off')
-            # ax[i].set_xticks([])
-            # ax[i].
-            if i != 0:
-                ax[i].set_yticks([])
+        # for i in range(len(ax)):
+        #     # ax[i].axis('off')
+        #     # ax[i].set_xticks([])
+        #     # ax[i].
+        #     if i != 0:
+        #         ax[i].set_yticks([])
 
 
-        print self.dirname
+        # print self.dirname
 
         fp = os.path.join(self.dirname,"emol_mtpfbending_angle.dat")
         x = np.loadtxt(fp) # 858, 14
         # data = np.reshape(x,(13,x.shape[0]/13,x.shape[1]))
         data = np.reshape(x,(x.shape[0]/13,13,x.shape[1])) # 66, 13, 14
-
 
         # cumulative data
         pdata = data[::,::,::2] # 66, 13, 7
@@ -1577,24 +1586,30 @@ class Microtubule():
         udata = np.cumsum(pdata,axis=2)
         ctdata = np.transpose(udata)
 
-
         frames = np.linspace(0,self.total_frames,data.shape[1])
         # xticks = np.linspace(,frames[])
 
+        # # 7 angles in 12 dimer.
+        # for a in range(len(ax)):
+        #     #                   13 :: 7
+        #     # ax[a].imshow(data[::,::,a],aspect='auto',cmap='plasma',vmin=8,vmax=38)
+        #     # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=15,vmax=80)
+        #     ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=-30,vmax=30)
+        #     # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=10,vmax=180)
+        #     # print data[::,::,a]
+        #     # ax[a].set_xticks()
+        #     # break
+        self.mtpfcentroids = pdata
+        self.mtpfbending = ctdata
+
+    def plot_mtpf_global(self,ax):
+        '''
+        ax = list of ax1,ax2, ..
+        '''
         # 7 angles in 12 dimer.
         for a in range(len(ax)):
             #                   13 :: 7
-            # ax[a].imshow(data[::,::,a],aspect='auto',cmap='plasma',vmin=8,vmax=38)
-            # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=15,vmax=80)
-            ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=15,vmax=90)
-            # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=10,vmax=180)
-            # print data[::,::,a]
-            # ax[a].set_xticks()
-            # break
-
-
-        self.mtpfcentroids = pdata
-        self.mtpfbending = ctdata
+            ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=-30,vmax=30)
 
 
     def plot_mtpf_local(self):
@@ -1604,22 +1619,22 @@ class Microtubule():
         #  ---------------------------------------------------------  #
         #  Start matplotlib (1/4)                                     #
         #  ---------------------------------------------------------  #
-        import matplotlib
+        # import matplotlib
         # import seaborn as sns
         # default - Qt5Agg
         # print matplotlib.rcsetup.all_backends
         # matplotlib.use('GTKAgg')
         # matplotlib.use('TkAgg')
-        print 'backend:',matplotlib.get_backend()
-        import matplotlib.pyplot as plt
-        from matplotlib.gridspec import GridSpec
+        # print 'backend:',matplotlib.get_backend()
+        # import matplotlib.pyplot as plt
+        # from matplotlib.gridspec import GridSpec
         # import pylab
 
-        fig = plt.figure(0)
-        fig.set_size_inches(15.0,3.0)
-        plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.12)
-        dct_font = {'size':'12'}
-        matplotlib.rc('font',**dct_font)
+        # fig = plt.figure(0)
+        # fig.set_size_inches(15.0,3.0)
+        # plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.12)
+        # dct_font = {'size':'12'}
+        # matplotlib.rc('font',**dct_font)
 
         gs = GridSpec(1,23)
         ax1 = plt.subplot(gs[0,0:3])
@@ -1711,131 +1726,63 @@ class Microtubule():
         #             destdirname='fig/histogramCDF')
         # mpl_myargs_end
 
-    def isolate_contact_losstype_from_dimers(self,fig):
+    def plot_contact_interface(self,ax,face='n',limits=(0,600)):
         """
         """
-        #  ---------------------------------------------------------  #
-        #  functions                                                  #
-        #  ---------------------------------------------------------  #
-        # my_library = os.path.expanduser('~/.pylib')
-        # sys.path.append(my_library)
-        # mpl_moving_average
-        # mpl_forcequench
-        # mpl_worm
-
-        #  ---------------------------------------------------------  #
-        #  Start matplotlib (1/4)                                     #
-        #  ---------------------------------------------------------  #
-        import matplotlib
-        import matplotlib.pyplot as plt
-        from matplotlib.gridspec import GridSpec
-
-        # default - Qt5Agg
-        # print matplotlib.rcsetup.all_backends
-        # matplotlib.use('GTKAgg')
-        # matplotlib.use('TkAgg')
-        # print 'backend:',matplotlib.get_backend()
-
-        # font_prop_large = matplotlib.font_manager.FontProperties(size='large')
-
-        # for k in matplotlib.rcParams.keys():
-        #     print k
-        dct_font = {'family':'sans-serif',
-                    'weight':'normal',
-                    'size'  :'18'}
-        matplotlib.rc('font',**dct_font)
-        # matplotlib.rcParams['legend.frameon'] = False
-        # matplotlib.rcParams['figure.dpi'] = 900
-        # print matplotlib.rcParams['figure.dpi']
-
-        # fig = plt.figure(0)
-        fig.set_size_inches(12.0,12.0)
-        plt.subplots_adjust(left=0.180,right=0.960,top=0.950,bottom=0.10,
-                            wspace=0.4,hspace=0.3)
-
-        gs = GridSpec(3,3)
-        ax1 = plt.subplot(gs[0,0])
-        ax2 = plt.subplot(gs[0,1])
-        ax3 = plt.subplot(gs[0,2])
-
-        ax4 = plt.subplot(gs[1,0])
-        ax5 = plt.subplot(gs[1,1])
-        ax6 = plt.subplot(gs[1,2])
-
-        ax7 = plt.subplot(gs[2,0])
-        ax8 = plt.subplot(gs[2,1])
-        ax9 = plt.subplot(gs[2,2])
-        # ax2 = plt.subplot(gs[1,:-1])
-        ax = [ax1,ax2,ax3,
-              ax4,ax5,ax6,
-              ax7,ax8,ax9]
-
-        for axes in [ax1,ax3,ax7,ax9]:
-            axes.axis('off')
-
-
         #  ---------------------------------------------------------  #
         #  Import Data! (2/4)                                         #
         #  ---------------------------------------------------------  #
-        print "hello isolate Contacts!"
+        print "hello isolate Contacts!  ",face
+        print ax
         print self.contacts.shape # only goes dimers.
         print self.dimers # need to be doubled.
+        ax.set_prop_cycle(cycler('color',mycolors))
 
-        # def plot_contacts(self,ax1,dimers,shift=0,limit=None):
+        ax.tick_params(axis='both',labelsize=12)
+        # ax.legend(loc=3,fontsize=6)
 
-        ax2.set_prop_cycle(cycler('color',mycolors))
-        ax4.set_prop_cycle(cycler('color',mycolors))
-        ax5.set_prop_cycle(cycler('color',mycolors))
-        ax6.set_prop_cycle(cycler('color',mycolors))
-        ax8.set_prop_cycle(cycler('color',mycolors))
+        if face == "n":
+            icontacts = self.ncontacts
+        elif face == "e":
+            icontacts = self.econtacts
+        elif face == "w":
+            icontacts = self.wcontacts
+        elif face == "s":
+            icontacts = self.scontacts
 
-        self.plot_contacts(ax5,self.dimers)
+        if((face == "n") or (face == "s")):
+            decrease = 0.75
+        else:
+            decrease = 0.2
 
-        ax5.tick_params(axis='both',labelsize=10)
-        ax5.legend(loc=3,fontsize=6)
-        # print ax5.get_xlim()
-
-
-        print "NS"
-        print self.ncontacts.shape
-        print self.scontacts.shape
-
-        print "WE"
-        print self.wcontacts.shape
-        print self.econtacts.shape
-
-
-        # print ran.shape
+        # print icontacts.shape
+        # for i in range(icontacts.shape[1]):
         # sys.exit()
 
-        # ax5.set_prop_cycle(cycler('color',mycolors))
+        min_f = self.frames[-1]
 
         for i,d in enumerate(self.dimers):
-            print d
+            # print d
+            # print min(icontacts[::,d])
+            for f in range(icontacts.shape[0]):
+                if icontacts[f,d] < decrease:
+                    break
+            if f < min_f:
+                min_f = f
+            # print f
+            # sys.exit()
+
             if i > 18:
                 break
-            ax2.plot(self.ncontacts[::,d],color=mycolors[i])
-            ax4.plot(self.wcontacts[::,d],color=mycolors[i])
-            ax6.plot(self.econtacts[::,d],color=mycolors[i])
-            ax8.plot(self.scontacts[::,d],color=mycolors[i])
+            ax.plot(icontacts[::,d],color=mycolors[i])
 
-        for axes in [ax2,ax4,ax6,ax8]:
-            axes.set_xlim(ax5.get_xlim())
+        print 'Min_f:',min_f
+        self.plot_vertlines(ax,[min_f])
+        # sys.exit()
 
+        # ax.set_xlim(limits)
+        ax.set_ylim(-0.03,1.03)
+        ax.set_xlim(self.frames[0],self.frames[-1])
+        ax.text(70,0.1,face.upper())
 
-        #  ---------------------------------------------------------  #
-        #  Make final adjustments: (4/4)                              #
-        #  mpl - available expansions                                 #
-        #  ---------------------------------------------------------  #
-        # mpl_rc
-        # mpl_font
-        # mpl_label
-        # mpl_xy
-        # mpl_ticks
-
-        from plot.SETTINGS import *
-        savedir = os.path.join(self.my_dir,'contacts_iso/%s' % (self.rnd))
-        # P = SaveFig(savedir,self.name,
-        #             destdirname='fig/contacts_iso/%s' % self.rnd)
-        P = SaveFig(self.my_dir,self.name,
-                    destdirname='fig/contacts_iso/%s' % self.rnd)
+        return min_f
