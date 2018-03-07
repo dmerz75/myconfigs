@@ -53,6 +53,8 @@ class Microtubule():
         self.name = name
         self.dimers = []
         self.truncated = 'no'
+        self.num_pf = 13
+        self.num_dimers = 104
         # self.rnd = rnd
 
 
@@ -117,21 +119,21 @@ class Microtubule():
 
         if ((self.rnd != 16) and (self.rnd != 17)):
             if re.search('nop',self.name) != None:
-                lst = glob('mt_noplate.psf')
+                lst = glob.glob('mt_noplate.psf')
             else:
-                lst = glob('mt.psf')
+                lst = glob.glob('mt.psf')
         else:
             if self.rnd == 16:
                 # lst = glob('mt12_lev.psf')
                 lst = glob.glob('mt12_lev.psf')
             elif self.rnd == 17:
                 if re.search("rev",self.name) != None:
-                    lst = glob('mt12_rev.psf')
+                    lst = glob.glob('mt12_rev.psf')
                 else:
                     # lst = glob('mt12_plate.psf')
                     # lst = glob('mt12.psf')
                     # lst = glob('mt12_lev.psf')
-                    lst = glob('mt12_plate.psf')
+                    lst = glob.glob('mt12_plate.psf')
                     # mt12_lev.psf
                     # mt12_plate.psf
                     # mt12.psf
@@ -1474,65 +1476,8 @@ class Microtubule():
         """
         print "getting mtpf."
 
-        #  ---------------------------------------------------------  #
-        #  Start matplotlib (1/4)                                     #
-        #  ---------------------------------------------------------  #
-        # import numpy.ma as ma
-        # import matplotlib
-        # import matplotlib.pyplot as plt
-        # from matplotlib.gridspec import GridSpec
-        # fig = plt.figure(0)
-        # fig.set_size_inches(15.0,3.0)
-        # plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.05)
-
-        # font_prop_large = matplotlib.font_manager.FontProperties(size='large')
-        # for k in matplotlib.rcParams.keys():
-        #     print k
-        # dct_font = {'family':'sans-serif',
-        #             'weight':'normal',
-        #             'size'  :'12'}
-        # dct_font = {'size'  :'12'}
-        # matplotlib.rc('font',**dct_font)
-        # matplotlib.rcParams['legend.frameon'] = False
-        # matplotlib.rcParams['figure.dpi'] = 900
-        # print matplotlib.rcParams['figure.dpi']
-        # plt.tick_params(labelsize=10)
-        # plt.tick_params()
-
-        # gs = GridSpec(1,7)
-        # ax1 = plt.subplot(gs[0,0])
-        # ax2 = plt.subplot(gs[0,1])
-        # ax3 = plt.subplot(gs[0,2])
-        # ax4 = plt.subplot(gs[0,3])
-        # ax5 = plt.subplot(gs[0,4])
-        # ax6 = plt.subplot(gs[0,5])
-        # ax7 = plt.subplot(gs[0,6])
-        # ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
-
-
-        # ax[0].set_yticklabels(np.linspace(1,14,2))
-        # ax[0].set_yticklabels(np.linspace(1,14,2))
-
-        # ylocs = np.linspace(0,12,7)
-        # ylabels = [int(x) for x in np.linspace(1,13,7)]
-        # print ylabels
-        # ax[0].set_yticks(ylocs)
-        # ax[0].set_yticklabels(ylabels)
-
-
-        # for i in range(len(ax)):
-        #     # ax[i].axis('off')
-        #     # ax[i].set_xticks([])
-        #     # ax[i].
-        #     if i != 0:
-        #         ax[i].set_yticks([])
-
-
-        # print self.dirname
-
         fp = os.path.join(self.dirname,"emol_mtpfbending_angle.dat")
         x = np.loadtxt(fp) # 858, 14
-        # data = np.reshape(x,(13,x.shape[0]/13,x.shape[1]))
         data = np.reshape(x,(x.shape[0]/13,13,x.shape[1])) # 66, 13, 14
 
         # cumulative data
@@ -1546,9 +1491,9 @@ class Microtubule():
                 # print cdata[a,b,::]
                 for index,c in enumerate(cdata[a,b,::]):
                     if c > 55:
-                        print index,c
+                        # print index,c
                         i2 = (index - 1) * 2 + 1
-                        print data[a,b,::]
+                        # print data[a,b,::]
                         mdata[a,b,0:i2] = data[a,b,0:i2]
                         break
                         # print mdata[a,b,::]
@@ -1557,119 +1502,96 @@ class Microtubule():
                     # print data[a,b,c]
                     # if data[a,b,c] >
 
+        frames = np.linspace(0,self.total_frames,data.shape[1])
+
         # cumulative data (round 2)
         pdata = mdata[::,::,::2] # 66, 13, 7
         cdata = mdata[::,::,1::2] # 66, 13, 7
-        # sys.exit()
-
-        # cdata = np.cumsum(pdata,axis=2)
-        # cdata = np.zeros(pdata.shape)
-        # zdata = np.zeros(data.shape)
-
-
-        # print pdata.shape
-        # sys.exit()
-        # print x.shape
-        # print data.shape
-
-
-        # for a in range(pdata.shape[2]):
-            # a2 = a * 2 + 1
-            # for i in data[]
-            # print pdata[10,11,::]
-            # print data[10,11,::]
-
-
-        # sys.exit()
 
         # cumulative, transpose, remove centroids
         udata = np.cumsum(pdata,axis=2)
         ctdata = np.transpose(udata)
 
-        frames = np.linspace(0,self.total_frames,data.shape[1])
-        # xticks = np.linspace(,frames[])
-
-        # # 7 angles in 12 dimer.
-        # for a in range(len(ax)):
-        #     #                   13 :: 7
-        #     # ax[a].imshow(data[::,::,a],aspect='auto',cmap='plasma',vmin=8,vmax=38)
-        #     # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=15,vmax=80)
-        #     ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=-30,vmax=30)
-        #     # ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=10,vmax=180)
-        #     # print data[::,::,a]
-        #     # ax[a].set_xticks()
-        #     # break
         self.mtpfcentroids = pdata
         self.mtpfbending = ctdata
+
 
     def plot_mtpf_global(self,ax):
         '''
         ax = list of ax1,ax2, ..
         '''
         # 7 angles in 12 dimer.
-        for a in range(len(ax)):
+        cmap = matplotlib.cm.get_cmap("rainbow")
+        print self.mtpfbending.shape
+
+        for a in ax:
+            a.tick_params(axis='both',labelsize=12)
+             # a.set_yticklabels([str(x) for x in np.arange(1,14,2)])
+            # a.set_yticks(np.linspace(0,13,2),np.arange(1,14,2))
+            # a.set_yticks(np.linspace(0,13,2))
+            # a.set_ylabel(np.arange(1,14,2))
+
+
+        # print self.num_dimers/self.num_pf
+        if self.num_dimers/self.num_pf == 8:
+            start = 2
+            # for a in ax[-3:-1]:
+            for a in ax[0:2]:
+                a.axis('off')
+        else:
+            start = 0
+
+
+        # Y-Ticks:
+        ax[0+start].set_yticks(np.linspace(0,12,4))
+        ax[0+start].set_yticklabels(np.arange(1,14,4))
+
+        for i,a in enumerate(ax):
+            # if i == start:
+            #     a.set_yticks
+            if i > start:
+                a.set_yticks([])
+
+
+        # Plot:
+        for a in range(self.mtpfbending.shape[0]):
             #                   13 :: 7
-            ax[a].imshow(ctdata[a,::,::],aspect='auto',cmap='plasma',vmin=-30,vmax=30)
+            ax[a+start].imshow(self.mtpfbending[a,::,::],aspect='auto',cmap='rainbow',vmin=0,vmax=20)
 
 
-    def plot_mtpf_local(self):
+        # Colorbar:
+        # plt.colorbar(ax8,ticks=[0,1])
+        cb1 = matplotlib.colorbar.ColorbarBase(ax[-1],
+                                               cmap=cmap)
+
+        # cbar = plt.colorbar(cax=ax[-1])
+        # plt.colorbar
+        # ax[-1]
+        # for i in range(len(ax)):
+        #     if i != 0+start:
+        #         ax[i+start].set_yticks([])
+        # for a in ax:
+            # a.set_xlim(-5,100)
+
+
+    def plot_mtpf_local(self,ax):
         """
         Plot pf bending angle, local.
         """
-        #  ---------------------------------------------------------  #
-        #  Start matplotlib (1/4)                                     #
-        #  ---------------------------------------------------------  #
-        # import matplotlib
-        # import seaborn as sns
-        # default - Qt5Agg
-        # print matplotlib.rcsetup.all_backends
-        # matplotlib.use('GTKAgg')
-        # matplotlib.use('TkAgg')
-        # print 'backend:',matplotlib.get_backend()
-        # import matplotlib.pyplot as plt
-        # from matplotlib.gridspec import GridSpec
-        # import pylab
-
-        # fig = plt.figure(0)
-        # fig.set_size_inches(15.0,3.0)
-        # plt.subplots_adjust(left=0.15,right=0.94,top=0.90,bottom=0.18,hspace=0.2,wspace=0.12)
-        # dct_font = {'size':'12'}
-        # matplotlib.rc('font',**dct_font)
-
-        gs = GridSpec(1,23)
-        ax1 = plt.subplot(gs[0,0:3])
-        ax2 = plt.subplot(gs[0,3:6])
-        ax3 = plt.subplot(gs[0,6:9])
-        ax4 = plt.subplot(gs[0,9:12])
-        ax5 = plt.subplot(gs[0,12:15])
-        ax6 = plt.subplot(gs[0,15:18])
-        ax7 = plt.subplot(gs[0,18:21])
-        ax8 = plt.subplot(gs[0,22:23])
-        # gs = GridSpec(1,7)
-        # ax1 = plt.subplot(gs[0,0])
-        # ax2 = plt.subplot(gs[0,1])
-        # ax3 = plt.subplot(gs[0,2])
-        # ax4 = plt.subplot(gs[0,3])
-        # ax5 = plt.subplot(gs[0,4])
-        # ax6 = plt.subplot(gs[0,5])
-        # ax7 = plt.subplot(gs[0,6])
-
-        ax = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
-        cr = np.linspace(1,0,self.mtpfbending.shape[1])
         cmap = matplotlib.cm.get_cmap("rainbow")
-
-
-
-
-
-        for i in range(len(ax)):
-            if i != 0:
-                ax[i].set_yticks([])
-
-        for a in ax:
-            a.set_ylim(-5,100)
+        cr = np.linspace(1,0,self.mtpfbending.shape[1])
 
         print self.mtpfbending.shape
+
+        if self.num_dimers/self.num_pf == 8:
+            start = 2
+            # for a in ax[-3:-1]:
+            for a in ax[0:2]:
+                a.axis('off')
+        else:
+            start = 0
+
+
         frames = np.linspace(0,self.total_frames,self.mtpfbending.shape[2])
 
         for i in range(self.mtpfbending.shape[0]):
@@ -1679,52 +1601,88 @@ class Microtubule():
             for p in range(self.mtpfbending.shape[1]):
                 # 13
                 # print np.var(self.mtpfbending[i,p,::])
-
                 if np.var(self.mtpfbending[i,p,::]) > 80.0:
                     # print cr
                     # print cr[p]
-                    ax[i].plot(frames,self.mtpfbending[i,p,::],color=cmap(cr[p]))
+                    ax[i+start].plot(frames,self.mtpfbending[i,p,::],color=cmap(cr[p]))
 
 
-        # plt.colorbar(ax8,ticks=[0,1])
-        cb1 = matplotlib.colorbar.ColorbarBase(ax8,
-                                               cmap=cmap,
-                                               orientation='vertical')
-        # ax[0].plot()
+        for a in ax:
+            a.tick_params(axis='both',labelsize=12)
+            a.set_yticks([-90,-45,0,45,90])
+            a.set_ylim(-92,92)
+            # a.set_xticks([0,200,40,600])
+            a.set_xticks([0,250,500])
+            a.set_xlim(frames[0],frames[-1])
+
+
         # sys.exit()
 
+        # for i in range(len(ax)):
+        #     if i != 0:
+        #         ax[i].set_yticks([])
+
+        # for a in ax:
+        #     a.set_ylim(-5,100)
+        cb1 = matplotlib.colorbar.ColorbarBase(ax[-1],cmap=cmap)
 
 
-        #  ---------------------------------------------------------  #
-        #  Make final adjustments: (4/4)                              #
-        #  mpl - available expansions                                 #
-        #  ---------------------------------------------------------  #
-        # mpl_rc
-        # mpl_font
-        # mpl_label
-        # mpl_xy
-        # mpl_ticks
-        # mpl_tick
-        # mpl_minorticks
-        # mpl_legend
-        # combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
-        # from plot.SETTINGS import *
+    def remove_early_contact_losses(self,face='n'):
+        '''
+        Remove the early contact losses.
+        '''
+        early_frame = 75 # in first 75 frames
+        decrease = 0.89 # 11% drop
+        icontacts = self.contacts
+        if face == "n":
+            icontacts = self.ncontacts
+        elif face == "e":
+            icontacts = self.econtacts
+        elif face == "w":
+            icontacts = self.wcontacts
+        elif face == "s":
+            icontacts = self.scontacts
 
-        # Save a matplotlib figure.
-        # REQ:
-        # (1) cwd = saves here, else provide 'destdirname'
-        # (2) name = filename without suffix. eg. 'png' (def), 'svg'
-        # OPT:
-        # (3) destdirname: eg. 'fig/histograms'
-        # (4) dpi: (optional) 120 (default), 300, 600, 1200
-        # (5) filetypes: ['png','svg','eps','pdf']
+        lst_frames_dimers = []
+        for i,d in enumerate(self.dimers):
+            # print d
+            # print min(icontacts[::,d])
+            # if i > 18:
+            #     break
+            # ax.plot(icontacts[::,d],color=mycolors[i])
 
-        # P = SaveFig(cwd,name,destdirname*,dpi*,filetypes*)
-        # print plt.gcf().canvas.get_supported_filetypes()
-        # P = SaveFig(my_dir,
-        #             'hist_%s_%s' % (result_type,data_name),
-        #             destdirname='fig/histogramCDF')
-        # mpl_myargs_end
+            for f in range(icontacts.shape[0]):
+
+                if f == icontacts.shape[0] - 1:
+                    lst_frames_dimers.append((f,d))
+
+                if icontacts[f,d] < decrease:
+                    lst_frames_dimers.append((f,d))
+                    break
+
+
+        new_dimers = []
+        for f in lst_frames_dimers:
+            # print f[0],f[1]
+            if f[0] > early_frame:
+                new_dimers.append(f[1])
+
+        self.dimers = new_dimers
+
+        # print min_f
+        # min_f = min(lst_frames_dimers,key=lambda f: f[0])
+        # sys.exit()
+
+        # print 'Min_f:',min_f
+        # self.plot_vertlines(ax,[min_f])
+        # sys.exit()
+
+        # ax.set_xlim(limits)
+        # ax.set_ylim(-0.03,1.03)
+        # ax.set_xlim(self.frames[0],self.frames[-1])
+        # ax.text(70,0.1,face.upper())
+        # return min_f
+
 
     def plot_contact_interface(self,ax,face='n',limits=(0,600)):
         """
@@ -1733,11 +1691,11 @@ class Microtubule():
         #  Import Data! (2/4)                                         #
         #  ---------------------------------------------------------  #
         print "hello isolate Contacts!  ",face
-        print ax
+        # print ax
         print self.contacts.shape # only goes dimers.
         print self.dimers # need to be doubled.
-        ax.set_prop_cycle(cycler('color',mycolors))
 
+        ax.set_prop_cycle(cycler('color',mycolors))
         ax.tick_params(axis='both',labelsize=12)
         # ax.legend(loc=3,fontsize=6)
 
@@ -1751,32 +1709,65 @@ class Microtubule():
             icontacts = self.scontacts
 
         if((face == "n") or (face == "s")):
-            decrease = 0.75
+            # n,s: north, south
+            decrease = 0.20
+            slope_criterion = 0.3
         else:
-            decrease = 0.2
+            # w,e: west, east
+            decrease = 0.85
+            slope_criterion = 0.1
 
         # print icontacts.shape
         # for i in range(icontacts.shape[1]):
         # sys.exit()
 
-        min_f = self.frames[-1]
+        min_f = self.frames[-1] # the last frame.
+        start_f = 95 # start beyond frame 95
 
+        lst_frames_dimers = []
         for i,d in enumerate(self.dimers):
             # print d
             # print min(icontacts[::,d])
-            for f in range(icontacts.shape[0]):
-                if icontacts[f,d] < decrease:
-                    break
-            if f < min_f:
-                min_f = f
-            # print f
-            # sys.exit()
-
-            if i > 18:
-                break
             ax.plot(icontacts[::,d],color=mycolors[i])
+            if i >= 18:
+                break
 
-        print 'Min_f:',min_f
+            # print icontacts.shape[0]
+            for f in range(20,icontacts.shape[0]): # 586 frames..
+                # print 'f:',f,'of',icontacts.shape[0]
+                # print icontacts
+
+                # to get last frame, only if necessary.
+                if f == icontacts.shape[0] - 1:
+                    lst_frames_dimers.append((f,d))
+                    break
+
+                slope1 = icontacts[f-15,d] - icontacts[f,d]
+                slope2 = icontacts[f-10,d] - icontacts[f,d]
+                slope3 = icontacts[f-5,d] - icontacts[f,d]
+                slope = max([slope1,slope2,slope3])
+
+                if np.abs(slope) > slope_criterion:
+                    # print slope
+                    lst_frames_dimers.append((f,d))
+                    break
+
+                # if icontacts[f,d] < decrease:
+                #     lst_frames_dimers.append((f,d))
+                #     break
+
+
+        for f in lst_frames_dimers:
+            # print f[0],f[1]
+            if f[0] > start_f:
+                if f[0] < min_f:
+                    min_f = f[0]
+
+        # print min_f
+        # min_f = min(lst_dimers_frames,key=lambda f: f[0])
+        # sys.exit()
+
+        # print 'Min_f:',min_f
         self.plot_vertlines(ax,[min_f])
         # sys.exit()
 
@@ -1785,4 +1776,6 @@ class Microtubule():
         ax.set_xlim(self.frames[0],self.frames[-1])
         ax.text(70,0.1,face.upper())
 
+        # print "Early frame: ",min_f
+        # sys.exit()
         return min_f

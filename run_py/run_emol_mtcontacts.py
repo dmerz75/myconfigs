@@ -18,40 +18,22 @@ my_library = os.path.expanduser('~/.pylib')
 sys.path.append(my_library)
 from plot.SOP import *
 from data.check_bad_lines import check_bad_lines
-
-
 from mylib.run_command import run_command
+from mylib.FindAllFiles import *
 
-# import subprocess
-
-# def run_command(invocation,script):
-#     pipe=subprocess.Popen([invocation,script],stdin=subprocess.PIPE,
-#                           stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-#     stdout,stderr = pipe.communicate()
-#     print 'stdout >> ',stdout
-#     print 'stderr >> ',stderr
-
-#     # os.chdir(os.path.dirname(script))
-#     # run_command('touch',script)
-#     # os.chdir(my_dir)
-
-
-# mpl_moving_average
-# mpl_forcequench
-# mpl_worm
 
 #  ---------------------------------------------------------  #
 #  Start matplotlib (1/4)                                     #
 #  ---------------------------------------------------------  #
-import matplotlib
+# import matplotlib
 # default - Qt5Agg
 # print matplotlib.rcsetup.all_backends
 # matplotlib.use('GTKAgg')
 # matplotlib.use('TkAgg')
-print 'backend:',matplotlib.get_backend()
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-fig = plt.figure(0)
+# print 'backend:',matplotlib.get_backend()
+# import matplotlib.pyplot as plt
+# from matplotlib.gridspec import GridSpec
+# fig = plt.figure(0)
 
 #  ---------------------------------------------------------  #
 #  Import Data! (2/4)                                         #
@@ -73,6 +55,7 @@ def parse_arguments():
     parser.add_argument("-r","--round_name",help="round_name: 1,2,3 .. -> 02",type=int)
     parser.add_argument("-m","--multi",help="multi: defaults to None, any other")
     parser.add_argument("-f","--function",help="function: run,rename(default)")
+    parser.add_argument("-p","--program",help="program: emol3n, pfbend")
     args = vars(parser.parse_args())
     return args
 
@@ -88,28 +71,21 @@ print "option:",option,"data:",data_name,"round:",round_name
 combined_name = '%s_%s_%s_%s' % (result_type, plot_type,round_name,data_name)
 
 function = args['function']
+prog = args['program']
 
-
-gs = GridSpec(1,1)
-ax1 = plt.subplot(gs[0,:])
-# ax2 = plt.subplot(gs[1,:-1])
-ax = [ax1]
-
-
-if multi != None:
-    ax2 = ax1.twiny()
-    ax3 = ax1.twiny()
-    ax = [ax1,ax2,ax3]
+# gs = GridSpec(1,1)
+# ax1 = plt.subplot(gs[0,:])
+# # ax2 = plt.subplot(gs[1,:-1])
+# ax = [ax1]
+# if multi != None:
+#     ax2 = ax1.twiny()
+#     ax3 = ax1.twiny()
+#     ax = [ax1,ax2,ax3]
 
 
 #  ---------------------------------------------------------  #
 #  Import Data! (3/4)                                         #
 #  ---------------------------------------------------------  #
-# mylib/faf
-my_library = os.path.expanduser('~/.pylib')
-sys.path.append(my_library)
-from mylib.FindAllFiles import *
-
 def load_dct(cwd=my_dir,pattern='*.dat'):
     # FindAllFiles
     print 'cwd:',cwd
@@ -291,10 +267,14 @@ for k,v in dct_plot.iteritems():
         # OPTION
         # command = ['emol_mtcontacts',pdb,dcd,'0','5000','1']
 
-        command = ['emol_mtcontacts3n',pdb,dcd,'0','5000','1']
+        if prog == 'emol3n':
+            command = ['emol_mtcontacts3n',pdb,dcd,'0','5000','1']
+            datfile = 'emol_mtcontacts_by_subdomain3n.dat'
+        elif prog == 'pfbend':
+            command = ['emol_mtpfbend3',pdb,dcd,'2','5000','10']
+            datfile = 'emol_mtpfbending_angle.dat'
+
         # command = ['emol_mtcontacts_topo',pdb,dcd,'3','903','3','top_this.top']
-
-
         # if int(round_name) < 15:
         #     command = ['run_segment_dcd_dimermap_mt',pdb,dcd,'209','1','0','5000','1']
         # else:
@@ -305,15 +285,13 @@ for k,v in dct_plot.iteritems():
         # num_datfile = len(datfiles)
 
         # datfile = 'emol_mtcontacts.dat'
-        datfile = 'emol_mtcontacts_top.dat'
+        # datfile = 'emol_mtcontacts_top.dat'
         # print datfiles
         # print num_datfile
         # sys.exit()
 
-
         if function == 'run':
             if os.path.exists(datfile):
-
             # OPTION
             # if 0:
                 print 'emol_contacts.dat must be renamed first. not running!'
@@ -330,10 +308,12 @@ for k,v in dct_plot.iteritems():
                 new_name = fcn + '_' + time_ext + '.dat'
                 print 'renaming:',new_name,'in',os.path.basename(ddir)
                 os.rename(datfile,new_name)
-            else:
-                print 'no emol_contacts.dat found.'
-                print 'found emol_contacts*.dat',num_datfile
-                print datfiles
+            # else:
+            #     pass
+            # else:
+            #     print 'no emol_contacts.dat found.'
+            #     print 'found emol_contacts*.dat',num_datfile
+            #     print datfiles
 
 
         # if ((not os.path.exists(datfile)) and (function == 'run')):
@@ -349,8 +329,8 @@ for k,v in dct_plot.iteritems():
         #     os.rename(datfile,new_name)
 
 
-min_x = 0.0
-max_x = 0.0
+# min_x = 0.0
+# max_x = 0.0
 
 # for k,v in dct_plot.iteritems():
 #     if k not in lst_plot:
@@ -434,7 +414,7 @@ max_x = 0.0
 # mpl_legend
 # combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
 # save_fig
-from plot.SETTINGS import *
+# from plot.SETTINGS import *
 # save_fig(my_dir,0,'fig/indentation','%s_%s_%s' % (result_type,plot_type,data_name),option)
 # save_fig(my_dir,0,'fig/indentation','%s' % (combined_name),option)
 
