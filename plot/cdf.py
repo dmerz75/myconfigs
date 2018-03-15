@@ -8,11 +8,53 @@ class myCDF():
     Evaluate the cumulative distribution function.
 
     """
-    def __init__(self,data):
+    def __init__(self,data,**kwargs):
         """
         Pass in an array.
+
+        Default values:
+        minimum # of bins: 4
+        alpha:             0.5 (full)
         """
+        self.name = "default"
         self.data = data
+
+        if 'lower_limit' in kwargs:
+            self.lower_limit = kwargs['lower_limit']
+        else:
+            self.lower_limit = min(data)
+
+        if 'upper_limit' in kwargs:
+            self.upper_limit = kwargs['upper_limit']
+        else:
+            self.upper_limit = max(data)
+
+
+        if 'nbins' in kwargs:
+            self.nbins = kwargs['nbins']
+        else:
+            self.nbins = 4
+
+        if 'alpha' in kwargs:
+            self.alpha = kwargs['alpha']
+        else:
+            self.alpha = 0.5
+
+        if 'pattern' in kwargs:
+            self.pattern = kwargs['pattern']
+        else:
+            self.pattern = None
+
+        # print 'nbins:',nbins
+        # sys.exit()
+        # cdf = myCDF(data)
+        # cdf.print_class()
+        # cdf.determine_bins(lower_limit=0.3,upper_limit=0.6,nbins=3) # set
+        # cdf.determine_bins_limits(lower_limit=0.3,upper_limit=0.6,nbins=)
+        # cdf.determine_bins_limits(lower_limit=lower_limit,
+        #                           upper_limit=upper_limit,
+        #                           nbins=nbins) # set
+
 
 
     def print_class(self):
@@ -119,7 +161,34 @@ class myCDF():
 
         return
 
-    def plot_bars(self,**kwargs):
+
+    def plot_cdf(self,ax,color='b'):
+        '''
+        Plot the CDF.
+        '''
+        # CDF-2
+        ax.plot(self.bins[:-1],self.cumulative,color=color)
+
+
+    def empty(self):
+        # ax[0].set_xlim(bins[0],bins[-1])
+
+        # CDF-3
+        if 1:
+            # with:
+            ax[0].set_ylim(-0.05,2.8)
+            ax[0].set_xlim(0.22,1.30)
+        else:
+            # without:
+            ax[0].set_ylim(-0.05,1.12)
+            ax[0].set_xlim(0.30,1.30)
+
+        ax[0].set_xlabel('Forces',fontsize=24)
+        # ax[0].set_ylabel('Frequency',fontsize=24)
+        ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
+        return bins
+
+    def plot_bars(self,ax,**kwargs):
         '''
         Plot a histogram (bar graph).
         '''
@@ -144,6 +213,11 @@ class myCDF():
         else:
             pattern = None
 
+        if 'label' in kwargs:
+            label = kwargs['label']
+        else:
+            label = None
+
         # print alpha
         # print pattern
         # sys.exit()
@@ -152,42 +226,18 @@ class myCDF():
         # for bar, pattern in zip(bars, patterns):
         #     bar.set_hatch(pattern)
         # CDF-1
-        plt.bar(self.bins[:-1],self.norm,self.width,color=color,fill=fill,
-                alpha=alpha,
-                edgecolor=color,
-                hatch=pattern)
+        ax.bar(self.bins[:-1],self.norm,self.width,color=color,fill=fill,
+               alpha=alpha,
+               edgecolor=color,
+               hatch=pattern,label=label)
+        ax.legend(loc=2)
 
-
-
-    def plot_cdf(self,color='b'):
-        '''
-        Plot the CDF.
-        '''
-        # CDF-2
-        plt.plot(self.bins[:-1],self.cumulative,color=color)
-
-
-    def empty(self):
-        # ax[0].set_xlim(bins[0],bins[-1])
-
-        # CDF-3
-        if 1:
-            # with:
-            ax[0].set_ylim(-0.05,2.8)
-            ax[0].set_xlim(0.22,1.30)
-        else:
-            # without:
-            ax[0].set_ylim(-0.05,1.12)
-            ax[0].set_xlim(0.30,1.30)
-
-        ax[0].set_xlabel('Forces',fontsize=24)
-        # ax[0].set_ylabel('Frequency',fontsize=24)
-        ax[0].set_ylabel('Norm. Freq. & CDF',fontsize=24)
-        return bins
 
 
     def plot_hist(self,color='b'):
         ''' Manual creation of a histogram.
+
+        Possibly Deprecated.
         '''
         print min(data),max(data)
 

@@ -109,8 +109,8 @@ if 0:
                 # mt.plot_vertlines(ax2,[frame1,frame2])
                 # mt.get_mtpf(ax2)
                 mt.get_mtpf()
-                # e1,f1 = mt.get_force_at_frame(frame1)
-                # e2,f2 = mt.get_force_at_frame(frame2)
+                # e1,f1 = mt.get_extNforce_at_frame(frame1)
+                # e2,f2 = mt.get_extNforce_at_frame(frame2)
                 # print frame1,e1,f1
                 # print frame2,e2,f2
                 # mt1 = mt
@@ -139,29 +139,44 @@ if 0:
 
 def write_crit_file(dct,value='firstvalue',rnd=0):
 
-    lst_stat = []
+    dct_names = {}
+    dct_names[10] = "Dimers8.Plate"
+    dct_names[11] = "Dimers8.NoPlate"
+    dct_names[17] = "Dimers12.Plate"
+    dct_names[16] = "Dimers12.NoPlate"
+    dct_names[26] = "Dimers12.NoPlate"
 
+    lst_stat = []
     for k,v in dct.iteritems():
         print k
         try:
-            lst_stat.append((k,v[value]))
+            lst_stat.append((k,v['breaking_pattern'],v[value]))
         except:
             pass
 
+    # lst_stat_first = dct.values().sort(key=lambda x: x['first'])
+    # lst_stat_crit =
+    # print lst_stat_first
+    # sys.exit()
+
     for stat in lst_stat:
-        print stat[0],stat[1]
-        lst_stat.sort(key=lambda x: x[1])
+        print stat[0],stat[1],stat[2]
+        lst_stat.sort(key=lambda x: x[2])
+
 
     outfile = os.path.join(my_dir,args['forceframecontacts'] +
-                           '.' + value + '.' + str(rnd) + '.out')
+                           '.' + value + '.' + str(rnd) +
+                           '.%s' % dct_names[rnd] +
+                           '.out')
+
     print "Writing:",outfile
 
     with open(outfile,'w+') as fp:
         # for k,v in dct_sortedstat.iteritems():
         # print k,v
         for stat in lst_stat:
-            print stat[0],stat[1]
-            fp.write("%s   %7.5f\n" % (stat[0],stat[1]))
+            print stat[0],stat[1],stat[2]
+            fp.write("%s     %s   %6.4f\n" % (stat[0],stat[1],stat[2]))
 
 
 #  ---------------------------------------------------------  #
@@ -180,6 +195,8 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     set9 = x.remove_dirname('fail',None,x.dct)
     set9 = x.remove_dirname('example',None,set9)
     set9 = x.remove_dirname('tops_extra',None,set9)
+    set9 = x.remove_dirname('_nop_',None,set9)
+    set9 = x.remove_dirname('_rev_',None,set9)
     set9 = x.query_dirname("round_%d" % rnd,None,set9)
     set9 = x.sort_dirname(-1,set9)
     print 'dct_matches:',len(set9.keys())
@@ -381,6 +398,8 @@ def plot_all(mt_list,lst_plot):
         ax4 = plt.subplot(gs[2:4,10:16])
         ax6 = plt.subplot(gs[2:4,18:24])
 
+        axtop6 = [ax1,ax2,ax3,ax4,ax5,ax6]
+
         # Row 3,4: PFBend, Angles
         ax71 = plt.subplot(gs[4:6,0:3])
         ax72 = plt.subplot(gs[4:6,3:6])
@@ -390,6 +409,7 @@ def plot_all(mt_list,lst_plot):
         ax76 = plt.subplot(gs[4:6,15:18])
         ax77 = plt.subplot(gs[4:6,18:21])
         ax78 = plt.subplot(gs[4:6,23:24]) # colorbar
+        ax7s = [ax71,ax72,ax73,ax74,ax75,ax76,ax77]
         ax7 = [ax71,ax72,ax73,ax74,ax75,ax76,ax77,ax78]
 
         ax81 = plt.subplot(gs[6:8,0:3])
@@ -400,9 +420,12 @@ def plot_all(mt_list,lst_plot):
         ax86 = plt.subplot(gs[6:8,15:18])
         ax87 = plt.subplot(gs[6:8,18:21])
         ax88 = plt.subplot(gs[6:8,23:24]) # colorbar
+        ax8s = [ax81,ax82,ax83,ax84,ax85,ax86,ax87]
         ax8 = [ax81,ax82,ax83,ax84,ax85,ax86,ax87,ax88]
 
         axes_all = [ax1,ax2,ax3,ax4,ax5,ax6] + ax7 + ax8
+        # axes_plotted = axtop6 + ax7s + ax8s
+        axes_plotted = axtop6 + ax8s
         axes_lower = ax7 + ax8
 
         # print line
@@ -439,33 +462,62 @@ def plot_all(mt_list,lst_plot):
         # mt.plot_forceindentation(ax1) # with "Full indent," "partial"
         mt.plot_forceframe(ax1)
         mt.plot_contacts(ax2,mt.dimers)
+        mt.plot_contact_interface(ax3,'n')
+        mt.plot_contact_interface(ax4,'s')
+        mt.plot_contact_interface(ax5,'w')
+        mt.plot_contact_interface(ax6,'e')
+
+
         # mt.get_mtpf(ax2)
-
         # plot N,S,E,W contacts.
-        minfn = mt.plot_contact_interface(ax3,'n')
-        minfs = mt.plot_contact_interface(ax4,'s')
-        minfw = mt.plot_contact_interface(ax5,'w')
-        minfe = mt.plot_contact_interface(ax6,'e')
-        mt.plot_vertlines(ax1,[min([minfn,minfs]),min([minfw,minfs])])
-        mt.plot_vertlines(ax2,[min([minfn,minfs]),min([minfw,minfs])])
-        # mt.plot_vertlines(ax2,[minfn,minfw])
+        # minfn = mt.plot_contact_interface(ax3,'n')
+        # minfs = mt.plot_contact_interface(ax4,'s')
+        # minfw = mt.plot_contact_interface(ax5,'w')
+        # minfe = mt.plot_contact_interface(ax6,'e')
+        mt.get_break_events()
 
-        minframe_lat = min([minfw,minfe])
-        minframe_lon = min([minfn,minfs])
+        mt.determine_early_late_contact_changes()
+
+        # Get maxforceframes. Store in maxforceframes
+        mt.get_maxforceframe() # Get after mt.break_first
+
+        print "The Breaking Pattern: ",mt.breaking_pattern
+        # print minfn,minfs,minfw,minfe
+        # sys.exit()
+        # mt.plot_vertlines(ax1,[min([minfn,minfs]),min([minfw,minfs])])
+        # mt.plot_vertlines(ax2,[min([minfn,minfs]),min([minfw,minfs])])
+        # mt.plot_vertlines(ax2,[minfn,minfw])
+        # minframe_lat = min([minfw,minfe])
+        # minframe_lon = min([minfn,minfs])
         # print minframes
         # sys.exit()
 
-        e0,f0 = mt.get_force_at_frame(min([minframe_lat,minframe_lon]))
-        e1,f1 = mt.get_force_at_frame(minframe_lat)
-        e2,f2 = mt.get_force_at_frame(minframe_lon)
-
-        # print frame1,e1,f1
-        # print frame2,e2,f2
 
         # PLOT MTPF - global, local.
         mt.get_mtpf()
         mt.plot_mtpf_global(ax7)
         mt.plot_mtpf_local(ax8)
+
+
+        # Draw Vertical Lines for First, Critical Breaks.
+        # mt.plot_vertlines([ax1,ax2],[mt.break_first],color='g')
+        # mt.plot_vertlines([ax1,ax2],[mt.break_critical],color='r')
+        mt.plot_vertlines(axes_plotted,[mt.break_first],color='g')
+        mt.plot_vertlines(axes_plotted,[mt.break_critical],color='r')
+        # mt.plot_vertlines(ax1,[mt.break_first],color='g')
+        # mt.plot_vertlines(ax2,[mt.break_first],color='g')
+
+
+
+        e1,f1 = mt.get_extNforce_at_frame(mt.break_first)
+        e2,f2 = mt.get_extNforce_at_frame(mt.break_critical)
+        # e0,f0 = mt.get_extNforce_at_frame(min([minframe_lat,minframe_lon]))
+        # e1,f1 = mt.get_extNforce_at_frame(minframe_lat)
+        # e2,f2 = mt.get_extNforce_at_frame(minframe_lon)
+
+        # print frame1,e1,f1
+        # print frame2,e2,f2
+
 
         # Now..
         # Get the frame of first lateral break,
@@ -497,9 +549,17 @@ def plot_all(mt_list,lst_plot):
         # dct_stat[mt.name]['first'] = min([minframe_lat + minframe_lon])
         # dct_stat[mt.name]['lat'] = minframe_lat
         # dct_stat[mt.name]['lon'] = minframe_lon
-        dct_stat[mt.name]['first'] = f0
-        dct_stat[mt.name]['lat'] = f1
-        dct_stat[mt.name]['lon'] = f2
+
+        dct_stat[mt.name]['first'] = f1
+        dct_stat[mt.name]['critical'] = f2
+        dct_stat[mt.name]['breaking_pattern'] = mt.breaking_pattern
+
+
+        # dct_stat[mt.name]['first'] = f0
+        # dct_stat[mt.name]['lat'] = f1
+        # dct_stat[mt.name]['lon'] = f2
+
+
         # dct_stat[mt.name]['second'] = f2
         # dct_stat[mt.name]['second'] = f2
         # firsts.append(f1)
@@ -513,9 +573,15 @@ def plot_all(mt_list,lst_plot):
     # Write First, and Maxvalue:
     # write_crit_file(dct_stat,'.first.out','first')
     # write_crit_file(dct_stat,'.maxvalue.out','second')
+
+    # March decision:
+    # write_crit_file(dct_stat,'first',rnd)
+    # write_crit_file(dct_stat,'lat',rnd)
+    # write_crit_file(dct_stat,'lon',rnd)
+
+    # Final decision:
     write_crit_file(dct_stat,'first',rnd)
-    write_crit_file(dct_stat,'lat',rnd)
-    write_crit_file(dct_stat,'lon',rnd)
+    write_crit_file(dct_stat,'critical',rnd)
 
 
 # End all

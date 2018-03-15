@@ -55,6 +55,11 @@ class Microtubule():
         self.truncated = 'no'
         self.num_pf = 13
         self.num_dimers = 104
+
+
+        # (frame, force, lat/lon/both, Qn (lon if both)
+        self.break_events = []
+
         # self.rnd = rnd
 
 
@@ -1011,7 +1016,7 @@ class Microtubule():
         setattr(self,dir_obj,nesw_contacts)
 
 
-    def get_force_at_frame(self,frame):
+    def get_extNforce_at_frame(self,frame):
         '''
         Get force at a particular frame.
         '''
@@ -1019,12 +1024,13 @@ class Microtubule():
         # print self.ext_raw
         # print self.frames
 
-        print self.f_nano.shape
-        print self.ext_raw.shape
-        print self.frames.shape
+        # USED
+        # print self.f_nano.shape
+        # print self.ext_raw.shape
+        # print self.frames.shape
 
         percent = float(frame)/self.frames.shape[0]
-        print percent
+        # print percent
 
         fsize = int(percent * self.f_nano.shape[0])
         esize = int(percent * self.ext_raw.shape[0])
@@ -1323,6 +1329,151 @@ class Microtubule():
         # handles,labels = ax1.get_legend_handles_labels()
         # ax1.legend(handles,labels,prop={'size':14},loc=2)
 
+    def get_maxforceframe(self):
+        '''
+        Get the frame at which the maximum force is obtained.
+        Watch out for ever increasing indentation forces (such
+        as when the cantilever runs into the plate.)
+        '''
+        print "Searching for the maxforceframe."
+
+
+
+        # start_pos = self.break_first * 10
+        # # critical_frame = int(self.f_nano.shape[0] * 0.1)
+
+
+        # # use a 1% search. 10% of 10%
+        # # frame10p = int(self.f_nano.shape[0] * 0.1) # frame 10%
+        # # srange = int(0.4 * frame10p)
+        # erange = int(0.012 * self.f_nano.shape[0]) # a 3% span on ~6000 pts. 180
+        # print erange
+
+        # for f in range(start_pos+erange,self.f_nano.shape[0]-4*erange,3*erange):
+        #     # f = 18 .. 36 .. 5982 (6000-18)
+        #     span1 = self.f_nano[f:f+erange]
+        #     slope1 = (span1[-1] - span1[0])/span1.shape[0]
+        #     span2 = self.f_nano[f+erange:f+2*erange]
+        #     slope2 = (span2[-1] - span2[0])/span2.shape[0]
+        #     span3 = self.f_nano[f+2*erange:f+3*erange]
+        #     slope3 = (span3[-1] - span3[0])/span3.shape[0]
+        #     span4 = self.f_nano[f+3*erange:f+4*erange]
+        #     slope4 = (span4[-1] - span4[0])/span4.shape[0]
+
+        #     print "frame/slopes: ",f,"  ",
+        #     print "%7.5f  %7.5f  %7.5f  %7.5f" % (slope1,slope2,slope3,slope4)
+
+        #     allslopes = [slope1,slope2,slope3,slope4]
+        #     minslope = min(allslopes)
+        #     minslope_index = allslopes.index(minslope)
+        #     # 'big' slopes
+        #     slopes = [s for s in allslopes if np.abs(s) > 0.00009] # 0.0001
+        #     slopes_pos = [s for s in slopes if s > 0]
+        #     slopes_neg = [s for s in slopes if s < 0]
+
+        #     if len(slopes_neg) >= 2:
+        #         critical_frame = int((f + minslope_index * erange) * 0.1)
+        #         break
+
+        #     # if ((slopes[-2] < 0) and (slopes[-1] < 0)):
+        #     # print span1,span2,span3
+
+
+        # print "critical_frame: ",critical_frame
+        # # self.maxforceframes = lst_frames
+        # self.maxforceframe = critical_frame
+        # self.break_critical = critical_frame
+
+        # sys.exit()
+        # return
+
+
+        def collect_frames_of_interest(initialf):
+            # while condition:
+            # while(initialf<self.f_nano.shape[0]):
+                # print i
+                # i = initial_frame
+            for f in range(initialf,self.f_nano.shape[0]):
+
+                mid_frame = initialf + srange       # ex. 200 - 260
+                mid2_frame = initialf + 2 * srange
+                final_frame = initialf + 3 * srange # ex. 260 - 320
+
+                early_avg = np.mean(self.f_nano[initialf:mid_frame])
+                mid1_avg = np.mean(self.f_nano[mid_frame:mid2_frame])
+                late_avg = np.mean(self.f_nano[mid2_frame:final_frame])
+
+                if ((early_avg > mid1_avg) and (early_avg > late_avg)):
+                    break
+                initialf += srange
+
+            frames1 = initialf * 0.1
+            frames2 = mid_frame * 0.1
+            frames3 = final_frame * 0.1
+
+            interest_frame = int(0.5 * (frames1 + frames2))
+
+            # return (initialf*0.1,mid_frame*0.1,final_frame*)
+            # return (frames1,frames2,frames3)
+            return interest_frame
+
+
+
+        # sys.exit()
+
+
+        # self.f_nano
+        print self.f_nano.shape
+        print self.break_split_first_crit * 10
+        # print "10% frame:",frame10p
+        # print "frame_range:",srange
+
+        # use a 1% search. 10% of 10%
+        # frame10p = int(self.f_nano.shape[0] * 0.1) # frame 10%
+        # srange = int(0.4 * frame10p)
+        srange = int(0.04 * self.f_nano.shape[0])
+        # erange = int(0.012 * self.f_nano.shape[0]) # a 3% span on ~6000 pts. 180
+        # print erange
+
+        lst_tups = []
+        lst_tupforces = []
+        lst_frames = []
+
+        # call the collect frame of interest function
+        frame = self.break_split_first_crit
+
+        while(frame<self.f_nano.shape[0]):
+            # lst_tups.append(collect_frames_of_interest(frame))
+            # frame = int(lst_tups[-1][2] * 10) + srange
+            lst_frames.append(collect_frames_of_interest(frame))
+            frame = int(lst_frames[-1] * 10) + srange
+
+
+        print "Critical Break Candidates:",lst_frames
+        # sys.exit()
+
+        # if lst_tups
+        if lst_tups:
+            for tup in lst_tups:
+                # print tup[0],tup[1],tup[2]
+                e1,f1 = self.get_extNforce_at_frame(tup[0])
+                e2,f2 = self.get_extNforce_at_frame(tup[1])
+                e3,f3 = self.get_extNforce_at_frame(tup[2])
+                # print f1,f2,f3
+                lst_tupforces.append((f1,f2,f3))
+
+        # if lst_tups
+        # if lst_tups:
+        #     for i in range(len(lst_tups)):
+        #         print lst_tups[i][0],lst_tups[i][1],lst_tups[i][2]
+        #         print lst_tupforces[i][0],lst_tupforces[i][1],lst_tupforces[i][2]
+
+        # print lst_frames
+        self.maxforceframes = lst_frames
+        self.maxforceframe = lst_frames[0]
+        self.break_critical = lst_frames[0]
+        # return lst_frames[0]
+        # sys.exit()
 
     def plot_contacts(self,ax,dimers,shift=0,limit=None):
         '''
@@ -1403,16 +1554,30 @@ class Microtubule():
 
 
 
-    def plot_vertlines(self,ax1,lstlines):
+    def plot_vertlines(self,ax,lstlines,**kwargs):
         '''
         '''
         print "plotting vertical lines"
-
         mycolors = ['black','green','magenta']
-        ax1.set_prop_cycle(cycler('color',mycolors))
 
-        for i,line in enumerate(lstlines):
-            ax1.axvline(line,color=mycolors[i],linestyle='--',linewidth=1.5)
+        if 'color' in kwargs:
+            mycolors = [kwargs['color'] for x in range(len(lstlines))]
+
+        if 'colors' in kwargs:
+            mycolors = kwargs['colors']
+
+        # print mycolors
+        # sys.exit()
+
+        for a,axp in enumerate(ax):
+
+            axp.set_prop_cycle(cycler('color',mycolors))
+
+            for i,line in enumerate(lstlines):
+
+                # axp.axvline(line,color=mycolors[i],linestyle='-',linewidth=2.0)
+                axp.axvline(line,color=mycolors[i],linestyle='--',linewidth=2.0)
+
 
     def get_mtpf_dep(self):
         """
@@ -1627,6 +1792,14 @@ class Microtubule():
         cb1 = matplotlib.colorbar.ColorbarBase(ax[-1],cmap=cmap)
 
 
+        # OFF unused plots.
+        if self.num_dimers/self.num_pf == 8:
+            for a in ax[0:2]:
+                a.axis('off')
+
+
+
+
     def remove_early_contact_losses(self,face='n'):
         '''
         Remove the early contact losses.
@@ -1686,7 +1859,236 @@ class Microtubule():
 
     def plot_contact_interface(self,ax,face='n',limits=(0,600)):
         """
+        Plot Contact Interface.
         """
+        ax.set_prop_cycle(cycler('color',mycolors))
+        ax.tick_params(axis='both',labelsize=12)
+        ax.set_ylim(-0.03,1.03)
+        ax.set_xlim(self.frames[0],self.frames[-1])
+        ax.text(70,0.1,face.upper())
+
+        # Choose Face:
+        if face == "n":
+            icontacts = self.ncontacts
+        elif face == "e":
+            icontacts = self.econtacts
+        elif face == "w":
+            icontacts = self.wcontacts
+        elif face == "s":
+            icontacts = self.scontacts
+
+        for i,d in enumerate(self.dimers):
+            ax.plot(icontacts[::,d],color=mycolors[i])
+
+
+    def get_break_events(self,face='n'):
+        """
+        Plot Contact Interface.
+        # (frame, force, lat/lon/both, Qn (lon if both)
+        self.break_events = []
+        """
+
+        # Choose Face:
+        if face == "n":
+            icontacts = self.ncontacts
+        elif face == "e":
+            icontacts = self.econtacts
+        elif face == "w":
+            icontacts = self.wcontacts
+        elif face == "s":
+            icontacts = self.scontacts
+
+        def find_simple_contact_changes(arr,threshold):
+            # print arr
+            # print arr.shape
+
+            for i in range(arr.shape[0]):
+
+                if arr[i] < threshold:
+                    break
+
+            return i
+
+
+        # Dictionary:
+        dct_conchange = {}
+
+        for i,d in enumerate(self.dimers):
+            dct_conchange[(d,face)] = {}
+            # print d
+            # print min(icontacts[::,d])
+            ax.plot(icontacts[::,d],color=mycolors[i])
+            frame1 = find_contact_changes(icontacts[::,d],0.82) # early
+            frame2 = find_contact_changes(icontacts[::,d],0.2) # late/complete
+            dct_conchange[(d,face)] = sorted([frame1,frame2])
+
+
+        self.dct_contact_events.update(dct_conchange)
+        # self.dct_contact_events =
+
+
+        # for k,v in dct_conchange.items():
+        #     print k,face,v[face]
+
+
+        # early lateral, late lat, early Long., late Longitudinal.
+        # find_interesting_contactface_changes(dct_conchange)
+
+
+    def determine_early_late_contact_changes(self):
+        """
+        Determine Early and Late Lateral and Longitudinal contact changes.
+        Early = < 82% remains
+        Late = < 20% remains
+        "The Breaking Pattern:
+           Lat-Lon-Lat
+           or
+           Lat-Lat-Lon
+        """
+
+        def find_repeated_frames(lst):
+
+            f1 = lst[0]
+
+            # for i in range(5,2,-1):
+            #     print i
+            #     avg = np.mean(lst[0:i])
+            #     if f1 / avg > 0.98:
+            #         break
+
+            for i in range(len(lst)):
+
+                if float(f1) / lst[i] < 0.9:
+                    break
+
+            late_frame = lst[i]
+            return f1,late_frame
+            # for i,f in enumerate(lst):
+            #     print i,f
+
+
+        lst_early_lat = []
+        lst_early_lon = []
+
+        lst_late_lat = []
+        lst_late_lon = []
+
+        for k,v in self.dct_contact_events.items():
+            print k,v
+
+            if((k[1] == 'e') or (k[1] == 'w')):
+                lst_early_lat.append(v[0])
+
+            if((k[1] == 'e') or (k[1] == 'w')):
+                lst_late_lat.append(v[1])
+
+            if((k[1] == 'n') or (k[1] == 's')):
+                lst_early_lon.append(v[0])
+
+            if((k[1] == 'n') or (k[1] == 's')):
+                lst_late_lon.append(v[1])
+
+
+        # print "\nSorted Early lat/lon:"
+        # print sorted(lst_early_lat)
+        # print sorted(lst_early_lon)
+
+        # print "\nSorted Late/Complete lat/lon:"
+        # print sorted(lst_late_lat)
+        # print sorted(lst_late_lon)
+
+
+        # el1, ll1 = find_repeated_frames(sorted(lst_early_lat))
+        # el2, ll2 = find_repeated_frames(sorted(lst_late_lat))
+        # eL1, lL1 = find_repeated_frames(sorted(lst_early_lon))
+        # eL2, lL2 = find_repeated_frames(sorted(lst_late_lon))
+
+        # print "\nResults. early lat 1,2;  late lat 1,2;  early Lon 1,2;  late Lon 1,2"
+        # print el1,el2
+        # print ll1,ll2
+
+        # print eL1,eL2
+        # print lL1,lL2
+
+        # Determine Breaking Pattern:
+        # Get Lat-Lon-Lat; or Lat-Lat-Lon
+        Lat1 = sorted(lst_early_lat)[0]
+        Lat2 = sorted(lst_late_lat)[0]
+        Lon = sorted(lst_early_lon)[0]
+
+        if((Lat1 < Lat2) and (Lat1 < Lon)):
+
+            if((Lon < Lat2 + 5) and (Lon > Lat2 - 5)):
+                self.breaking_pattern = "LatLatLonsame"
+
+            if(Lat2 < Lon):
+                self.breaking_pattern = "LatLat"
+
+            elif(Lon < Lat2):
+                self.breaking_pattern = "LatLon"
+
+        else:
+            # self.breaking_pattern = "Other"
+            self.breaking_pattern = "LonFirst"
+
+        # print "Lat1,Lat2,Lon:",Lat1,Lat2,Lon
+
+        self.break_first = sorted([Lat1,Lat2,Lon])[1]
+        self.break_split_first_crit = max([Lat1,Lat2,Lon])
+
+
+        # sys.exit()
+        # self.plot_vertlines()
+
+
+
+    def plot_contact_interface2(self,ax,face='n',limits=(0,600)):
+        """
+        """
+
+        def search_contact_array(start_f):
+            # searching contact array
+            lst_frames_dimers = []
+            for i,d in enumerate(self.dimers):
+                # print d
+                # print min(icontacts[::,d])
+                # ax.plot(icontacts[::,d],color=mycolors[i])
+                if i >= 18:
+                    break
+
+                # print icontacts.shape[0]
+                start_f = lst_frames_dimers[-1][0]
+
+                for f in range(start_f,icontacts.shape[0]): # 586 frames..
+                    print 'f:',f,'of',icontacts.shape[0]
+                    # print icontacts
+
+                    # to get last frame, only if necessary.
+                    if f == icontacts.shape[0] - 1:
+                        lst_frames_dimers.append((f,d))
+                        break
+
+                    slope1 = icontacts[f-15,d] - icontacts[f,d]
+                    slope2 = icontacts[f-10,d] - icontacts[f,d]
+                    slope3 = icontacts[f-5,d] - icontacts[f,d]
+                    slope = max([slope1,slope2,slope3])
+
+                    if len(lst_frames_dimers) < 1:
+                        if np.abs(slope) > slope_criterion:
+                            # print slope
+                            lst_frames_dimers.append((f,d))
+                            break
+                    else:
+                        if np.abs(slope) > slope_final:
+                            lst_frames_dimers.append((f,d))
+                            break
+
+
+                    # if icontacts[f,d] < decrease:
+                    #     lst_frames_dimers.append((f,d))
+                    #     break
+
+
         #  ---------------------------------------------------------  #
         #  Import Data! (2/4)                                         #
         #  ---------------------------------------------------------  #
@@ -1717,6 +2119,8 @@ class Microtubule():
             decrease = 0.85
             slope_criterion = 0.1
 
+        slope_final = 0.5
+
         # print icontacts.shape
         # for i in range(icontacts.shape[1]):
         # sys.exit()
@@ -1724,51 +2128,36 @@ class Microtubule():
         min_f = self.frames[-1] # the last frame.
         start_f = 95 # start beyond frame 95
 
-        lst_frames_dimers = []
         for i,d in enumerate(self.dimers):
             # print d
             # print min(icontacts[::,d])
             ax.plot(icontacts[::,d],color=mycolors[i])
-            if i >= 18:
-                break
 
-            # print icontacts.shape[0]
-            for f in range(20,icontacts.shape[0]): # 586 frames..
-                # print 'f:',f,'of',icontacts.shape[0]
-                # print icontacts
 
-                # to get last frame, only if necessary.
-                if f == icontacts.shape[0] - 1:
-                    lst_frames_dimers.append((f,d))
-                    break
+        while(found_frame < self.frames[-1]):
 
-                slope1 = icontacts[f-15,d] - icontacts[f,d]
-                slope2 = icontacts[f-10,d] - icontacts[f,d]
-                slope3 = icontacts[f-5,d] - icontacts[f,d]
-                slope = max([slope1,slope2,slope3])
+            found_frame = search_contact_array(0)
 
-                if np.abs(slope) > slope_criterion:
-                    # print slope
-                    lst_frames_dimers.append((f,d))
-                    break
 
-                # if icontacts[f,d] < decrease:
-                #     lst_frames_dimers.append((f,d))
-                #     break
+        sys.exit()
+
+
 
 
         for f in lst_frames_dimers:
-            # print f[0],f[1]
+            print f[0],f[1]
             if f[0] > start_f:
                 if f[0] < min_f:
                     min_f = f[0]
 
-        # print min_f
-        # min_f = min(lst_dimers_frames,key=lambda f: f[0])
-        # sys.exit()
+
+
+        print min_f
+        min_f = min(lst_dimers_frames,key=lambda f: f[0])
+        sys.exit()
 
         # print 'Min_f:',min_f
-        self.plot_vertlines(ax,[min_f])
+        # self.plot_vertlines(ax,[min_f])
         # sys.exit()
 
         # ax.set_xlim(limits)

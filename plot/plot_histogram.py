@@ -19,25 +19,29 @@ my_library = os.path.expanduser('~/.pylib')
 sys.path.append(my_library)
 from plot.cdf import *
 from mylib.FindAllFiles import *
-
+from plot.SETTINGS import *
+import argparse
 #  ---------------------------------------------------------  #
 #  Start matplotlib (1/4)                                     #
 #  ---------------------------------------------------------  #
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-fig = plt.figure(0)
 
-gs = GridSpec(1,1)
-ax1 = plt.subplot(gs[0,:])
-ax = [ax1]
+def new_fig():
+    fig = plt.figure(0)
+    gs = GridSpec(1,1)
+    ax1 = plt.subplot(gs[0,:])
+    ax = [ax1]
 
-fig.set_size_inches(7,5)
-plt.subplots_adjust(left=0.180,right=0.950,top=0.940,bottom=0.22)
-dct_font = {'family':'sans-serif',
-            'weight':'normal',
-            'size'  :'20'}
-matplotlib.rc('font',**dct_font)
+    fig.set_size_inches(7,5)
+    plt.subplots_adjust(left=0.180,right=0.950,top=0.940,bottom=0.22)
+    dct_font = {'family':'sans-serif',
+                'weight':'normal',
+                'size'  :'14'}
+    matplotlib.rc('font',**dct_font)
+    return ax
+
 
 #  ---------------------------------------------------------  #
 #  Import Data! (2/4)                                         #
@@ -50,8 +54,6 @@ option = None
 #  ---------------------------------------------------------  #
 #  mpl_myargs_begin                                           #
 #  ---------------------------------------------------------  #
-import argparse
-
 def parse_arguments():
     ''' Parse script's arguments.
     '''
@@ -95,6 +97,11 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     set9 = x.remove_dirname('fail',None,x.dct)
     # set9 = x.query_filename(rnd,set9)
     set9 = x.sort_filename(set9)
+
+    lst = []
+    for k,v in set9.items():
+        lst.append(v['file'])
+    return lst
     # x.dct (last pos.)
     # set9 = x.sort_dirname(-1,x.dct)
     # x.print_ [query,class]
@@ -103,17 +110,19 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     # x.print_query(set9)
     # print len(set9.keys()),'of',x.total
     # sys.exit()
-    return set9
+    # return set9
     # return x.dct
 
 # dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'rev_*.out')
-dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'pname_*.out')
-for k,v in dct_hist.iteritems():
-    print k,v['filename']
+# dct_hist = load_dct(os.path.join(my_dir,'results.crit_breaks'),'pname_*.out')
+# for k,v in dct_hist.iteritems():
+#     print k,v['filename']
 # sys.exit()
 
 def get_data(datafile,topology,position=None):
+    print "Processing data."
     print datafile
+    print topology,position
     lst_data = []
     with open(datafile,'r+') as fp:
         for line in fp:
@@ -132,13 +141,14 @@ def get_data(datafile,topology,position=None):
                 # print position
                 if (re.search(position,line) != None):
                     # print line
+                    # print position,"Found!"
                     lst_data.append(float(line.split()[1]))
             else:
-                print line.split()
+                # print line.split()
                 lst_data.append(float(line.split()[1]))
 
     data = np.array(lst_data)
-    print data.shape
+    print "Returning array:",data.shape
     return data
 
 
@@ -334,8 +344,6 @@ if 0:
 
 
 
-for k,v in dct_hist.iteritems():
-    print k,v
 
 
 # 0 rev_crit_breaks_mt8_combined.maxvalue.out
@@ -355,6 +363,7 @@ for k,v in dct_hist.iteritems():
 # 14 rev_crit_breaks_17.maxvalue.final0.out
 # 15 rev_crit_breaks_17.first.final0.out
 # sys.exit()
+
 
 
 if args['sel'] == 100:
@@ -835,41 +844,215 @@ if args['sel'] >= 2000:
     sys.exit()
 
 
-#  ---------------------------------------------------------  #
-#  Make final adjustments: (4/4)                              #
-#  mpl - available expansions                                 #
-#  ---------------------------------------------------------  #
-# mpl_rc
-# mpl_font
-# mpl_label
-# mpl_xy
-# mpl_ticks
-# mpl_tick
-# mpl_minorticks
-# mpl_legend
-# combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
-# save_fig
+def plot_all(ax,dfiles,**kwargs):
+    '''
+    Plot all.
+    '''
+    print "Plotting."
+    colors = ['m','g']
 
-if topology != None:
-    data_name = data_name + '_%s' % topology
-if position != None:
-    data_name = data_name + '_%s' % position
-data_name = data_name + '_rnd%s' % rnd
+    if 'description' in kwargs:
+        description = kwargs['description']
+    if 'lower_limit' in kwargs:
+        lower_limit = kwargs['lower_limit']
+    else:
+        lower_limit = 0.2
+    if 'upper_limit' in kwargs:
+        upper_limit = kwargs['upper_limit']
+    else:
+        upper_limit = 0.6
+    if 'nbins' in kwargs:
+        nbins = kwargs['nbins']
+    else:
+        nbins = 6
+    if 'topology' in kwargs:
+        topology = kwargs['topology']
+    else:
+        topology = None
+    if 'position' in kwargs:
+        position = kwargs['position']
+    else:
+        position = None
 
-from plot.SETTINGS import *
 
-# Save a matplotlib figure.
-# REQ:
-# (1) cwd = saves here, else provide 'destdirname'
-# (2) name = filename without suffix. eg. 'png' (def), 'svg'
-# OPT:
-# (3) destdirname: eg. 'fig/histograms'
-# (4) dpi: (optional) 120 (default), 300, 600, 1200
-# (5) filetypes: ['png','svg','eps','pdf']
+    str_name = ''
+    for i,dfile in enumerate(dfiles):
 
-# P = SaveFig(cwd,name,destdirname*,dpi*,filetypes*)
-# print plt.gcf().canvas.get_supported_filetypes()
+        data = get_data(dfile,topology,position)
+        # print data.shape
+        # sys.exit()
+        cdf = myCDF(data)
+        cdf.name = dfile.split('/')[-1].split('.')[-2]
+        str_name = str_name + cdf.name
+        print str_name
+        # sys.exit()
+        print 'limits initially: ',cdf.lower_limit,cdf.upper_limit
 
-P = SaveFig(my_dir,
-            'hist_%s_%s' % (result_type,data_name),
-            destdirname='fig/histogramCDF')
+        cdf.determine_bins_limits(nbins=nbins,
+                                  lower_limit=lower_limit,
+                                  upper_limit=upper_limit) # nbins,lower_limit,upper_limit
+        cdf.get_hist() # none,processing
+        # cdf.plot_bars(color=color,fill=fill,alpha=alpha,pattern=pattern)
+        cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=cdf.name) # color,fill,alpha,pattern,label
+        cdf.plot_cdf(ax,color=colors[i])
+        cdf.print_values()
+        cdf.print_stats()
+
+    # ax.legend(loc=2)
+
+    # Data Name:
+    data_name = cdf.name
+    # print data_name
+    # sys.exit()
+    if topology != None:
+        data_name = data_name + '_%s' % topology
+    if position != None:
+        data_name = data_name + '_%s' % position
+    if rnd != None:
+        data_name = data_name + '_%s' % rnd
+    # if description:
+    #     description = re.sub(" ","",description)
+    #     description = re.sub(",","_",description)
+    #     data_name = data_name + '_%s' % description
+    data_name = data_name + str_name
+
+    # ax.set_label(fontsize=14)
+    ax.tick_params(axis='both',labelsize=14)
+    # ax.axis(size=14)
+    ax.set_xlabel('Breaking Force',fontsize=16)
+    ax.set_ylabel('Normalized Freq.',fontsize=16)
+
+    P = SaveFig(my_dir,
+                'hist_%s_%s' % (result_type,data_name),
+                destdirname='fig/histogramCDF')
+    plt.clf()
+
+
+def print_data_sets(d):
+    for k,v in d.items():
+        print k,v['file']
+
+def merge_dct(d1,d2):
+    print d1
+    sys.exit()
+    dct = d1.copy()
+    dct.update(d2)
+    return dct
+    # for d in lst:
+    #     dct.update(d)
+    # return dct
+
+
+# plt.clf()
+# plot_all('lat',topology,position)
+# plot_all('lat',position)
+
+# round_10_mt8doz
+# round_11_mt8nop
+# round_13_freeplus
+# round_14_pushmid
+# round_16_mtdoz_complete_nop
+# round_17_mtdozplate
+# round_26_mtdoz
+# print_data_sets(files_lat)
+# print_data_sets(files_lon)
+# print_data_sets(files_first)
+# 0 /home/dmerz3/ext/completed_mt/results_breaks/march_firstbreaks/ALL.v1.first.16.out
+# 1 /home/dmerz3/ext/completed_mt/results_breaks/march_firstbreaks/ALL.v1.first.17.out
+# 2 /home/dmerz3/ext/completed_mt/results_breaks/march_firstbreaks/ALL.v1.first.10.out
+# 3 /home/dmerz3/ext/completed_mt/results_breaks/march_firstbreaks/ALL.v1.first.11.out
+# ALL.v1.first.10d8plate.out
+# ALL.v1.first.11d8nop.out
+# ALL.v1.first.16d12nop.out
+# ALL.v1.first.17d12plate.out
+
+
+# plot_all(ax[0],files1,description='nop,plate 12',
+#          nbins=8,lower_limit=0.16,upper_limit=0.56)
+files_lat = load_dct(my_dir,"ALL.v1.lat*") # lat,lon,first
+files_lon = load_dct(my_dir,"ALL.v1.lon*") # lat,lon,first
+files_first = load_dct(my_dir,"ALL.v1.first*") # lat,lon,first
+
+if ((args['sel'] >= 700) and (args['sel'] <= 725)):
+
+    files1 = [files_first[2],files_first[3]] # 11-10, nop, plate, 8
+    files2 = [files_first[0],files_first[1]] # 16,17, nop, plate, 12
+    files3 = [files_first[2],files_first[0]] # 11-16, nop, 8-12
+    files4 = [files_first[3],files_first[1]] # 10-17, plate, 8-12
+
+    print files1
+    print files2
+    print files3
+    print files4
+
+    nbins = 8
+    lower_limit = 0.18
+    upper_limit = 0.50
+
+    ax = new_fig() # 12noplate, 12plate
+    plot_all(ax[0],files1,
+             nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+    ax = new_fig() # 8nop, 8plate
+    plot_all(ax[0],files2,
+             nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+    ax = new_fig() # description='nop, 8v12')
+    plot_all(ax[0],files3,
+             nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+    ax = new_fig() # description='plate, 8v12')
+    plot_all(ax[0],files4,
+             nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+if ((args['sel'] >= 750) and (args['sel'] <= 759)):
+
+    files1 = [files_first[2],files_first[3]] # 10-11, nop, plate, 8
+    files2 = [files_first[0],files_first[1]] # 16,17, nop, plate, 12
+    files3 = [files_first[2],files_first[0]] # 10-17, nop, 8-12
+    files4 = [files_first[3],files_first[1]] # 11-16, plate, 8-12
+
+    print files1
+    print files2
+    print files3
+    print files4
+
+    nbins = 6
+    lower_limit = 0.18
+    upper_limit = 0.50
+
+    positions = ['oz1','oz2','oz3','oz4','oz5']
+    tup_files = [(2,3),(0,1),(2,0),(3,1)]
+
+    for t in range(len(tup_files)):
+        files = [files_first[tup_files[t][0]],
+                 files_first[tup_files[t][1]]]
+        print files
+        for i in range(5):
+            ax = new_fig()
+            plot_all(ax[0],files,
+                     nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit,
+                     position=positions[i])
+
+    # ax = new_fig() # 8nop, 8plate
+    # plot_all(ax[0],files2,
+    #          nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+    # ax = new_fig() # description='nop, 8v12')
+    # plot_all(ax[0],files3,
+    #          nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+    # ax = new_fig() # description='plate, 8v12')
+    # plot_all(ax[0],files4,
+    #          nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+
+
+# dfiles1 = update_dct(files1)
+# for k,v in dfiles1.items():
+#     print k,v
+# # files2 = [files_]
+
+# # print datafiles
+# # datafiles1 =
+# plot_all(ax[0],dfiles1,None,None)
