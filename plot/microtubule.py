@@ -1547,6 +1547,7 @@ class Microtubule():
         # handles, labels = ax.get_legend_handles_labels()
         # ax.legend(bbox_to_anchor=(1.02, 1),loc=2,borderaxespad=0.0,fontsize=12)
 
+        ax.legend(loc=2,fontsize=6)
 
         if hasattr(self,'reversal_frame'):
             print 'reversal_frame:',self.reversal_frame
@@ -1887,7 +1888,6 @@ class Microtubule():
         # (frame, force, lat/lon/both, Qn (lon if both)
         self.break_events = []
         """
-
         # Choose Face:
         if face == "n":
             icontacts = self.ncontacts
@@ -1897,6 +1897,89 @@ class Microtubule():
             icontacts = self.wcontacts
         elif face == "s":
             icontacts = self.scontacts
+
+
+        def find_contact_changes(d,arr):
+            """
+            Find all significant contact changes.
+            Dimer,contact array
+            """
+
+            # frames
+            sigI = []
+            # restart = 0
+
+            for ind in range(arr.shape[0]):
+                # if restart == 0:
+
+                if arr[ind] > 0.90:
+                    continue
+                else:
+
+                    e,f = self.get_extNforce_at_frame(ind)
+
+                    if len(sigI) < 1:
+                        sigI.append((ind,face,arr[ind],f,e,'early')) # early
+                        continue
+
+                    # most recent entry
+                    prev_frame = sigI[-1][0] # frame
+                    prev_force = sigI[-1][3] # f (force)
+                    prev_q     = sigI[-1][2] # previous Qn
+
+                    if arr[ind] < 0.2:
+                        sigI.append((ind,face,arr[ind],f,e,'late'))
+                        break
+
+                    # if force changed since last entry
+                    if np.abs(prev_force - f) > 0.1:
+                        sigI.append((ind,face,arr[ind],f,e,'mid'))
+                        continue
+
+                    # if frame changed since last entry
+                    if np.abs(prev_frame - ind) > 5:
+                        sigI.append((ind,face,arr[ind],f,e,'mid')) # late
+                        continue
+
+                    # if Qn changed since last entry
+                    if np.abs(prev_q - arr[ind]) > 0.1:
+                        sigI.append((ind,face,arr[ind],f,e,'mid'))
+                        continue
+
+            return sigI
+
+
+                # i1 = arr[ind]
+                # i2 = arr[ind+2]
+                # i3 = arr[ind+4]
+                # i4 = arr[ind+6]
+                # diff2 = i2 - i1
+                # diff3 = i3 - i1
+                # diff4 = i4 - i1
+                # # print i1,i2,i3,i4," ",diff2,diff3,diff4
+                # print diff2,diff3,diff4
+
+                # negdiffs = [d for d in [diff2,diff3,diff4] if d < 0]
+
+                # try:
+                #     diff = max([np.abs(d) for d in negdiffs])
+                # except:
+                #     diff = 0
+
+                # if diff > 0.1:
+                #     print "Got one!"
+                #     sigI.append(ind)
+
+            # print "Significant Indices of the contact array."
+            # print d,sigI
+
+            # if not sigI:
+                # print d,arr
+                # self.dimers.remove(d)
+
+            # sys.exit()
+
+
 
         def find_simple_contact_changes(arr,threshold):
             # print arr
@@ -1917,13 +2000,15 @@ class Microtubule():
             dct_conchange[(d,face)] = {}
             # print d
             # print min(icontacts[::,d])
-            ax.plot(icontacts[::,d],color=mycolors[i])
-            frame1 = find_contact_changes(icontacts[::,d],0.82) # early
-            frame2 = find_contact_changes(icontacts[::,d],0.2) # late/complete
-            dct_conchange[(d,face)] = sorted([frame1,frame2])
+            # ax.plot(icontacts[::,d],color=mycolors[i])
+            # frame1 = find_contact_changes(icontacts[::,d],0.82) # early
+            # frame2 = find_contact_changes(icontacts[::,d],0.2) # late/complete
+            # dct_conchange[(d,face)] = sorted([frame1,frame2])
+            sigFrames = find_contact_changes(d,icontacts[::,d])
 
 
-        self.dct_contact_events.update(dct_conchange)
+
+        # self.dct_contact_events.update(dct_conchange)
         # self.dct_contact_events =
 
 

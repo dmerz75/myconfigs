@@ -459,6 +459,14 @@ def plot_all(mt_list,lst_plot):
         mt.get_forceindentation()
         mt.get_force_by_time_series()
 
+        #
+        mt.get_break_events('n')
+        mt.get_break_events('s')
+        mt.get_break_events('e')
+        mt.get_break_events('w')
+
+
+
         # mt.plot_forceindentation(ax1) # with "Full indent," "partial"
         mt.plot_forceframe(ax1)
         mt.plot_contacts(ax2,mt.dimers)
@@ -467,6 +475,12 @@ def plot_all(mt_list,lst_plot):
         mt.plot_contact_interface(ax5,'w')
         mt.plot_contact_interface(ax6,'e')
 
+        P = SaveFig(mt.my_dir,mt.name,
+                    destdirname='fig/contacts_full/%s' % mt.rnd)
+
+        sys.exit()
+
+
 
         # mt.get_mtpf(ax2)
         # plot N,S,E,W contacts.
@@ -474,10 +488,9 @@ def plot_all(mt_list,lst_plot):
         # minfs = mt.plot_contact_interface(ax4,'s')
         # minfw = mt.plot_contact_interface(ax5,'w')
         # minfe = mt.plot_contact_interface(ax6,'e')
-        mt.get_break_events()
+
 
         mt.determine_early_late_contact_changes()
-
         # Get maxforceframes. Store in maxforceframes
         mt.get_maxforceframe() # Get after mt.break_first
 
