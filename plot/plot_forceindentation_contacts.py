@@ -464,6 +464,7 @@ def plot_all(mt_list,lst_plot):
         mt.get_break_events('s')
         mt.get_break_events('e')
         mt.get_break_events('w')
+        mt.process_break_events()
 
 
 

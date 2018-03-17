@@ -1888,6 +1888,11 @@ class Microtubule():
         # (frame, force, lat/lon/both, Qn (lon if both)
         self.break_events = []
         """
+
+        if not hasattr(self,'break_events'):
+            self.break_events = []
+
+
         # Choose Face:
         if face == "n":
             icontacts = self.ncontacts
@@ -1904,6 +1909,9 @@ class Microtubule():
             Find all significant contact changes.
             Dimer,contact array
             """
+            # print d,arr
+            # if not arr:
+
 
             # frames
             sigI = []
@@ -1916,7 +1924,12 @@ class Microtubule():
                     continue
                 else:
 
-                    e,f = self.get_extNforce_at_frame(ind)
+                    # print ind
+                    try:
+                        e,f = self.get_extNforce_at_frame(ind)
+                    except IndexError:
+                        break
+
 
                     if len(sigI) < 1:
                         sigI.append((ind,face,arr[ind],f,e,'early')) # early
@@ -1931,21 +1944,31 @@ class Microtubule():
                         sigI.append((ind,face,arr[ind],f,e,'late'))
                         break
 
+                    # # if force changed since last entry
+                    # if np.abs(prev_force - f) > 0.1:
+                    #     sigI.append((ind,face,arr[ind],f,e,'mid'))
+                    #     continue
+
+                    # # if frame changed since last entry
+                    # if np.abs(prev_frame - ind) > 5:
+                    #     sigI.append((ind,face,arr[ind],f,e,'mid')) # late
+                    #     continue
+
+                    # # if Qn changed since last entry
+                    # if np.abs(prev_q - arr[ind]) > 0.1:
+                    #     sigI.append((ind,face,arr[ind],f,e,'mid'))
+                    #     continue
+
+
                     # if force changed since last entry
-                    if np.abs(prev_force - f) > 0.1:
+                    if ((np.abs(prev_force - f) > 0.1) and
+                        (np.abs(prev_frame - ind) > 5) and
+                        (np.abs(prev_q - arr[ind]) > 0.1)):
                         sigI.append((ind,face,arr[ind],f,e,'mid'))
                         continue
 
-                    # if frame changed since last entry
-                    if np.abs(prev_frame - ind) > 5:
-                        sigI.append((ind,face,arr[ind],f,e,'mid')) # late
-                        continue
 
-                    # if Qn changed since last entry
-                    if np.abs(prev_q - arr[ind]) > 0.1:
-                        sigI.append((ind,face,arr[ind],f,e,'mid'))
-                        continue
-
+            # frame, face, Qn, force, extension, description.
             return sigI
 
 
@@ -1996,6 +2019,9 @@ class Microtubule():
         # Dictionary:
         dct_conchange = {}
 
+
+        break_events = []
+
         for i,d in enumerate(self.dimers):
             dct_conchange[(d,face)] = {}
             # print d
@@ -2005,6 +2031,27 @@ class Microtubule():
             # frame2 = find_contact_changes(icontacts[::,d],0.2) # late/complete
             # dct_conchange[(d,face)] = sorted([frame1,frame2])
             sigFrames = find_contact_changes(d,icontacts[::,d])
+            print d,sigFrames
+            if sigFrames:
+                # break_events.extend(sigFrames)
+                self.break_events.extend(sigFrames)
+
+        # break_events = flatten(break_events)
+
+
+        # Have all break events:
+        # print break_events
+        # break_early_lat = [b for b in break_events if b[1] == 'e']
+
+
+        # break_early_lat = filter(key=lambda x: x[1] == 'e',break_events)
+        # print len(break_early_lat)
+
+        # sys.exit()
+        # if ((x[1] == 'e') or (x[1] == 'w'))])
+
+
+
 
 
 
@@ -2018,6 +2065,74 @@ class Microtubule():
 
         # early lateral, late lat, early Long., late Longitudinal.
         # find_interesting_contactface_changes(dct_conchange)
+
+
+    def process_break_events(self):
+        '''
+        Process break events.
+        '''
+
+        def print_list_of_tuples(tup):
+
+            for t in tup:
+                print t[0],t[1],t[2],t[3],t[4],t[5]
+
+
+        def get_breaktype(ltup,face1,face2,eventtime):
+
+            breaks = sorted([b for b in ltup if (
+                ((b[1] == face1) or (b[1] == face2))
+                and (b[5] == eventtime))],
+                                     key=lambda x: x[0])
+
+            return breaks
+
+
+
+        print "Processing break events."
+        # print self.break_events
+        # break_lat_early = sorted([b for b in self.break_events if (
+        #     ((b[1] == 'e') or (b[1] == 'w'))
+        #     and (b[5] == 'early'))],
+        #                          key=lambda x: x[0])
+        # break_lon_early = sorted([b for b in self.break_events if (
+        #     ((b[1] == 'n') or (b[1] == 's'))
+        #     and (b[5] == 'early'))],
+        #                          key=lambda x: x[0])
+
+        break_lat_early = get_breaktype(self.break_events,'e','w','early')
+        break_lon_early = get_breaktype(self.break_events,'n','s','early')
+        break_lat_late = get_breaktype(self.break_events,'e','w','late')
+        break_lon_late = get_breaktype(self.break_events,'n','s','late')
+
+        print len(break_lat_early)
+        print_list_of_tuples(break_lat_early)
+
+        print len(break_lon_early)
+        print_list_of_tuples(break_lon_early)
+
+        print len(break_lat_late)
+        print_list_of_tuples(break_lat_late)
+
+        print len(break_lon_late)
+        print_list_of_tuples(break_lon_late)
+
+
+        # Need:
+        Both the first frame force. - All frames near that force level??
+        Determine Lat,Lon,Lat etc.
+        Write it into Lat,Lon.
+
+
+        # print break_lat_early
+        # for t in break_lat_early:
+            # print t[0],t[1],t[2],t[3],t[4],t[5]
+
+        # early_lat_frames = [f[0] for f in break_lat_early if f[]]
+
+
+        sys.exit()
+
 
 
     def determine_early_late_contact_changes(self):
