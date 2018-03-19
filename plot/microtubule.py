@@ -29,6 +29,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
+# from plot.cdf import *
+
+
 
 
 from cycler import cycler
@@ -39,6 +42,28 @@ mycolors = ['k', 'r', 'g', 'b','c','m','lime',
             'orange','orchid','darkgrey','indianred',
             'tan','cadetblue']
 # ax1.set_prop_cycle(cycler('color',mycolors))
+
+
+
+def get_frame_below_threshold(arr,threshold):
+
+    for i in range(arr.shape[0]):
+
+        if arr[i] < threshold:
+            break
+
+    return i
+
+def get_frame_below_avg_threshold(arr,span,threshold):
+
+    # 5:   5,
+    for i in range(arr.shape[0]-span):
+        avg = np.mean(arr[i:i+span])
+        if avg < threshold:
+            break
+
+    # back of span frame, Qn
+    return i+span,arr[i+span]
 
 
 class Microtubule():
@@ -59,7 +84,9 @@ class Microtubule():
 
         # (frame, force, lat/lon/both, Qn (lon if both)
         self.break_events = []
-
+        self.break_events_lon = []
+        self.break_events_lat = []
+        self.breaking_pattern = ''
         # self.rnd = rnd
 
 
@@ -1882,16 +1909,357 @@ class Microtubule():
             ax.plot(icontacts[::,d],color=mycolors[i])
 
 
+    def get_crit_break_events(self):
+        """
+        Focus on just the first few.
+        """
+        if not hasattr(self,'break_events'):
+            self.break_events = []
+        if not hasattr(self,'break_first_dimers'):
+            self.break_first_dimers = []
+
+        # # Choose Face:
+        # if face == "n":
+        #     icontacts = self.ncontacts
+        # elif face == "e":
+        #     icontacts = self.econtacts
+        # elif face == "w":
+        #     icontacts = self.wcontacts
+        # elif face == "s":
+        #     icontacts = self.scontacts
+
+
+
+        first_complete_break_dimers_lat = []
+        first_complete_break_dimers_lon = []
+
+        for i,d in enumerate(self.dimers):
+
+            frame = get_frame_below_threshold(self.ncontacts[::,d],0.3)
+            # if (d,frame) not in first_complete_break_dimers_lon:
+            first_complete_break_dimers_lon.append((d,frame))
+
+            frame = get_frame_below_threshold(self.scontacts[::,d],0.3)
+            # if (d,frame) not in first_complete_break_dimers_lon:
+            first_complete_break_dimers_lon.append((d,frame))
+
+            # if len(first_complete_break_dimers_lon) >= 4:
+            #     break
+
+        # for i,d in enumerate(self.dimers):
+        #     frame = get_frame_below_threshold(self.wcontacts[::,d],0.3)
+        #     if (d,frame) not in first_complete_break_dimers_lat:
+        #         first_complete_break_dimers_lat.append((d,frame))
+        #     frame = get_frame_below_threshold(self.econtacts[::,d],0.3)
+        #     if (d,frame) not in first_complete_break_dimers_lat:
+        #         first_complete_break_dimers_lat.append((d,frame))
+
+        #     if len(first_complete_break_dimers_lat) >= 4:
+        #         break
+
+
+        # Dictionary:
+        first_complete_break_dimers_lon = sorted(first_complete_break_dimers_lon,
+                                                 key=lambda tup: tup[1])[0:3]
+        # first_complete_break_dimers_lat = sorted(first_complete_break_dimers_lat,
+        #                                          key=lambda tup: tup[1])
+
+        print first_complete_break_dimers_lon
+        # sys.exit()
+        # print first_complete_break_dimers_lat
+
+        # for i in range(1,len(first_complete_break_dimers_lon)-1):
+
+        #     df1 = first_complete_break_dimers_lon[i-1]
+        #     df2 = first_complete_break_dimers_lon[i]
+
+        #     if df2[1] - df1[1] < 10:
+        #         self.break_first_dimers.append(df1[0])
+        #         self.break_first_dimers.append(df2[0])
+        #         break
+
+        # for i in range(1,len(first_complete_break_dimers_lat)-1):
+
+        #     df1 = first_complete_break_dimers_lat[i-1]
+        #     df2 = first_complete_break_dimers_lat[i]
+
+        #     if df2[1] - df1[1] < 10:
+        #         self.break_first_dimers.append(df1[0])
+        #         self.break_first_dimers.append(df2[0])
+        #         # self.break_first_dimers_lat = [df1[0],df2[0]]
+        #         break
+
+
+        first_complete_break_results = []
+
+        # for i,con in enumerate([self.ncontacts,self.scontacts,self.wcontacts,self.econtacts]):
+        for i,con in enumerate([self.ncontacts,self.scontacts]):
+            for b in first_complete_break_dimers_lon:
+
+                d = b[0] # dimer
+                frame,qn = get_frame_below_avg_threshold(con[::,d],4,0.01)
+                e,f = self.get_extNforce_at_frame(frame)
+
+                # first_complete_break_results.append()
+                if((f > 0.2) and (f < 1.0) and (frame < 500)):
+                    first_complete_break_results.append((frame,'lon',qn,e,f))
+
+
+
+        # Remove Duplicate Break Events. (First)
+        first_breaks = sorted(first_complete_break_results,key=lambda t: t[4])
+        # first_breaks = sorted(first_complete_break_results)
+        # for f in first_breaks:
+        #     print f
+        # print '--'
+        # first_breaks = sorted(list(set(first_breaks)))
+        # first_breaks = sorted(first_complete_break_results,key=lambda t: t[4])
+
+        for f in first_breaks:
+            print f
+        # sys.exit()
+
+        # limit
+        # break_critical_frame = int(np.mean([t[0] for t in first_breaks]))
+
+        if((self.rnd == '11') or
+           (self.rnd == '16') or
+           (self.rnd == '26')):
+            break_critical_frame = first_breaks[-1][0] + 50
+        else:
+            break_critical_frame = first_breaks[-1][0]
+
+        print "critical_frame:",break_critical_frame
+        self.break_critical,self.force_critical = self.get_maxforce_uptoframe(break_critical_frame)
+        print self.break_critical,self.force_critical
+        # print self.break_critical,crit_force
+
+        # self.break_critical = first_breaks[-1][0]
+        # self.break_critical = int(break_criticals)
+
+        # sys.exit()
+
+    def get_maxforce_uptoframe(self,frame):
+        """
+        Get the Maximum force up to the corresponding frame limit.
+        """
+        # print self.f_nano.shape[0]
+
+        # percent = (float(frame)*10)/self.frames.shape[0]
+        percent = (float(frame)*10)/self.f_nano.shape[0]
+        # print 'percent:',percent
+
+        fsize = int(percent * self.f_nano.shape[0])
+        esize = int(percent * self.ext_raw.shape[0])
+
+        tempf = self.f_nano[:fsize]
+        tempe = self.ext_raw[:esize]
+
+
+        frame = list(tempf).index(max(tempf))
+        frame = int(float(frame) / 10.0)
+
+
+        # print max(tempf)
+        return frame,max(tempf)
+
+        # lastf = tempf[-1]
+        # laste = tempe[-1]
+        # return laste,lastf
+
+
+
+
+    # def get_first_break_events(self,face='n'):
+    def get_first_break_events(self):
+        """
+        Focus on just the first few.
+        """
+        if not hasattr(self,'break_events'):
+            self.break_events = []
+        if not hasattr(self,'break_first_dimers'):
+            self.break_first_dimers = []
+
+        # # Choose Face:
+        # if face == "n":
+        #     icontacts = self.ncontacts
+        # elif face == "e":
+        #     icontacts = self.econtacts
+        # elif face == "w":
+        #     icontacts = self.wcontacts
+        # elif face == "s":
+        #     icontacts = self.scontacts
+
+
+
+        first_complete_break_dimers_lat = []
+        first_complete_break_dimers_lon = []
+
+        for i,d in enumerate(self.dimers):
+
+            frame = get_frame_below_threshold(self.ncontacts[::,d],0.3)
+            if (d,frame) not in first_complete_break_dimers_lon:
+                first_complete_break_dimers_lon.append((d,frame))
+            frame = get_frame_below_threshold(self.scontacts[::,d],0.3)
+            if (d,frame) not in first_complete_break_dimers_lon:
+                first_complete_break_dimers_lon.append((d,frame))
+
+        for i,d in enumerate(self.dimers):
+            frame = get_frame_below_threshold(self.wcontacts[::,d],0.3)
+            if (d,frame) not in first_complete_break_dimers_lat:
+                first_complete_break_dimers_lat.append((d,frame))
+            frame = get_frame_below_threshold(self.econtacts[::,d],0.3)
+            if (d,frame) not in first_complete_break_dimers_lat:
+                first_complete_break_dimers_lat.append((d,frame))
+
+
+
+        # Dictionary:
+        dct_conchange = {}
+        break_events = []
+
+        first_complete_break_dimers_lon = sorted(first_complete_break_dimers_lon,
+                                                 key=lambda tup: tup[1])
+        first_complete_break_dimers_lat = sorted(first_complete_break_dimers_lat,
+                                                 key=lambda tup: tup[1])
+
+
+        # print first_complete_break_dimers_lon
+        # print first_complete_break_dimers_lat
+
+        for i in range(1,len(first_complete_break_dimers_lon)-1):
+
+            df1 = first_complete_break_dimers_lon[i-1]
+            df2 = first_complete_break_dimers_lon[i]
+
+            if df2[1] - df1[1] < 10:
+                self.break_first_dimers.append(df1[0])
+                self.break_first_dimers.append(df2[0])
+                break
+
+        for i in range(1,len(first_complete_break_dimers_lat)-1):
+
+            df1 = first_complete_break_dimers_lat[i-1]
+            df2 = first_complete_break_dimers_lat[i]
+
+            if df2[1] - df1[1] < 10:
+                self.break_first_dimers.append(df1[0])
+                self.break_first_dimers.append(df2[0])
+                # self.break_first_dimers_lat = [df1[0],df2[0]]
+                break
+
+
+        first_complete_break_results = []
+
+        for i,con in enumerate([self.ncontacts,self.scontacts,self.wcontacts,self.econtacts]):
+
+            for d in self.break_first_dimers:
+
+                frame,qn = get_frame_below_avg_threshold(con[::,d],5,0.9)
+                e,f = self.get_extNforce_at_frame(frame)
+                # print d,frame,qn,e,f
+
+                # frame, face, Qn, force, extension, description.
+                if i <= 1:
+                    first_complete_break_results.append((frame,'lat',qn,e,f))
+                else:
+                    first_complete_break_results.append((frame,'lon',qn,e,f))
+
+
+        # Remove Duplicate Break Events. (First)
+        first_breaks = sorted(first_complete_break_results)
+        # for f in first_breaks:
+        #     print f
+        first_breaks = sorted(list(set(first_breaks)))
+
+        # print 'removed duplicates.'
+        # for f in first_breaks:
+        #     print f
+
+
+        Lat1 = -1
+        Lon  = -1
+        count = 0
+
+        while((Lat1 == -1) or (Lon == -1)):
+            if((first_breaks[count][1] == 'lat') and (Lat1 == -1)):
+                Lat1 = first_breaks[count][0]
+                self.breaking_pattern = self.breaking_pattern + 'lat'
+
+            if((first_breaks[count][1] == 'lon') and (Lon == -1)):
+                Lon = first_breaks[count][0]
+                self.breaking_pattern = self.breaking_pattern + 'lon'
+
+            count += 1
+
+            if count >= len(first_breaks):
+                break
+
+        self.Lat1 = Lat1
+        self.Lon = Lon
+        self.break_first = min([Lat1,Lon])
+        # print dir(self)
+        # self.fir
+        # for f in first_breaks:
+        #     if f[1] == 'lat':
+        #         Lat1 = f[0]
+
+
+
+        # if first_breaks[0] == 'lat':
+        #     Lat1 = first_breaks[0][0]
+        #     for f in first_breaks:
+        #         if f[1] != 'lat':
+        #             Lon = f[0]
+        #             break
+        # else:
+        #     Lon = first_breaks[0][0]
+        #     for f in first_breaks:
+        #         if f[1] != 'lon':
+        #             Lat1 = f[0]
+        #             break
+
+        # for f in first_breaks:
+        #     first_breaks[0]
+
+        return
+
+        # # Determine Breaking Pattern:
+        # # Get Lat-Lon-Lat; or Lat-Lat-Lon
+        Lat1 = sorted(lst_early_lat)[0][0]
+        Lat2 = sorted(lst_late_lat)[0][0]
+        Lon = sorted(lst_early_lon)[0][0]
+        Lon2= sorted(lst_early_lon)[0][1]
+
+        if((Lat1 < Lat2) and (Lat1 < Lon)):
+
+            if((Lon < Lat2 + 5) and (Lon > Lat2 - 5)):
+                self.breaking_pattern = "LatLatLonsame"
+
+            if(Lat2 < Lon):
+                self.breaking_pattern = "LatLat"
+
+            elif(Lon < Lat2):
+                self.breaking_pattern = "LatLon"
+
+        else:
+            # self.breaking_pattern = "Other"
+            self.breaking_pattern = "LonFirst"
+
+        # sys.exit()
+
+
     def get_break_events(self,face='n'):
         """
         Plot Contact Interface.
         # (frame, force, lat/lon/both, Qn (lon if both)
         self.break_events = []
         """
+        # criteria = {}
+        # criteria['n'] =
 
         if not hasattr(self,'break_events'):
             self.break_events = []
-
 
         # Choose Face:
         if face == "n":
@@ -1904,6 +2272,19 @@ class Microtubule():
             icontacts = self.scontacts
 
 
+
+            # if sigFrames:
+            #     # break_events.extend(sigFrames)
+
+            #     self.break_events.extend(sigFrames)
+
+            #     if((face == 'n') or (face == 's')):
+            #         self.break_events_lon.extend(sigFrames)
+            #     else:
+            #         self.break_events_lat.extend(sigFrames)
+
+
+
         def find_contact_changes(d,arr):
             """
             Find all significant contact changes.
@@ -1913,58 +2294,61 @@ class Microtubule():
             # if not arr:
 
 
+
             # frames
             sigI = []
             # restart = 0
 
-            for ind in range(arr.shape[0]):
+            for fr in range(arr.shape[0]):
                 # if restart == 0:
 
-                if arr[ind] > 0.90:
+                if arr[fr] > 0.90:
                     continue
                 else:
 
-                    # print ind
+                    # print fr
                     try:
-                        e,f = self.get_extNforce_at_frame(ind)
+                        e,f = self.get_extNforce_at_frame(fr)
                     except IndexError:
                         break
 
 
+                    # have fr, face, arr[fr] (Qn), f,e
                     if len(sigI) < 1:
-                        sigI.append((ind,face,arr[ind],f,e,'early')) # early
+                        sigI.append((fr,face,arr[fr],f,e,'early')) # early
                         continue
 
                     # most recent entry
                     prev_frame = sigI[-1][0] # frame
                     prev_force = sigI[-1][3] # f (force)
                     prev_q     = sigI[-1][2] # previous Qn
+                    prev_ind   = sigI[-1][4] # previous Ind.
 
-                    if arr[ind] < 0.2:
-                        sigI.append((ind,face,arr[ind],f,e,'late'))
+                    if arr[fr] < 0.2:
+                        sigI.append((fr,face,arr[fr],f,e,'late'))
                         break
 
                     # # if force changed since last entry
                     # if np.abs(prev_force - f) > 0.1:
-                    #     sigI.append((ind,face,arr[ind],f,e,'mid'))
+                    #     sigI.append((fr,face,arr[fr],f,e,'mid'))
                     #     continue
 
                     # # if frame changed since last entry
-                    # if np.abs(prev_frame - ind) > 5:
-                    #     sigI.append((ind,face,arr[ind],f,e,'mid')) # late
+                    # if np.abs(prev_frame - fr) > 5:
+                    #     sigI.append((fr,face,arr[fr],f,e,'mid')) # late
                     #     continue
 
                     # # if Qn changed since last entry
-                    # if np.abs(prev_q - arr[ind]) > 0.1:
-                    #     sigI.append((ind,face,arr[ind],f,e,'mid'))
+                    # if np.abs(prev_q - arr[fr]) > 0.1:
+                    #     sigI.append((fr,face,arr[fr],f,e,'mid'))
                     #     continue
 
 
                     # if force changed since last entry
                     if ((np.abs(prev_force - f) > 0.1) and
-                        (np.abs(prev_frame - ind) > 5) and
-                        (np.abs(prev_q - arr[ind]) > 0.1)):
-                        sigI.append((ind,face,arr[ind],f,e,'mid'))
+                        (np.abs(prev_frame - fr) > 5) and
+                        (np.abs(prev_q - arr[fr]) > 0.1)):
+                        sigI.append((fr,face,arr[fr],f,e,'mid'))
                         continue
 
 
@@ -1972,10 +2356,10 @@ class Microtubule():
             return sigI
 
 
-                # i1 = arr[ind]
-                # i2 = arr[ind+2]
-                # i3 = arr[ind+4]
-                # i4 = arr[ind+6]
+                # i1 = arr[fr]
+                # i2 = arr[fr+2]
+                # i3 = arr[fr+4]
+                # i4 = arr[fr+6]
                 # diff2 = i2 - i1
                 # diff3 = i3 - i1
                 # diff4 = i4 - i1
@@ -1991,7 +2375,7 @@ class Microtubule():
 
                 # if diff > 0.1:
                 #     print "Got one!"
-                #     sigI.append(ind)
+                #     sigI.append(fr)
 
             # print "Significant Indices of the contact array."
             # print d,sigI
@@ -2018,8 +2402,6 @@ class Microtubule():
 
         # Dictionary:
         dct_conchange = {}
-
-
         break_events = []
 
         for i,d in enumerate(self.dimers):
@@ -2031,40 +2413,16 @@ class Microtubule():
             # frame2 = find_contact_changes(icontacts[::,d],0.2) # late/complete
             # dct_conchange[(d,face)] = sorted([frame1,frame2])
             sigFrames = find_contact_changes(d,icontacts[::,d])
-            print d,sigFrames
+            # print d,sigFrames
             if sigFrames:
                 # break_events.extend(sigFrames)
+
                 self.break_events.extend(sigFrames)
 
-        # break_events = flatten(break_events)
-
-
-        # Have all break events:
-        # print break_events
-        # break_early_lat = [b for b in break_events if b[1] == 'e']
-
-
-        # break_early_lat = filter(key=lambda x: x[1] == 'e',break_events)
-        # print len(break_early_lat)
-
-        # sys.exit()
-        # if ((x[1] == 'e') or (x[1] == 'w'))])
-
-
-
-
-
-
-        # self.dct_contact_events.update(dct_conchange)
-        # self.dct_contact_events =
-
-
-        # for k,v in dct_conchange.items():
-        #     print k,face,v[face]
-
-
-        # early lateral, late lat, early Long., late Longitudinal.
-        # find_interesting_contactface_changes(dct_conchange)
+                if((face == 'n') or (face == 's')):
+                    self.break_events_lon.extend(sigFrames)
+                else:
+                    self.break_events_lat.extend(sigFrames)
 
 
     def process_break_events(self):
@@ -2085,8 +2443,8 @@ class Microtubule():
                 and (b[5] == eventtime))],
                                      key=lambda x: x[0])
 
+            # list of tuples: 0-5: frame, face, force, Qn, Ext, Early/Late
             return breaks
-
 
 
         print "Processing break events."
@@ -2100,38 +2458,155 @@ class Microtubule():
         #     and (b[5] == 'early'))],
         #                          key=lambda x: x[0])
 
-        break_lat_early = get_breaktype(self.break_events,'e','w','early')
-        break_lon_early = get_breaktype(self.break_events,'n','s','early')
-        break_lat_late = get_breaktype(self.break_events,'e','w','late')
-        break_lon_late = get_breaktype(self.break_events,'n','s','late')
+        # Breaks:
+        lst_early_lat = get_breaktype(self.break_events,'e','w','early')
+        lst_early_lon = get_breaktype(self.break_events,'n','s','early')
+        lst_late_lat = get_breaktype(self.break_events,'e','w','late')
+        lst_late_lon = get_breaktype(self.break_events,'n','s','late')
 
-        print len(break_lat_early)
-        print_list_of_tuples(break_lat_early)
+        # Consider removing duplicates.
 
-        print len(break_lon_early)
-        print_list_of_tuples(break_lon_early)
+        print len(lst_early_lat)
+        print_list_of_tuples(lst_early_lat)
 
-        print len(break_lat_late)
-        print_list_of_tuples(break_lat_late)
+        print len(lst_early_lon)
+        print_list_of_tuples(lst_early_lon)
 
-        print len(break_lon_late)
-        print_list_of_tuples(break_lon_late)
+        print len(lst_late_lat)
+        print_list_of_tuples(lst_late_lat)
+
+        print len(lst_late_lon)
+        print_list_of_tuples(lst_late_lon)
+
+
+        # Histograms:
+        # cdf = myCDF(data)
+        # # cdf.print_class()
+        # # cdf.determine_bins(lower_limit=0.3,upper_limit=0.6,nbins=3) # set
+        # # cdf.determine_bins_limits(lower_limit=0.3,upper_limit=0.6,nbins=)
+        # cdf.determine_bins_limits(lower_limit=lower_limit,
+        #                           upper_limit=upper_limit,
+        #                           nbins=nbins) # set
+
+        # # print cdf.bins
+        # # print alpha
+        # # sys.exit()
+
+        # # cdf.get_hist(bins=cdbins)
+        # cdf.get_hist()
+        # cdf.print_values()
+
+
+
+
+        # print "all_lat:"
+        # print_list_of_tuples(self.break_events_lat)
+        # print "all_lon:"
+        # print_list_of_tuples(self.break_events_lon)
+
+
+        # Sorted by force.
+        force_early_lat = sorted(lst_early_lat, key=lambda tup: tup[3])
+        force_early_lon = sorted(lst_early_lon, key=lambda tup: tup[3])
+        force_late_lat = sorted(lst_late_lat, key=lambda tup: tup[3])
+        force_late_lon = sorted(lst_late_lon, key=lambda tup: tup[3])
+
+        critforces = force_early_lat[-5:] + \
+                     force_early_lon[-5:] + \
+                     force_late_lat[-5:] + \
+                     force_late_lon[-5:]
+
+        critforce_targets = sorted([t for t in critforces if t[2] < 0.4])
+        nc = int(len(critforce_targets) * 0.4)
+
+        if len(critforce_targets) > 10:
+            critforce_targets = critforce_targets[3:-3]
+        elif len(critforce_targets) > 8:
+            critforce_targets = critforce_targets[2:-2]
+        else:
+            critforce_targets = critforce_targets[1:-1]
+
+        self.break_critical = np.mean([t[0] for t in critforce_targets])
+        print 'Critical_break:',self.break_critical
+
+        sys.exit()
+
+        # for c in critforce_targets:
+        #     print c
+
+        # for c in range(nc,len(critforce_targets)):
+        #     print critforce_targets[c]
+
+
+
+        # print critforce_early_lat[-5:]
+        # print critforce_early_lon[-5:]
+        # print
+
+
+        # sys.exit()
+
+        # top_crit_targets = []
+        # top_crit_targets.extend(critforce_early_lat[-5:])
+        # top_crit_targets.extend(critforce_early_lon[0:5])
+        # top_crit_targets.extend(critforce_late_lat[-4])
+        # top_crit_targets.extend(critforce_late_lon[-4])
+
+        # top_crit_targets = sorted(top_crit_targets)
+        # print top_crit_targets
+        # # print_list_of_tuples(top_crit_targets)
+        # sys.exit()
 
 
         # Need:
-        Both the first frame force. - All frames near that force level??
-        Determine Lat,Lon,Lat etc.
-        Write it into Lat,Lon.
+        # Both the first frame force. - All frames near that force level??
+        # Determine Lat,Lon,Lat etc.
+        # Write it into Lat,Lon.
+        # early_lat_frames = np.array(sorted([t[0] for t in lst_lat_early]))
+        # print early_lat_frames.shape
+        # print early_lat_frames
+        # early_lat = [t[0] for t in lst_lat_early if(float(t[0])/float(lst_lat_early[0][0]) > 0.98)]
+        # print early_lat
 
+
+        # # Determine Breaking Pattern:
+        # # Get Lat-Lon-Lat; or Lat-Lat-Lon
+        Lat1 = sorted(lst_early_lat)[0][0]
+        Lat2 = sorted(lst_late_lat)[0][0]
+        Lon = sorted(lst_early_lon)[0][0]
+        Lon2= sorted(lst_early_lon)[0][1]
+
+        if((Lat1 < Lat2) and (Lat1 < Lon)):
+
+            if((Lon < Lat2 + 5) and (Lon > Lat2 - 5)):
+                self.breaking_pattern = "LatLatLonsame"
+
+            if(Lat2 < Lon):
+                self.breaking_pattern = "LatLat"
+
+            elif(Lon < Lat2):
+                self.breaking_pattern = "LatLon"
+
+        else:
+            # self.breaking_pattern = "Other"
+            self.breaking_pattern = "LonFirst"
+
+        # print "Lat1,Lat2,Lon:",Lat1,Lat2,Lon
+        # Lat1 197
+        # Lon  186
+        # Lat2 250
+        # Lon2 304
+        breakfirst_candidates = sorted([Lat1,Lat2,Lon,Lon2])
+
+        self.break_first = sorted([Lat1,Lat2,Lon,Lon2])[1]
+        self.break_split_first_crit = max([Lat1,Lat2,Lon])
 
         # print break_lat_early
         # for t in break_lat_early:
             # print t[0],t[1],t[2],t[3],t[4],t[5]
 
         # early_lat_frames = [f[0] for f in break_lat_early if f[]]
-
-
-        sys.exit()
+        # sys.exit()
 
 
 

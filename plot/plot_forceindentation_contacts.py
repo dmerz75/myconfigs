@@ -195,8 +195,12 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     set9 = x.remove_dirname('fail',None,x.dct)
     set9 = x.remove_dirname('example',None,set9)
     set9 = x.remove_dirname('tops_extra',None,set9)
-    set9 = x.remove_dirname('_nop_',None,set9)
-    set9 = x.remove_dirname('_rev_',None,set9)
+
+    if((rnd == '10') or (rnd == '11')):
+        set9 = x.remove_dirname('_nop_',None,set9)
+        set9 = x.remove_dirname('_rev_',None,set9)
+
+
     set9 = x.query_dirname("round_%d" % rnd,None,set9)
     set9 = x.sort_dirname(-1,set9)
     print 'dct_matches:',len(set9.keys())
@@ -458,14 +462,16 @@ def plot_all(mt_list,lst_plot):
 
         mt.get_forceindentation()
         mt.get_force_by_time_series()
+        mt.get_first_break_events()
+        mt.get_crit_break_events()
+        # sys.exit()
 
-        #
-        mt.get_break_events('n')
-        mt.get_break_events('s')
-        mt.get_break_events('e')
-        mt.get_break_events('w')
-        mt.process_break_events()
 
+        # mt.get_break_events('n')
+        # mt.get_break_events('s')
+        # mt.get_break_events('e')
+        # mt.get_break_events('w')
+        # mt.process_break_events()
 
 
         # mt.plot_forceindentation(ax1) # with "Full indent," "partial"
@@ -476,10 +482,9 @@ def plot_all(mt_list,lst_plot):
         mt.plot_contact_interface(ax5,'w')
         mt.plot_contact_interface(ax6,'e')
 
-        P = SaveFig(mt.my_dir,mt.name,
-                    destdirname='fig/contacts_full/%s' % mt.rnd)
-
-        sys.exit()
+        # P = SaveFig(mt.my_dir,mt.name,
+        #             destdirname='fig/contacts_full/%s' % mt.rnd)
+        # sys.exit()
 
 
 
@@ -491,9 +496,9 @@ def plot_all(mt_list,lst_plot):
         # minfe = mt.plot_contact_interface(ax6,'e')
 
 
-        mt.determine_early_late_contact_changes()
+        # mt.determine_early_late_contact_changes()
         # Get maxforceframes. Store in maxforceframes
-        mt.get_maxforceframe() # Get after mt.break_first
+        # mt.get_maxforceframe() # Get after mt.break_first
 
         print "The Breaking Pattern: ",mt.breaking_pattern
         # print minfn,minfs,minfw,minfe
