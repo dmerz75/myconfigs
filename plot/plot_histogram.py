@@ -132,21 +132,22 @@ def get_data(datafile,topology,position=None):
                 if ((re.search(topology,line) != None) and
                     (re.search(position,line) != None)):
                     # print line
-                    lst_data.append(float(line.split()[1]))
+                    lst_data.append(float(line.split()[2]))
             elif (topology != None):
                 if (re.search(topology,line) != None):
                     # print line
-                    lst_data.append(float(line.split()[1]))
+                    lst_data.append(float(line.split()[2]))
             elif (position != None):
                 # print position
                 if (re.search(position,line) != None):
                     # print line
                     # print position,"Found!"
-                    lst_data.append(float(line.split()[1]))
+                    lst_data.append(float(line.split()[2]))
             else:
                 # print line.split()
-                lst_data.append(float(line.split()[1]))
+                lst_data.append(float(line.split()[2]))
 
+    lst_data = sorted(lst_data)
     data = np.array(lst_data)
     print "Returning array:",data.shape
     return data
@@ -882,7 +883,10 @@ def plot_all(ax,dfiles,**kwargs):
         # print data.shape
         # sys.exit()
         cdf = myCDF(data)
-        cdf.name = dfile.split('/')[-1].split('.')[-2]
+        # print dfile
+        cdf.name = ('.').join(dfile.split('/')[-1].split('.')[2:6])
+        print cdf.name
+        # sys.exit()
         str_name = str_name + cdf.name
         print str_name
         # sys.exit()
@@ -891,6 +895,8 @@ def plot_all(ax,dfiles,**kwargs):
         cdf.determine_bins_limits(nbins=nbins,
                                   lower_limit=lower_limit,
                                   upper_limit=upper_limit) # nbins,lower_limit,upper_limit
+
+        # sys.exit()
         cdf.get_hist() # none,processing
         # cdf.plot_bars(color=color,fill=fill,alpha=alpha,pattern=pattern)
         cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=cdf.name) # color,fill,alpha,pattern,label
@@ -1007,8 +1013,27 @@ if ((args['sel'] >= 700) and (args['sel'] <= 725)):
 
 if ((args['sel'] >= 750) and (args['sel'] <= 759)):
 
-    files1 = [files_first[2],files_first[3]] # 10-11, nop, plate, 8
+    # files_first
+    search_dir = os.path.join(my_dir,'results_breaks/r6.manualcuratedbreaks')
+    files_first = load_dct(search_dir,"ALL.v1.*") # lat,lon,first
+    files_first = sorted(files_first)
+
+    files_first = ['/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.10.Dimers8.Plate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.11.Dimers8.NoPlate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.16.Dimers12.NoPlate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.17.Dimers12.Plate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.10.Dimers8.Plate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.11.Dimers8.NoPlate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.16.Dimers12.NoPlate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.17.Dimers12.Plate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/extra/ALL.v1.critical.26.Dimers12.NoPlate.out',
+     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/extra/ALL.v1.first.26.Dimers12.NoPlate.out']
+    # print list(files_first)
+    # sys.exit()
+
+    files1 = [files_first[4],files_first[5]] # 10-11, nop, plate, 8
     files2 = [files_first[0],files_first[1]] # 16,17, nop, plate, 12
+
     files3 = [files_first[2],files_first[0]] # 10-17, nop, 8-12
     files4 = [files_first[3],files_first[1]] # 11-16, plate, 8-12
 
@@ -1021,8 +1046,22 @@ if ((args['sel'] >= 750) and (args['sel'] <= 759)):
     lower_limit = 0.18
     upper_limit = 0.50
 
+    tup_files = [(2,3),(0,1),(4,5),(6,7),(1,2),(0,3)]
+
+    for t in range(len(tup_files)):
+        files = [files_first[tup_files[t][0]],
+                 files_first[tup_files[t][1]]]
+        print files
+        ax = new_fig()
+        plot_all(ax[0],files,nbins=nbins)
+
+
+
+
+    sys.exit()
+
     positions = ['oz1','oz2','oz3','oz4','oz5']
-    tup_files = [(2,3),(0,1),(2,0),(3,1)]
+
 
     for t in range(len(tup_files)):
         files = [files_first[tup_files[t][0]],

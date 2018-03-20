@@ -103,6 +103,10 @@ class myCDF():
         # for k,v in kwargs.iteritems():
         #     print k,v
 
+        # self.lower_limit = min(self.data)
+        # self.upper_limit = max(self.data)
+
+
         if 'nbins' not in kwargs:
             nbins = 3
         else:
@@ -117,6 +121,10 @@ class myCDF():
             setattr(self,'upper_limit',kwargs['upper_limit'])
         else:
             setattr(self,'upper_limit',max(self.data))
+
+
+        # print dir(self)
+        # print self.data
 
         self.bins = np.linspace(self.lower_limit,self.upper_limit,nbins+1)
 
@@ -143,6 +151,10 @@ class myCDF():
         self.freq = hist[0]
         self.bins = hist[1]
         self.width = self.bins[1] - self.bins[0]
+
+        print self.freq
+        print self.bins
+        print self.width
 
         # self.norm = self.freq / np.linalg.norm(self.freq)
         # print np.linalg.norm(self.freq)

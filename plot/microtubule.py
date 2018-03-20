@@ -1909,6 +1909,78 @@ class Microtubule():
             ax.plot(icontacts[::,d],color=mycolors[i])
 
 
+    def manual_override_first_crit_break_frames(self,fp_name):
+        """
+        Manually Read the Config file again.
+        """
+
+        # print fp_name
+        # print self.name
+
+        # print dir(self)
+        # print self.file
+        # print self.filename
+        ffile = os.path.join(self.my_dir,fp_name)
+        print ffile
+        print fp_name
+        print self.name
+
+        # pattern = "round_%s*%s" % (self.rnd,self.name)
+        # print pattern
+
+        # return
+
+        with open(ffile) as fp:
+
+            for line in fp:
+
+                if line.startswith('#'):
+                    continue
+
+                if((re.search(self.name,line) != None) and
+                   (re.search('round_%s' % self.rnd,line) != None)):
+
+                    print 'match:'
+                    print line
+                    numbers = [int(x) for x in line.split('.dat')[-1].split()]
+                    print numbers
+
+                    if numbers:
+                        self.break_first = numbers[0]
+                        self.break_critical = numbers[1]
+                    # break
+
+        # print numbers
+        # sys.exit()
+
+
+
+
+    # def set_breaking_pattern(self):
+    #     """
+    #     Set the breaking pattern, a final check.
+    #     """
+        # if self.
+
+        # if((Lat1 < Lat2) and (Lat1 < Lon)):
+
+        #     if((Lon < Lat2 + 5) and (Lon > Lat2 - 5)):
+        #         self.breaking_pattern = "LatLatLonsame"
+
+        #     if(Lat2 < Lon):
+        #         self.breaking_pattern = "LatLat"
+
+        #     elif(Lon < Lat2):
+        #         self.breaking_pattern = "LatLon"
+
+        # else:
+        #     # self.breaking_pattern = "Other"
+        #     self.breaking_pattern = "LonFirst"
+
+        # # sys.exit()
+
+
+
     def get_crit_break_events(self):
         """
         Focus on just the first few.

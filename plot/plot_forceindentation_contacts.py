@@ -464,6 +464,7 @@ def plot_all(mt_list,lst_plot):
         mt.get_force_by_time_series()
         mt.get_first_break_events()
         mt.get_crit_break_events()
+        mt.manual_override_first_crit_break_frames(ffile)
         # sys.exit()
 
 
@@ -481,6 +482,8 @@ def plot_all(mt_list,lst_plot):
         mt.plot_contact_interface(ax4,'s')
         mt.plot_contact_interface(ax5,'w')
         mt.plot_contact_interface(ax6,'e')
+
+        print "The Breaking Pattern: ",mt.breaking_pattern
 
         # P = SaveFig(mt.my_dir,mt.name,
         #             destdirname='fig/contacts_full/%s' % mt.rnd)
@@ -500,7 +503,7 @@ def plot_all(mt_list,lst_plot):
         # Get maxforceframes. Store in maxforceframes
         # mt.get_maxforceframe() # Get after mt.break_first
 
-        print "The Breaking Pattern: ",mt.breaking_pattern
+
         # print minfn,minfs,minfw,minfe
         # sys.exit()
         # mt.plot_vertlines(ax1,[min([minfn,minfs]),min([minfw,minfs])])
