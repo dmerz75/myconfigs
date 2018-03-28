@@ -49,7 +49,7 @@ class SaveFig():
         # self.print_class()
 
 
-        print(self.__doc__)
+        # print(self.__doc__)
 
         # self.print_class()
 
@@ -110,8 +110,8 @@ class SaveFig():
                              (self.name,
                               suffix))))
 
-            print('found: ')
-            print(dct[suffix][-3:])
+            # print('found: ')
+            # print(dct[suffix][-3:])
             # print dct.keys()
 
             # if len(lst) == 0:

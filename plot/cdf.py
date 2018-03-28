@@ -73,21 +73,25 @@ class myCDF():
             # o.write(definition)
 
     def print_values(self):
-        print 'frequency:',self.freq
-        print 'bins:',self.bins
+        print 'Data:'
+        print self.data
+        print 'Mean:',self.mean
+        print 'StdDev:',self.std
         print 'binwidth:',self.width
-        print 'normalized:',self.norm
-        print 'cumulative:',self.cumulative
+        print 'bins:',self.bins
+        print 'frequency:',self.freq
+        print 'normalized:'
+        print self.norm
+        print 'cumulative:'
+        print self.cumulative
         print 'regular-sum:',self.regsum
 
-    def print_stats(self):
-        print self.data
+    def get_meanstdev(self):
+        # print self.data
         self.mean = np.mean(self.data)
         self.std = np.std(self.data)
-
-        print 'Mean:',self.mean
-        print 'Stddev:',self.std
-
+        # print 'Mean:',self.mean
+        # print 'Stddev:',self.std
 
     def determine_bins_limits(self,**kwargs):
         '''
@@ -107,10 +111,15 @@ class myCDF():
         # self.upper_limit = max(self.data)
 
 
-        if 'nbins' not in kwargs:
-            nbins = 3
+        if 'nbins' in kwargs:
+            # self.nbins = 3
+            setattr(self,'nbins',kwargs['nbins'])
         else:
-            nbins = kwargs['nbins']
+            setattr(self,'nbins',3)
+            # self.nbins = kwargs['nbins']
+
+        # print self.nbins
+
 
         if 'lower_limit' in kwargs:
             setattr(self,'lower_limit',kwargs['lower_limit'])
@@ -125,8 +134,8 @@ class myCDF():
 
         # print dir(self)
         # print self.data
-
-        self.bins = np.linspace(self.lower_limit,self.upper_limit,nbins+1)
+        # print type(self.lower_limit),type(self.upper_limit),type(self.nbins)
+        self.bins = np.linspace(self.lower_limit,self.upper_limit,self.nbins+1)
 
 
     def get_hist(self,**kwargs):
@@ -146,22 +155,30 @@ class myCDF():
         # else:
         #     hist = np.histogram(self.data,bins=kwargs['bins']) # normed, density, still hits 10
 
+        # print self.data
+
+
         hist = np.histogram(self.data,bins=self.bins)
 
         self.freq = hist[0]
         self.bins = hist[1]
         self.width = self.bins[1] - self.bins[0]
 
-        print self.freq
-        print self.bins
-        print self.width
+        # print self.freq
+        # print self.bins
+        # print self.width
 
         # self.norm = self.freq / np.linalg.norm(self.freq)
         # print np.linalg.norm(self.freq)
         sum_tot = np.sum(self.freq)
+        # print sum_tot
+        # sys.exit()
+
+
         # print self.freq / sum_tot
-        norm_arr = np.array([float(x)/sum_tot for x in self.freq])
+        norm_arr = np.array([float(x)/float(sum_tot) for x in self.freq])
         # print norm_arr
+        # sys.exit()
         # print np.sum(norm_arr)
         # print np.cumsum(norm_arr)
         self.norm = norm_arr

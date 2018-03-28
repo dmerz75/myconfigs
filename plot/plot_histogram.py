@@ -70,8 +70,15 @@ def parse_arguments():
 
 
 args = parse_arguments()
-topology = args['topology']
-position = args['position']
+if args['topology'] != None:
+    topology = args['topology'].split(',')
+else:
+    topology = None
+if args['position'] != None:
+    position = args['position'].split(',')
+else:
+    position = None
+
 rnd = args['rnd']
 fnum = args['filenumber']
 nbins = args['nbins']
@@ -119,7 +126,7 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
 #     print k,v['filename']
 # sys.exit()
 
-def get_data(datafile,topology,position=None):
+def get_data_dep(datafile,topology,position=None):
     print "Processing data."
     print datafile
     print topology,position
@@ -151,6 +158,90 @@ def get_data(datafile,topology,position=None):
     data = np.array(lst_data)
     print "Returning array:",data.shape
     return data
+
+def get_lst_tup_data(datafile,**kwargs):
+    """
+    Topolgy and Position
+    [lists]
+    """
+    # if kwargs['topology'] != None:
+    #     top = list(kwargs['topology'])
+    # if 'position' in kwargs:
+    #     pos = list(kwargs['position'])
+
+    lst_tupdata = []
+
+    with open(datafile,'r+') as fp:
+
+        for line in fp:
+            values = tuple(line.split())
+            # lst_data.append(float(line.split()[2]))
+            lst_tupdata.append((values[0],values[1],float(values[2])))
+
+    lst_data = sorted(lst_tupdata,key=lambda x: x[2])
+    # lst_data = sorted(lst_data)
+    # data = np.array(lst_data)
+    # for obj in lst_data:
+    #     print obj
+    return lst_data
+
+def get_pertinent_data(lst,keyword=None):
+    """
+    Topology and Position
+    """
+    print "Searching for %s" % keyword
+    if keyword == None:
+        return lst
+
+    lst_data = []
+
+    for i,v in enumerate(lst):
+
+        # print v[0]
+
+        for key in keyword:
+            # print key
+            if re.search(key,v[0]) != None:
+                # lst.remove(v)
+                lst_data.append(v)
+        # print len(lst)
+
+
+
+    return lst_data
+
+
+
+
+
+
+
+
+
+    #         if kwargs['topology'] != None:
+    #             # for
+    #             # if re.search(kwargs['topology'],line) == None:
+    #             for t in top:
+    #                 if re.search(t,line) != None:
+    #                     lst_data.append(float(line.split()[2]))
+
+    #                     # no match found.
+    #                     # continue
+
+    #         if kwargs['position'] != None:
+
+    #             # if re.search(kwargs['position'],line) == None:
+    #             for p in pos:
+    #                 if re.search(p,line) == None:
+    #                     # continue
+
+
+    #         lst_data.append(float(line.split()[2]))
+
+    # lst_data = sorted(lst_data)
+    # data = np.array(lst_data)
+    # print "Returning array:",data.shape
+    # return data
 
 
 def get_cdf(data,color='b',fill=True,**kwargs):
@@ -876,33 +967,46 @@ def plot_all(ax,dfiles,**kwargs):
         position = None
 
 
+    nbins = 8
+    if re.search('critical',dfiles[0]) != None:
+        lower_limit = 0.48
+        upper_limit = 0.96
+    else:
+        lower_limit = 0.24
+        upper_limit = 0.60
+
+
+
     str_name = ''
     for i,dfile in enumerate(dfiles):
 
-        data = get_data(dfile,topology,position)
+        tdata = get_lst_tup_data(dfile)
+        print len(tdata)
+        lst_tdata = get_pertinent_data(tdata,topology)
+        lst_tdata = get_pertinent_data(lst_tdata,position)
+        data = np.array(sorted([v[2] for v in lst_tdata]))
         # print data.shape
+        # print data
         # sys.exit()
         cdf = myCDF(data)
-        # print dfile
         cdf.name = ('.').join(dfile.split('/')[-1].split('.')[2:6])
         print cdf.name
-        # sys.exit()
-        str_name = str_name + cdf.name
-        print str_name
-        # sys.exit()
-        print 'limits initially: ',cdf.lower_limit,cdf.upper_limit
-
+        for t in lst_tdata:
+            print t
+        cdf.get_meanstdev()
+        # str_name = str_name + cdf.name
+        # print str_name
         cdf.determine_bins_limits(nbins=nbins,
                                   lower_limit=lower_limit,
                                   upper_limit=upper_limit) # nbins,lower_limit,upper_limit
-
-        # sys.exit()
         cdf.get_hist() # none,processing
         # cdf.plot_bars(color=color,fill=fill,alpha=alpha,pattern=pattern)
         cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=cdf.name) # color,fill,alpha,pattern,label
         cdf.plot_cdf(ax,color=colors[i])
+        print 'limits initially: ',cdf.lower_limit,cdf.upper_limit
+        print 'nbins:',nbins
         cdf.print_values()
-        cdf.print_stats()
+
 
     # ax.legend(loc=2)
 
@@ -913,7 +1017,9 @@ def plot_all(ax,dfiles,**kwargs):
     if topology != None:
         data_name = data_name + '_%s' % topology
     if position != None:
-        data_name = data_name + '_%s' % position
+        pos_name = ('-').join(position)
+        print 'pos_name:',pos_name
+        data_name = data_name + '_%s' % pos_name
     if rnd != None:
         data_name = data_name + '_%s' % rnd
     # if description:
@@ -1014,46 +1120,45 @@ if ((args['sel'] >= 700) and (args['sel'] <= 725)):
 if ((args['sel'] >= 750) and (args['sel'] <= 759)):
 
     # files_first
-    search_dir = os.path.join(my_dir,'results_breaks/r6.manualcuratedbreaks')
-    files_first = load_dct(search_dir,"ALL.v1.*") # lat,lon,first
-    files_first = sorted(files_first)
+    # search_dir = os.path.join(my_dir,'results_breaks/r7.manualcuratedbreaks2')
+    # files_first = load_dct(search_dir,"ALL.v1.*.out") # lat,lon,first
+    # files_first = sorted(files_first)
 
-    files_first = ['/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.10.Dimers8.Plate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.11.Dimers8.NoPlate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.16.Dimers12.NoPlate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.critical.17.Dimers12.Plate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.10.Dimers8.Plate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.11.Dimers8.NoPlate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.16.Dimers12.NoPlate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/ALL.v1.first.17.Dimers12.Plate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/extra/ALL.v1.critical.26.Dimers12.NoPlate.out',
-     '/home/dmerz3/ext/completed_mt/results_breaks/r6.manualcuratedbreaks/extra/ALL.v1.first.26.Dimers12.NoPlate.out']
-    # print list(files_first)
+    # print files_first
+    # for f in files_first:
+    #     print f
+    # sys.exit()
+    files_first = [
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.11.Dimers8.NoPlate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.10.Dimers8.Plate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.16.Dimers12.NoPlate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.17.Dimers12.Plate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.11.Dimers8.NoPlate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.10.Dimers8.Plate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.16.Dimers12.NoPlate.out',
+        '/home/dmerz3/ext/completed_mt/results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.17.Dimers12.Plate.out']
+    # results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.10.Dimers8.Plate.out     results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.10.Dimers8.Plate.out
+    # results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.11.Dimers8.NoPlate.out   results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.11.Dimers8.NoPlate.out
+    # results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.16.Dimers12.NoPlate.out  results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.16.Dimers12.NoPlate.out
+    # results_breaks/r7.manualcuratedbreaks2/ALL.v1.critical.17.Dimers12.Plate.out    results_breaks/r7.manualcuratedbreaks2/ALL.v1.first.17.Dimers12.Plate.out
+    # for f in files_first:
+    #     print f
     # sys.exit()
 
-    files1 = [files_first[4],files_first[5]] # 10-11, nop, plate, 8
-    files2 = [files_first[0],files_first[1]] # 16,17, nop, plate, 12
+    # nbins = 6
+    # lower_limit = 0.18
+    # upper_limit = 0.50
 
-    files3 = [files_first[2],files_first[0]] # 10-17, nop, 8-12
-    files4 = [files_first[3],files_first[1]] # 11-16, plate, 8-12
-
-    print files1
-    print files2
-    print files3
-    print files4
-
-    nbins = 6
-    lower_limit = 0.18
-    upper_limit = 0.50
-
-    tup_files = [(2,3),(0,1),(4,5),(6,7),(1,2),(0,3)]
+    tup_files = [(0,1),(2,3),(4,5),(6,7),(0,2),(1,3),
+                 (4,6),(5,7)]
 
     for t in range(len(tup_files)):
         files = [files_first[tup_files[t][0]],
                  files_first[tup_files[t][1]]]
         print files
         ax = new_fig()
-        plot_all(ax[0],files,nbins=nbins)
+        plot_all(ax[0],files,nbins=nbins,topology=topology,position=position)
+        axis_settings()
 
 
 

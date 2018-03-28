@@ -517,6 +517,8 @@ def plot_all(mt_list,lst_plot):
 
         # PLOT MTPF - global, local.
         mt.get_mtpf()
+        mt.process_mtpf()
+        # sys.exit()
         mt.plot_mtpf_global(ax7)
         mt.plot_mtpf_local(ax8)
 

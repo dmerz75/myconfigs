@@ -1663,6 +1663,88 @@ class Microtubule():
         # sys.exit()
 
 
+    def process_mtpf(self):
+        """
+        Process mtpf data.
+        """
+        print "Processing mtpf data."
+        print self.mtpf_data.shape
+
+        mtpf = self.mtpf_data
+        # data = np.zeros(self.mtpf_data.shape)
+
+
+        pdata = mtpf[::,::,::2] # 66, 13, 7  # PF angle:
+        cdata = mtpf[::,::,1::2] # 66, 13, 7 # Centroid Distance:
+
+        pfang_data = np.zeros(pdata.shape)
+        cdist_data = np.zeros(cdata.shape)
+
+
+        frame_at_centroid_sep = {} # pf dictionary = keys = 0-12
+        for pf in range(self.mtpf_data.shape[1]):
+            frame_at_centroid_sep[pf] = 9999
+
+
+        for f in range(self.mtpf_data.shape[0]):
+            # print f
+
+            for pf in range(self.mtpf_data.shape[1]):
+                # print pf
+
+                # print self.mtpf_data[f,pf,::]
+                # print pdata[f,pf,::]
+                # print cdata[f,pf,::]
+                avg_centroid_dist = np.mean(cdata[f,pf,::])
+                stdev_centroid_dist = np.std(cdata[f,pf,::])
+                # print avg_centroid_dist,stdev_centroid_dist
+                # if avg_centroid_dist > 50.0:
+                #     print "Longitudinal Break!"
+                if stdev_centroid_dist > 8.0:
+                    # print "Longitudinal Break!"
+                    # frame_at_centroid_sep.append((f,pf))
+                    if frame_at_centroid_sep[pf] > f:
+                        frame_at_centroid_sep[pf] = f
+                    # break
+                # print ''
+
+
+        # print frame_at_centroid_sep
+        # print min(frame_at_centroid_sep)
+        pfs_that_break = []
+        for k,v in frame_at_centroid_sep.items():
+            # print k,v
+            if v < 9999:
+                pfs_that_break.append(k)
+
+
+
+        # Assign to the Zero Arrays the data corresponding to the PF's that break,
+        # but only up to the frame where the break occurs.
+        for f in range(self.mtpf_data.shape[0]):
+            # print f
+            for pf in range(self.mtpf_data.shape[1]):
+
+                if pf not in pfs_that_break:
+                    continue
+
+                pfang_data[f,pf,:frame_at_centroid_sep[pf]] = pdata[f,pf,:frame_at_centroid_sep[pf]]
+                cdist_data[f,pf,:frame_at_centroid_sep[pf]] = cdata[f,pf,:frame_at_centroid_sep[pf]]
+
+
+        print "PF-angle-shape:",pfang_data.shape
+        # cumulative, transpose, remove centroids
+        # udata = np.cumsum(pfang_data,axis=2)
+        # utdata = np.transpose(udata)
+        utdata = np.transpose(pfang_data)
+
+        # self.mtpfcentroids = pdata
+        # self.mtpfbending = ctdata
+
+        self.mtpfbending = utdata
+        self.mtpfcentroids = cdist_data
+
+
     def get_mtpf(self):
         """
         Plot bending angle.
@@ -1672,30 +1754,42 @@ class Microtubule():
         fp = os.path.join(self.dirname,"emol_mtpfbending_angle.dat")
         x = np.loadtxt(fp) # 858, 14
         data = np.reshape(x,(x.shape[0]/13,13,x.shape[1])) # 66, 13, 14
+        self.mtpf_data = data
+        return
+        # frames = np.linspace(0,self.total_frames,data.shape[1])
+
 
         # cumulative data
-        pdata = data[::,::,::2] # 66, 13, 7
-        cdata = data[::,::,1::2] # 66, 13, 7
+        # print data.shape
+        # data
+        # Frame  |  PF  |  14-PFangle/Centroid-Dist.
+        # (51, 13, 14)
+        pdata = data[::,::,::2] # 66, 13, 7  # PF angle:
+        cdata = data[::,::,1::2] # 66, 13, 7 # Centroid Distance:
         mdata = np.zeros(data.shape)
 
+        if 0:
+            for a in range(cdata.shape[0]):
+                for b in range(cdata.shape[1]):
+                    print 'centroid:',cdata[a,b,::]
+                    print 'pfangle:',pdata[a,b,::]
+                    for index,c in enumerate(cdata[a,b,::]):
+                        if c > 55:
+                            i2 = (index - 1) * 2 + 1
+                            print index,c,i2
+                            # print data[a,b,::]
+                            mdata[a,b,0:i2] = data[a,b,0:i2]
+                            break
+                            # print mdata[a,b,::]
 
-        for a in range(cdata.shape[0]):
-            for b in range(cdata.shape[1]):
-                # print cdata[a,b,::]
-                for index,c in enumerate(cdata[a,b,::]):
-                    if c > 55:
-                        # print index,c
-                        i2 = (index - 1) * 2 + 1
-                        # print data[a,b,::]
-                        mdata[a,b,0:i2] = data[a,b,0:i2]
-                        break
-                        # print mdata[a,b,::]
+                    # for c in range(data.shape[2]):
+                    #     print data[a,b,c]
+                    #     if data[a,b,c] >
 
-                # for c in range(data.shape[2]):
-                    # print data[a,b,c]
-                    # if data[a,b,c] >
 
-        frames = np.linspace(0,self.total_frames,data.shape[1])
+        # try to truncate the array at the big switch ..
+        # if
+
 
         # cumulative data (round 2)
         pdata = mdata[::,::,::2] # 66, 13, 7
@@ -1705,8 +1799,11 @@ class Microtubule():
         udata = np.cumsum(pdata,axis=2)
         ctdata = np.transpose(udata)
 
+
         self.mtpfcentroids = pdata
         self.mtpfbending = ctdata
+
+        sys.exit()
 
 
     def plot_mtpf_global(self,ax):
@@ -1714,7 +1811,7 @@ class Microtubule():
         ax = list of ax1,ax2, ..
         '''
         # 7 angles in 12 dimer.
-        cmap = matplotlib.cm.get_cmap("rainbow")
+        cmap = matplotlib.cm.get_cmap("jet")
         print self.mtpfbending.shape
 
         for a in ax:
@@ -1739,6 +1836,9 @@ class Microtubule():
         ax[0+start].set_yticks(np.linspace(0,12,4))
         ax[0+start].set_yticklabels(np.arange(1,14,4))
 
+
+        # frames = np.linspace(0,self.total_frames,self.mtpfbending.shape[2])
+
         for i,a in enumerate(ax):
             # if i == start:
             #     a.set_yticks
@@ -1746,16 +1846,36 @@ class Microtubule():
                 a.set_yticks([])
 
 
+        for i,a in enumerate(ax[:-1]):
+            pass
+            # a.set_xticks()
+            # a.set_xticklabels(np.arange(100,self.total_frames,3))
+
+
         # Plot:
-        for a in range(self.mtpfbending.shape[0]):
+        for a in range(self.mtpfbending.shape[0]): # use the 7
             #                   13 :: 7
-            ax[a+start].imshow(self.mtpfbending[a,::,::],aspect='auto',cmap='rainbow',vmin=0,vmax=20)
+            # print self.mtpfbending[a,::,::]
+            # print min(self.mtpfbending[a,0,::])
+            # print max(self.mtpfbending[a,0,::])
+
+            im = ax[a+start].imshow(self.mtpfbending[a,::,::],
+                                    aspect='auto',cmap=cmap,vmin=-50,vmax=50)
+
+            if a == int(self.mtpfbending.shape[0] * 0.5) + 1:
+                plt.colorbar(im,cax=ax[-1],use_gridspec=True)
+                # ax[a].colorbar(this_ax,cax=[ax[-1]])
+
+
+        # max_ax = int(self.mtpfbending.shape[0] * 0.5) + 1
+        # cb1 = matplotlib.colorbar.ColorbarBase(ax[-1],cmap=cmap)
+        # plt.colorbar(ax=this_ax,cmap=cmap,cax=ax[-1])
 
 
         # Colorbar:
         # plt.colorbar(ax8,ticks=[0,1])
-        cb1 = matplotlib.colorbar.ColorbarBase(ax[-1],
-                                               cmap=cmap)
+        # plt.colorbar(ax[-1],cax=axes)
+
 
         # cbar = plt.colorbar(cax=ax[-1])
         # plt.colorbar
@@ -1774,18 +1894,26 @@ class Microtubule():
         cmap = matplotlib.cm.get_cmap("rainbow")
         cr = np.linspace(1,0,self.mtpfbending.shape[1])
 
+
         print self.mtpfbending.shape
+
+        for a in ax:
+            a.tick_params(axis='both',labelsize=12)
+            # a.locator_params(axis='x',nticks=4)
+        # # OFF unused plots.
+        # if self.num_dimers/self.num_pf == 8:
+        #     for a in ax[0:2]:
+        #         a.axis('off')
 
         if self.num_dimers/self.num_pf == 8:
             start = 2
-            # for a in ax[-3:-1]:
             for a in ax[0:2]:
                 a.axis('off')
         else:
             start = 0
 
-
         frames = np.linspace(0,self.total_frames,self.mtpfbending.shape[2])
+
 
         for i in range(self.mtpfbending.shape[0]):
             # 7
@@ -1794,37 +1922,29 @@ class Microtubule():
             for p in range(self.mtpfbending.shape[1]):
                 # 13
                 # print np.var(self.mtpfbending[i,p,::])
-                if np.var(self.mtpfbending[i,p,::]) > 80.0:
+                if np.var(self.mtpfbending[i,p,::]) > 20.0:
                     # print cr
                     # print cr[p]
                     ax[i+start].plot(frames,self.mtpfbending[i,p,::],color=cmap(cr[p]))
 
 
-        for a in ax:
-            a.tick_params(axis='both',labelsize=12)
-            a.set_yticks([-90,-45,0,45,90])
-            a.set_ylim(-92,92)
-            # a.set_xticks([0,200,40,600])
-            a.set_xticks([0,250,500])
-            a.set_xlim(frames[0],frames[-1])
+        for i,a in enumerate(ax):
+            if i >= start:
+                a.tick_params(axis='both',labelsize=12)
+                a.set_yticks([-60,-30,0,30,60])
+                a.set_ylim(-72,72)
+
+                # To specify the number of ticks on both or any single axes
+                # a.locator_params(axis='y', nticks=6)
 
 
-        # sys.exit()
+            if i > start:
+                a.set_yticks([])
+                a.set_xlim(frames[0],frames[-1])
+                # a.set_xticks([0,250,500])
 
-        # for i in range(len(ax)):
-        #     if i != 0:
-        #         ax[i].set_yticks([])
 
-        # for a in ax:
-        #     a.set_ylim(-5,100)
         cb1 = matplotlib.colorbar.ColorbarBase(ax[-1],cmap=cmap)
-
-
-        # OFF unused plots.
-        if self.num_dimers/self.num_pf == 8:
-            for a in ax[0:2]:
-                a.axis('off')
-
 
 
 
