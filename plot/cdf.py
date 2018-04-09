@@ -1,7 +1,41 @@
+# coding: utf-8
+
 import numpy as np
 # import matplotlib
 import matplotlib.pyplot as plt
 import sys
+
+from scipy import stats
+
+
+def Kolmogorov_Smirnov_Test(data1,data2):
+    """
+    The two sample K-S test.
+    https://en.wikipedia.org/wiki/Kolmogorov-Smirnov_test
+    Two-sample Kolmogorov–Smirnov test
+
+    //
+    scipy.
+
+    scipy.stats.ks_2samp(data1, data2)[source]
+    Computes the Kolmogorov-Smirnov statistic on 2 samples.
+    This is a two-sided test for the null hypothesis that 2 independent
+    samples are drawn from the same continuous distribution.
+
+    Parameters:
+    a, b : sequence of 1-D ndarrays
+    two arrays of sample observations assumed to be drawn from a
+    continuous distribution, sample sizes can be different
+
+    Returns:
+    D : (float) KS statistic
+    p-value : (float) two-tailed p-value
+    """
+
+    d,p = stats.ks_2samp(data1,data2)
+
+    return d,p
+
 
 class myCDF():
     """

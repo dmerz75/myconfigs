@@ -427,10 +427,14 @@ def plot_all(mt_list,lst_plot):
         ax8s = [ax81,ax82,ax83,ax84,ax85,ax86,ax87]
         ax8 = [ax81,ax82,ax83,ax84,ax85,ax86,ax87,ax88]
 
+        # ax_bottom = plt.subplot(gs[4:8,0:24])
+
+
         axes_all = [ax1,ax2,ax3,ax4,ax5,ax6] + ax7 + ax8
         # axes_plotted = axtop6 + ax7s + ax8s
         axes_plotted = axtop6 + ax8s
         axes_lower = ax7 + ax8
+        axes_beta = ax7[:-1] + ax8[:-1]
 
         # print line
         # mtname = line.split()[0]
@@ -476,20 +480,21 @@ def plot_all(mt_list,lst_plot):
 
 
         # mt.plot_forceindentation(ax1) # with "Full indent," "partial"
-        mt.plot_forceframe(ax1)
-        mt.plot_contacts(ax2,mt.dimers)
-        mt.plot_contact_interface(ax3,'n')
-        mt.plot_contact_interface(ax4,'s')
-        mt.plot_contact_interface(ax5,'w')
-        mt.plot_contact_interface(ax6,'e')
 
-        print "The Breaking Pattern: ",mt.breaking_pattern
+
+        # PLOT: contacts
+        # mt.plot_forceframe(ax1)
+        # mt.plot_contacts(ax2,mt.dimers)
+        # mt.plot_contact_interface(ax3,'n')
+        # mt.plot_contact_interface(ax4,'s')
+        # mt.plot_contact_interface(ax5,'w')
+        # mt.plot_contact_interface(ax6,'e')
+        # print "The Breaking Pattern: ",mt.breaking_pattern
+
 
         # P = SaveFig(mt.my_dir,mt.name,
         #             destdirname='fig/contacts_full/%s' % mt.rnd)
         # sys.exit()
-
-
 
         # mt.get_mtpf(ax2)
         # plot N,S,E,W contacts.
@@ -518,9 +523,13 @@ def plot_all(mt_list,lst_plot):
         # PLOT MTPF - global, local.
         mt.get_mtpf()
         mt.process_mtpf()
-        # sys.exit()
-        mt.plot_mtpf_global(ax7)
-        mt.plot_mtpf_local(ax8)
+        # mt.plot_mtpf_global(ax7)
+        # mt.plot_mtpf_local(ax8)
+        # mt.get_cendist()
+        # mt.plot_cendist(ax_bottom)
+        mt.get_beta_angle()
+        mt.plot_beta_angle(axes_beta)
+
 
 
         # Draw Vertical Lines for First, Critical Breaks.
@@ -610,6 +619,11 @@ def plot_all(mt_list,lst_plot):
 
 # End all
 dct_dat = load_dct(my_dir,'mt_analysis.dat')
+# for tracking:
+for k,v in dct_dat.items():
+    # print k,v
+    print v['dirname']
+# sys.exit()
 lst_plotfile,dct_plotfile = get_plotted(ffile)
 mt_list = build_mt(dct_dat)
 plot_all(mt_list,lst_plotfile)

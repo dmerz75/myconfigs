@@ -1713,7 +1713,7 @@ class Microtubule():
         # print min(frame_at_centroid_sep)
         pfs_that_break = []
         for k,v in frame_at_centroid_sep.items():
-            # print k,v
+            print k,v
             if v < 9999:
                 pfs_that_break.append(k)
 
@@ -3035,3 +3035,152 @@ class Microtubule():
         # print "Early frame: ",min_f
         # sys.exit()
         return min_f
+
+
+    def get_cendist(self):
+        """
+        Get the centroid distance file.
+        File: emol_mtpfdist_centroid.dat
+        """
+
+        # print dir(self)
+        # print self.dirname
+        # print self.num_pf
+        # print self.num_dimers
+
+        dimer_length = self.num_dimers / self.num_pf
+        # print dimer_length
+
+
+        fp_cendist = os.path.join(self.dirname,"emol_mtpfdist_centroid.dat")
+        data_cendist = np.loadtxt(fp_cendist)
+        # print data_cendist.shape
+
+        arrsize_1 = data_cendist.shape[0] / self.num_pf
+        # print arrsize_1
+        frames = arrsize_1 / (dimer_length-1)
+
+        # print (frames,dimer_length-1)
+        # print frames * (dimer_length-1) * self.num_pf
+
+        data_angles = np.reshape(data_cendist,(frames,self.num_pf,
+                                               dimer_length-1,data_cendist.shape[1]))
+
+        self.data_cendist = data_angles
+        # print data_angles.shape
+        # for pf in range(self.num_pf):
+        #     print pf
+        #     print data_angles[0,pf,::,::]
+        # sys.exit()
+
+    def plot_cendist(self,ax):
+        """
+        Plot the data_cendist
+        """
+        print self.data_cendist.shape
+        cdata = self.data_cendist
+
+
+        for f in range(cdata.shape[0]):
+            print f
+            print cdata[f,0,::,::]
+
+            # break
+
+            # ax.plot()
+
+
+
+        sys.exit()
+
+
+    def get_beta_angle(self):
+        """
+        Get beta angle.
+        File:
+        """
+
+        # print dir(self)
+        # print self.dirname
+        # print self.num_pf
+        # print self.num_dimers
+
+        dimer_length = self.num_dimers / self.num_pf
+        # print dimer_length
+
+
+        fp_beta = os.path.join(self.dirname,"emol_mtpf_beta_angle.dat")
+        data_beta = np.loadtxt(fp_beta)
+        # print "Beta Angles: ",data_beta.shape
+
+        frames = data_beta.shape[0] / self.num_pf
+        # print frames
+        # frames = arrsize_1 / (dimer_length-1)
+
+        # print (frames,dimer_length-1)
+        # print frames * (dimer_length-1) * self.num_pf
+
+        # data = np.reshape(data_beta,(frames,self.num_pf,
+                                     # dimer_length-1,data_beta.shape[1]))
+
+        data = np.reshape(data_beta,(frames,data_beta.shape[0]/frames,data_beta.shape[1]))
+        # print data.shape
+        # self.data_cendist = data_angles
+        # print data_angles.shape
+        # for pf in range(self.num_pf):
+        #     print pf
+        #     print data_angles[0,pf,::,::]
+        # sys.exit()
+
+
+        break_points = {}
+
+        for i in range(self.num_pf):
+            break_points[i] = 9999
+
+
+        for f in range(data.shape[0]):
+            # print data[f]
+
+            for pf in range(data.shape[1]):
+
+                # print data[f,pf,::]
+                pfline = data[f,pf,::]
+                pfcdist = data[f,pf,::2]
+                pfang = data[f,pf,1::2]
+                # print pfcdist
+                # print pfang
+
+                if max(pfcdist) > 50.0:
+
+                    if f < break_points[pf]:
+                        break_points[pf] = f
+
+
+        for k,v in break_points.items():
+            print k,v
+
+            # first_half = data[:v,k,::]
+            second_half = data[v+1:,k,::]
+            second_half.fill(0)
+            data[v+1:,k,::] = second_half
+
+
+        for f in range(data.shape[0]):
+            for pf in range(data.shape[1]):
+
+                # print data[f,pf,::]
+                pfline = data[f,pf,::]
+                pfcdist = data[f,pf,::2]
+                pfang = data[f,pf,1::2]
+                # print pfcdist
+                # print pfang
+
+        self.data_beta_angle = data
+        # sys.exit()
+
+    def plot_beta_angle(self,axes):
+        """
+        Plot beta angles.
+        """
+        print "Hello."

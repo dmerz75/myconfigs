@@ -55,7 +55,8 @@ def parse_arguments():
     parser.add_argument("-r","--round_name",help="round_name: 1,2,3 .. -> 02",type=int)
     parser.add_argument("-m","--multi",help="multi: defaults to None, any other")
     parser.add_argument("-f","--function",help="function: run,rename(default)")
-    parser.add_argument("-p","--program",help="program: emol3n, pfbend")
+    parser.add_argument("-p","--program",help="program: emol3n, pfbend, \
+            pfbend_atan2")
     args = vars(parser.parse_args())
     return args
 
@@ -273,6 +274,16 @@ for k,v in dct_plot.iteritems():
         elif prog == 'pfbend':
             command = ['emol_mtpfbend3',pdb,dcd,'2','5000','10']
             datfile = 'emol_mtpfbending_angle.dat'
+        elif prog == 'pfbend_atan2':
+            command = ['emol_mtpfbend_atan2',pdb,dcd,'2','5000','10']
+            datfile = 'emol_mtpfbending_angle.dat'
+        elif prog == 'cendist':
+            command = ['emol_mtpfbend_distcen',pdb,dcd,'2','5000','10']
+            datfile = 'emol_mtpfdist_centroid.dat'
+        elif prog == 'beta':
+            command = ['emol_mtpfbend_betaangle',pdb,dcd,'2','5000','10']
+            datfile = 'emol_mtpf_beta_angle.dat'
+
 
         # command = ['emol_mtcontacts_topo',pdb,dcd,'3','903','3','top_this.top']
         # if int(round_name) < 15:
@@ -327,6 +338,8 @@ for k,v in dct_plot.iteritems():
         #     new_name = fcn + '_' + time_ext + '.dat'
         #     print 'renaming:',new_name,'in',os.path.basename(ddir)
         #     os.rename(datfile,new_name)
+
+    # break
 
 
 # min_x = 0.0
