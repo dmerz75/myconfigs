@@ -283,6 +283,9 @@ for k,v in dct_plot.iteritems():
         elif prog == 'beta':
             command = ['emol_mtpfbend_betaangle',pdb,dcd,'2','5000','10']
             datfile = 'emol_mtpf_beta_angle.dat'
+        elif prog == 'point4ab':
+            command = ['emol_mtpfbend_point4ab',pdb,dcd,'2','5000','10']
+            # datfile = 'emol_mtpf_point4AB.dat'
 
 
         # command = ['emol_mtcontacts_topo',pdb,dcd,'3','903','3','top_this.top']

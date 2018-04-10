@@ -3166,17 +3166,43 @@ class Microtubule():
             data[v+1:,k,::] = second_half
 
 
+
+
         for f in range(data.shape[0]):
             for pf in range(data.shape[1]):
 
-                # print data[f,pf,::]
+                print data[f,pf,::]
                 pfline = data[f,pf,::]
                 pfcdist = data[f,pf,::2]
                 pfang = data[f,pf,1::2]
-                # print pfcdist
-                # print pfang
+                print pfcdist
+                print pfang
+                print '-------'
+
+
+
+            print '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
+
+
+        first_pf_to_break = -1
+
+        frames_break_pf = break_points.values()
+        first_frame_break = min(frames_break_pf)
+
+
+        for k,v in break_points.items():
+            print k,v
+
+            if v == first_frame_break:
+                self.first_pf_to_break = k
+                break
+
+
+        print self.first_pf_to_break
+        self.frame_of_first_pf_to_break = break_points[self.first_pf_to_break]
 
         self.data_beta_angle = data
+
         # sys.exit()
 
     def plot_beta_angle(self,axes):
@@ -3184,3 +3210,148 @@ class Microtubule():
         Plot beta angles.
         """
         print "Hello."
+
+
+
+        pfdata = self.data_beta_angle[::,self.first_pf_to_break,:self.frame_of_first_pf_to_break]
+
+        cen_all = pfdata[::,::2]
+        ang_all = pfdata[::,1::2]
+
+
+        print pfdata.shape
+
+        for f in range(pfdata.shape[0]):
+
+            # print pfdata[f,::]
+
+            cen = pfdata[f,::2]
+            ang = pfdata[f,1::2]
+
+            print cen
+            print ang
+
+
+
+        # for ax in axes:
+
+
+    def get_point4ab(self):
+        """
+        Get Point4ab.
+        File:
+        """
+
+        # print dir(self)
+        # print self.dirname
+        # print self.num_pf
+        # print self.num_dimers
+
+        dimer_length = self.num_dimers / self.num_pf
+        # print dimer_length
+
+
+        fp_point4ab = os.path.join(self.dirname,"emol_mtpf_point4AB.dat")
+        data_point4ab = np.loadtxt(fp_point4ab)
+        # print "Beta Angles: ",data_point4ab.shape
+
+        frames = data_point4ab.shape[0] / self.num_pf
+        print "Frames: ",frames
+        # frames = arrsize_1 / (dimer_length-1)
+        # print (frames,dimer_length-1)
+        # print frames * (dimer_length-1) * self.num_pf
+
+        data = np.reshape(data_point4ab,(frames,data_point4ab.shape[0]/frames,data_point4ab.shape[1]))
+        print data.shape
+        # self.data_cendist = data_angles
+        # print data_angles.shape
+        # for pf in range(self.num_pf):
+        #     print pf
+        #     print data_angles[0,pf,::,::]
+        # sys.exit()
+
+        data_cdist = data[::,::,::2]
+        data_angle = data[::,::,1::2]
+
+        break_points = {}
+
+        for i in range(self.num_pf):
+            break_points[i] = 9999
+
+
+        for f in range(data.shape[0]):
+
+            for pf in range(data.shape[1]):
+
+                # print data[f,pf,::]
+                # print data_cdist[f,pf,::]
+                # print data_angle[f,pf,::]
+
+                if max(data_cdist[f,pf,::]) > 50.0:
+
+                    if f < break_points[pf]:
+                        break_points[pf] = f # + 1
+
+
+        # Zero out the beyond the break points.
+        for k,v in break_points.items():
+            print k,v
+
+            # first_half = data[:v,k,::]
+            second_half = data[v+1:,k,::]
+            second_half.fill(0)
+            data[v+1:,k,::] = second_half
+
+
+        data_angle = data[::,::,1::2]
+
+        self.data_point4ab = data_angle
+        self.point4ab_breakframes = break_points
+
+        # sys.exit()
+        return
+
+    def plot_point4ab(self,axes):
+        """
+        Plot point4ab.
+        """
+        data = self.data_point4ab
+        print data.shape
+
+        # print "Hello."
+        cmap = matplotlib.cm.get_cmap("jet")
+
+        # color = {0:'purple',1:'r',2:'m',
+        #          3:'hotpink',4:'',5:'m',
+        #          6:''}
+        # mycolors = ['k', 'r', 'g', 'b','c','m','lime',
+        #     'darkorange','sandybrown','hotpink',
+        #     'mediumseagreen','crimson','slategray',
+        #     'orange','orchid','darkgrey','indianred',
+        #     'tan','cadetblue']
+
+        cr = np.linspace(0,1,data.shape[1])
+
+        # ax[i+start].plot(frames,self.mtpfbending[i,p,::],color=cmap(cr[p]))
+
+
+        x = np.linspace(0,data.shape[0]*10,data.shape[0])
+
+        for i in range(data.shape[2]):
+            print i
+
+            for p in range(data.shape[1]):
+                print p
+
+                if self.point4ab_breakframes[p] == 9999:
+                    continue
+
+                # axes[i].plot(x,data[::,p,i],color=mycolors[p])
+                axes[i].plot(x,data[::,p,i],color=cmap(cr[p]))
+
+        # axes[-1].colorbar
+        cb1 = matplotlib.colorbar.ColorbarBase(axes[-1],cmap=cmap)
+
+
+        for ax in axes[:-1]:
+            ax.set_ylim((-1,67))

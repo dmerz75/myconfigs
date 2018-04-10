@@ -483,13 +483,13 @@ def plot_all(mt_list,lst_plot):
 
 
         # PLOT: contacts
-        # mt.plot_forceframe(ax1)
-        # mt.plot_contacts(ax2,mt.dimers)
-        # mt.plot_contact_interface(ax3,'n')
-        # mt.plot_contact_interface(ax4,'s')
-        # mt.plot_contact_interface(ax5,'w')
-        # mt.plot_contact_interface(ax6,'e')
-        # print "The Breaking Pattern: ",mt.breaking_pattern
+        mt.plot_forceframe(ax1)
+        mt.plot_contacts(ax2,mt.dimers)
+        mt.plot_contact_interface(ax3,'n')
+        mt.plot_contact_interface(ax4,'s')
+        mt.plot_contact_interface(ax5,'w')
+        mt.plot_contact_interface(ax6,'e')
+        print "The Breaking Pattern: ",mt.breaking_pattern
 
 
         # P = SaveFig(mt.my_dir,mt.name,
@@ -497,7 +497,7 @@ def plot_all(mt_list,lst_plot):
         # sys.exit()
 
         # mt.get_mtpf(ax2)
-        # plot N,S,E,W contacts.
+        # plot N,S,E,W contacts.    OLD
         # minfn = mt.plot_contact_interface(ax3,'n')
         # minfs = mt.plot_contact_interface(ax4,'s')
         # minfw = mt.plot_contact_interface(ax5,'w')
@@ -523,12 +523,21 @@ def plot_all(mt_list,lst_plot):
         # PLOT MTPF - global, local.
         mt.get_mtpf()
         mt.process_mtpf()
-        # mt.plot_mtpf_global(ax7)
+        mt.plot_mtpf_global(ax7)
+
         # mt.plot_mtpf_local(ax8)
+
         # mt.get_cendist()
         # mt.plot_cendist(ax_bottom)
-        mt.get_beta_angle()
-        mt.plot_beta_angle(axes_beta)
+
+        # beta angle.
+        # mt.get_beta_angle()
+        # mt.plot_beta_angle(axes_beta)
+
+        # point4ab
+        mt.get_point4ab()
+        mt.plot_point4ab(ax8)
+
 
 
 
