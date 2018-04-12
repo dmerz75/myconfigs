@@ -112,6 +112,12 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     set9 = x.remove_filename('_new.dat',set9)
     set9 = x.remove_filename('_bac.dat',set9)
     set9 = x.remove_dirname('dat',-1,set9)
+    set9 = x.remove_dirname('altern_',None,set9)
+
+    if 0:
+        set9 = x.remove_filename('_nop_',set9)
+        set9 = x.remove_filename('_rev_',set9)
+
 
     print len(set9.keys()),'of',x.total
     set9 = x.sort_dirname(-1,set9)
@@ -144,6 +150,25 @@ def get_bydata(dct,data_name):
     # print 'file returned:',len(set9.keys())
     # return set9
 
+def get_forward_only(dct):
+
+    dct_temp = dict(dct)
+
+    for k,v in dct_temp.items():
+        # print v
+        # print v['dirname']
+        if re.search('_nop_',v['dirname']) != None:
+
+            tdir = v['dirname'].split('/')[-2]
+            if int(tdir.split('_nop_')[-1]) != 0:
+                del dct_temp[k]
+    return dct_temp
+
+# set9 = x.remove_filename('_nop_',set9)
+# set9 = x.remove_filename('_rev_',set9)
+
+
+
 def get_doz(dct,data_name):
     print 'files entered:',len(dct.keys())
     x = FindAllFiles()
@@ -155,23 +180,8 @@ def get_doz(dct,data_name):
     # return lst
     return set9
 
-
-# available dictionaries:
-dct_dat = load_dct(my_dir,'*indent*.dat')
-print 'total entries:',len(dct_dat.keys())
-# for k,v in dct_dat.iteritems():
-#     print k,v['dirname']
-
-dct_plot = get_round(dct_dat,'round_%s' % round_name)
-
-for k,v in dct_plot.iteritems():
-    print k,v['dirname']
-
-
-
-
-def do_sorting():
-    lst_dcts = [get_doz(dct_plot,'doz%d' % x) for x in [1,2,3,4,5]]
+def do_sorting(dct):
+    lst_dcts = [get_doz(dct,'doz%d' % x) for x in [1,2,3,4,5]]
 
     for dct1 in lst_dcts: # lst of integers
         # for k,v in dct_plot.iteritems():
@@ -191,39 +201,39 @@ def do_sorting():
         #     print k,'\t',v['dirname'].split('/')[-2]
 
 
-print 'sorting...'
-do_sorting()
+# available dictionaries:
+dct_dat = load_dct(my_dir,'*indent*.dat')
+# for k,v in dct_dat.iteritems():
+    # print k,v['dirname']
+print 'total entries:',len(dct_dat.keys())
 # sys.exit()
 
-# for k,v
+dct_dat = get_forward_only(dct_dat)
+for k,v in dct_dat.items():
+    print k,v['dirname']
 
-# rounds:
-# 0: ningxi, 1:nolongrange 2: gb-w-longrange  3: longi-later-fail
-# 2,5,8, gb
-# 4:6 sasa, 5:6-gb, 6:6-, 7:4-, 8:6-gb, 9:6-;
-# 4,6,7,9
-# 13:18: lat1,lat2,lat3,lon1,lon2,lon3; down,up;
-# lst_plot = get_list(round_name)
-# print lst_plot
+print len(dct_dat.keys())
+# sys.exit()
+
+dct_plot = get_round(dct_dat,'round_%s' % round_name)
+# for k,v in dct_plot.iteritems():
+    # print k,v['dirname']
+print 'total entries:',len(dct_plot.keys())
+
+print 'sorting...'
+do_sorting(dct_plot)
+# sys.exit()
+
 
 if data_name != 'all':
     lst_plot = get_bydata(dct_plot,data_name)
 else:
     lst_plot = dct_plot.keys()
 print lst_plot
-# sys.exit()
+sys.exit()
 
 
-# ____check file integrity_____
-# for k,v in dct_plot.iteritems():
-#     check_bad_lines(v['file'])
-#     # check_bad_lines(v['file'],'new')
-#     check_bad_lines(v['file'],'write')
-#     continue
-# sys.exit()
-
-
-
+# Run Analysis:
 for k,v in dct_plot.iteritems():
     # print k,v['file']
     # print os.path.basename(v['dirname'])
@@ -285,8 +295,13 @@ for k,v in dct_plot.iteritems():
             datfile = 'emol_mtpf_beta_angle.dat'
         elif prog == 'point4ab':
             command = ['emol_mtpfbend_point4ab',pdb,dcd,'2','5000','10']
-            # datfile = 'emol_mtpf_point4AB.dat'
-
+            datfile = 'emol_mtpf_point4AB.dat'
+        elif prog == 'entirePF':
+            command = ['emol_mtpfbend_entire_PFang',pdb,dcd,'2','5000','5']
+            datfile = 'emol_mtpf_entire_PFang.dat'
+        elif prog == 'entirePFmax':
+            command = ['emol_mtpfbend_entire_PFang_max',pdb,dcd,'2','5000','5']
+            datfile = 'emol_mtpf_entire_PFang.dat'
 
         # command = ['emol_mtcontacts_topo',pdb,dcd,'3','903','3','top_this.top']
         # if int(round_name) < 15:
@@ -294,25 +309,21 @@ for k,v in dct_plot.iteritems():
         # else:
         #     command = ['run_segment_dcd_dimermap_mt',pdb,dcd,'313','1','0','5000','1']
         # command = ['run_segment_dcd',pdb,dcd,'209','1','0','5000','5']
-
         # datfiles = glob.glob('emol_mtcontacts.dat')
         # num_datfile = len(datfiles)
-
         # datfile = 'emol_mtcontacts.dat'
         # datfile = 'emol_mtcontacts_top.dat'
-        # print datfiles
-        # print num_datfile
-        # sys.exit()
 
-        if function == 'run':
-            if os.path.exists(datfile):
-            # OPTION
-            # if 0:
-                print 'emol_contacts.dat must be renamed first. not running!'
-            else:
-                print 'running:  ',os.path.basename(ddir)
-                print command
-                run_command(command)
+
+        # if function == 'run':
+        #     if os.path.exists(datfile):
+        #     # OPTION
+        #     # if 0:
+        #         print 'emol_contacts.dat must be renamed first. not running!'
+        #     else:
+        #         print 'running:  ',os.path.basename(ddir)
+        #         print command
+        #         run_command(command)
 
         if function == 'rename':
             if os.path.exists(datfile):
@@ -328,110 +339,3 @@ for k,v in dct_plot.iteritems():
             #     print 'no emol_contacts.dat found.'
             #     print 'found emol_contacts*.dat',num_datfile
             #     print datfiles
-
-
-        # if ((not os.path.exists(datfile)) and (function == 'run')):
-        #     print command
-        #     run_command(command)
-        # else:
-        #     print'mt_analysis.dat exists!!'
-        #     # time_ext = time.strftime("%Y_%m%d_%I%M")
-        #     time_ext = datetime.fromtimestamp(os.path.getmtime(datfile)).strftime('%Y_%m%d_%I%M')
-        #     fcn = os.path.splitext(datfile)[0]
-        #     new_name = fcn + '_' + time_ext + '.dat'
-        #     print 'renaming:',new_name,'in',os.path.basename(ddir)
-        #     os.rename(datfile,new_name)
-
-    # break
-
-
-# min_x = 0.0
-# max_x = 0.0
-
-# for k,v in dct_plot.iteritems():
-#     if k not in lst_plot:
-#         continue
-#     print 'plotting ',k
-
-#     # D = PlotSop('MT',point_start=0,point_stop=8040,ma_value=20,step=1,\
-#     #             ts=20,nav=100,dcdfreq=1000000,seam='down',outputtiming=100000)
-#     D = PlotSop('MT',point_start=0,point_stop=20000,ma_value=20,step=1,\
-#                 ts=20,nav=100,dcdfreq=1000000,seam='down',outputtiming=100000)
-
-#     D.load_data(v['file'])
-
-#     print 'HERE!'
-#     e8 = D.extension[-1] * 0.05
-#     t8 = D.time[-1] * 0.05
-#     f8 = D.frame[-1] * 0.05
-#     print e8
-#     print t8
-#     print f8
-
-#     newmin_x = D.extension[0]-e8
-#     newmax_x = D.extension[-1]+e8
-#     print newmin_x,newmax_x
-#     if min_x > newmin_x:
-#         min_x = newmin_x
-#     if max_x < newmax_x:
-#         max_x = newmax_x
-#     print "XMIN,XMAX:",min_x,max_x
-#     ax1.set_xlim(min_x,max_x)
-
-#     if multi != None:
-#         # eline = ax1.plot(D.extension,D.force,'k-',linewidth=2.0)
-#         eline = ax1.plot(D.extension,D.force,'k-')
-
-
-#         ax2.set_xlim(D.time[0]-t8,D.time[-1]+t8)
-#         tline = ax2.plot(D.time,D.force,'b')
-
-#         fig.text(0.01,0.135,'Time (ms)',color='b',size=16)
-#         ax2.spines['bottom'].set_color('b')
-#         ax2.spines['bottom'].set_position(('outward',70.0))
-#         ax2.xaxis.set_ticks_position('bottom')
-#         for tick in ax2.xaxis.get_major_ticks():
-#             tick.label.set_fontsize(16)
-
-
-#         ax3.set_xlim(D.frame[0]-f8,D.frame[-1]+f8)
-#         fline = ax3.plot(D.frame,D.force,'m')
-
-#         fig.text(0.01,0.050,'Frame #',color='m',size=16)
-#         ax3.spines['bottom'].set_color('m')
-#         ax3.spines['bottom'].set_position(('outward',110.0))
-#         ax3.xaxis.set_ticks_position('bottom')
-#         for tick in ax3.xaxis.get_major_ticks():
-#             tick.label.set_fontsize(16)
-#         break
-#     else:
-#         plt.plot(D.extension,D.force)
-#         ax1.set_ylim(-0.05,0.75)
-#         ax1.set_xlabel("Indentation Depth (nm)")
-#         ax1.set_ylabel("Force (nN)")
-
-
-
-
-
-
-
-#  ---------------------------------------------------------  #
-#  Make final adjustments: (4/4)                              #
-#  mpl - available expansions                                 #
-#  ---------------------------------------------------------  #
-# mpl_rc
-# mpl_font
-# mpl_label
-# mpl_xy
-# mpl_ticks
-# mpl_tick
-# mpl_minorticks
-# mpl_legend
-# combined_name = '%s_%s_%s' % (result_type, plot_type, data_name)
-# save_fig
-# from plot.SETTINGS import *
-# save_fig(my_dir,0,'fig/indentation','%s_%s_%s' % (result_type,plot_type,data_name),option)
-# save_fig(my_dir,0,'fig/indentation','%s' % (combined_name),option)
-
-# mpl_myargs_end

@@ -427,7 +427,7 @@ def plot_all(mt_list,lst_plot):
         ax8s = [ax81,ax82,ax83,ax84,ax85,ax86,ax87]
         ax8 = [ax81,ax82,ax83,ax84,ax85,ax86,ax87,ax88]
 
-        # ax_bottom = plt.subplot(gs[4:8,0:24])
+        ax_bottom = plt.subplot(gs[4:8,0:24])
 
 
         axes_all = [ax1,ax2,ax3,ax4,ax5,ax6] + ax7 + ax8
@@ -535,9 +535,14 @@ def plot_all(mt_list,lst_plot):
         # mt.plot_beta_angle(axes_beta)
 
         # point4ab
-        mt.get_point4ab()
-        mt.plot_point4ab(ax8)
+        # mt.get_point4ab()
+        # mt.plot_point4ab(ax8)
 
+        # entire PF ang:
+        mt.get_entire_PF_ang()
+        mt.plot_entire_PF_ang(ax_bottom)
+        mt.plot_vertlines([ax_bottom],[mt.break_first],color='g')
+        mt.plot_vertlines([ax_bottom],[mt.break_critical],color='r')
 
 
 

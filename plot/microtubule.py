@@ -3287,10 +3287,10 @@ class Microtubule():
                 # print data_cdist[f,pf,::]
                 # print data_angle[f,pf,::]
 
-                if max(data_cdist[f,pf,::]) > 50.0:
+                if max(data_cdist[f,pf,::]) > 72.0:
 
                     if f < break_points[pf]:
-                        break_points[pf] = f # + 1
+                        break_points[pf] = f + 1
 
 
         # Zero out the beyond the break points.
@@ -3320,6 +3320,8 @@ class Microtubule():
 
         # print "Hello."
         cmap = matplotlib.cm.get_cmap("jet")
+        # "jet": blue is 0,1,2
+        #      : maroon, red is 12, 11, 10 ..
 
         # color = {0:'purple',1:'r',2:'m',
         #          3:'hotpink',4:'',5:'m',
@@ -3347,6 +3349,10 @@ class Microtubule():
                     continue
 
                 # axes[i].plot(x,data[::,p,i],color=mycolors[p])
+                # print cmap(cr[p])
+                # sys.exit()
+                # if p > 5:
+                    # continue
                 axes[i].plot(x,data[::,p,i],color=cmap(cr[p]))
 
         # axes[-1].colorbar
@@ -3355,3 +3361,77 @@ class Microtubule():
 
         for ax in axes[:-1]:
             ax.set_ylim((-1,67))
+
+    def get_entire_PF_ang(self):
+        """
+        """
+        # print dir(self)
+        # print self.dirname
+        # print self.num_pf
+        # print self.num_dimers
+
+        dimer_length = self.num_dimers / self.num_pf
+
+        fp_pfang = os.path.join(self.dirname,"emol_mtpf_entire_PFang.dat")
+
+        data_pfang = np.loadtxt(fp_pfang)
+        # print "Beta Angles: ",data_pfang.shape
+
+        frames = data_pfang.shape[0] / self.num_pf
+        print "Frames: ",frames
+        # frames = arrsize_1 / (dimer_length-1)
+        # print (frames,dimer_length-1)
+        # print frames * (dimer_length-1) * self.num_pf
+
+        # data = np.reshape(data_pfang,(data_pfang.shape[0]/frames,frames,data_pfang.shape[1]))
+        data = np.reshape(data_pfang,(frames,data_pfang.shape[0]/frames,data_pfang.shape[1]))
+
+        self.data_entire_pfang = data
+        print data.shape
+
+        # for i in range(data.shape[0]):
+            # print data[i,::,::]
+
+        # print data[::,0,0]
+        # sys.exit()
+
+    def plot_entire_PF_ang(self,axes):
+        """
+        Plot the entire PF.
+        """
+        # (13, 4, 121)
+
+        print "Hello."
+        # ax = axes[0]
+        data = self.data_entire_pfang
+        x = np.linspace(0,data.shape[0]*5,data.shape[0])
+
+        # for f in range(data.shape[0]):
+        #     for p in range(data.shape[1]):
+        #         print data[f,p,::]
+        #     print '--'
+
+        # axes.plot(x,data[::,0,2])
+
+        for p in range(data.shape[1]):
+            axes.plot(x,data[::,p,5],color=mycolors[p],label=str(p))
+
+
+        axes.set_ylim((-2,122))
+
+        # legend
+        handles,labels = axes.get_legend_handles_labels()
+        axes.legend(handles,labels,prop={'size':12},loc=2)
+
+        # for p in range(data.shape[0]):
+
+            # print np.std(data[p,::,3])
+            # print data[p,::,3]
+            # if np.var(data[p,::,3]) > 50:
+            #     axes.plot(x,data[p,::,3])
+            #     axes.plot(x,data[p,::,2])
+
+
+
+        # for p in range(data)
+        # sys.exit()
