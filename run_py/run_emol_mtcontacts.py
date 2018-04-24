@@ -114,7 +114,7 @@ def load_dct(cwd=my_dir,pattern='*.dat'):
     set9 = x.remove_dirname('dat',-1,set9)
     set9 = x.remove_dirname('altern_',None,set9)
 
-    if 0:
+    if 1:
         set9 = x.remove_filename('_nop_',set9)
         set9 = x.remove_filename('_rev_',set9)
 
@@ -230,7 +230,7 @@ if data_name != 'all':
 else:
     lst_plot = dct_plot.keys()
 print lst_plot
-sys.exit()
+# sys.exit()
 
 
 # Run Analysis:
@@ -315,15 +315,15 @@ for k,v in dct_plot.iteritems():
         # datfile = 'emol_mtcontacts_top.dat'
 
 
-        # if function == 'run':
-        #     if os.path.exists(datfile):
-        #     # OPTION
-        #     # if 0:
-        #         print 'emol_contacts.dat must be renamed first. not running!'
-        #     else:
-        #         print 'running:  ',os.path.basename(ddir)
-        #         print command
-        #         run_command(command)
+        if function == 'run':
+            if os.path.exists(datfile):
+            # OPTION
+            # if 0:
+                print 'emol_contacts.dat must be renamed first. not running!'
+            else:
+                print 'running:  ',os.path.basename(ddir)
+                print command
+                run_command(command)
 
         if function == 'rename':
             if os.path.exists(datfile):

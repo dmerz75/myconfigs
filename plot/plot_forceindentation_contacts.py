@@ -137,7 +137,11 @@ if 0:
 
 
 
-def write_crit_file(dct,value='firstvalue',rnd=0):
+def write_crit_file(dct,value='first',rnd=0):
+
+    # for k,v in dct.items():
+    #     print k,v
+    # return
 
     dct_names = {}
     dct_names[10] = "Dimers8.Plate"
@@ -148,9 +152,10 @@ def write_crit_file(dct,value='firstvalue',rnd=0):
 
     lst_stat = []
     for k,v in dct.iteritems():
-        print k
+        # print k,v
         try:
-            lst_stat.append((k,v['breaking_pattern'],v[value]))
+            lst_stat.append((k,v['breaking_pattern'],v[value],
+                             v['%s_angle' % value]))
         except:
             pass
 
@@ -160,7 +165,7 @@ def write_crit_file(dct,value='firstvalue',rnd=0):
     # sys.exit()
 
     for stat in lst_stat:
-        print stat[0],stat[1],stat[2]
+        print stat[0],stat[1],stat[2],stat[3]
         lst_stat.sort(key=lambda x: x[2])
 
 
@@ -168,15 +173,20 @@ def write_crit_file(dct,value='firstvalue',rnd=0):
                            '.' + value + '.' + str(rnd) +
                            '.%s' % dct_names[rnd] +
                            '.out')
-
     print "Writing:",outfile
+
 
     with open(outfile,'w+') as fp:
         # for k,v in dct_sortedstat.iteritems():
         # print k,v
         for stat in lst_stat:
-            print stat[0],stat[1],stat[2]
-            fp.write("%s     %s   %6.4f\n" % (stat[0],stat[1],stat[2]))
+            print stat[0],stat[1],stat[2],stat[3]
+            fp.write("%s     %s   %6.4f  %6.2f\n" % (stat[0],
+                                                     stat[1],
+                                                     stat[2],
+                                                     stat[3]))
+    # sys.exit()
+
 
 
 #  ---------------------------------------------------------  #
@@ -541,6 +551,7 @@ def plot_all(mt_list,lst_plot):
         # entire PF ang:
         mt.get_entire_PF_ang()
         mt.plot_entire_PF_ang(ax_bottom)
+
         mt.plot_vertlines([ax_bottom],[mt.break_first],color='g')
         mt.plot_vertlines([ax_bottom],[mt.break_critical],color='r')
 
@@ -556,8 +567,21 @@ def plot_all(mt_list,lst_plot):
 
 
 
+        # Ext/Ind., Frame:
         e1,f1 = mt.get_extNforce_at_frame(mt.break_first)
         e2,f2 = mt.get_extNforce_at_frame(mt.break_critical)
+
+        # Angle, Frame:
+        a1 = mt.get_angle_at_frame(mt.break_first)
+        a2 = mt.get_angle_at_frame(mt.break_critical)
+        print "Max_angles: (first)",a1," (critical):",a2
+        # sys.exit()
+
+        # angle array
+        mt.write_max_angle_upto_frame(mt.break_critical)
+        # sys.exit()
+
+
         # e0,f0 = mt.get_extNforce_at_frame(min([minframe_lat,minframe_lon]))
         # e1,f1 = mt.get_extNforce_at_frame(minframe_lat)
         # e2,f2 = mt.get_extNforce_at_frame(minframe_lon)
@@ -599,6 +623,8 @@ def plot_all(mt_list,lst_plot):
 
         dct_stat[mt.name]['first'] = f1
         dct_stat[mt.name]['critical'] = f2
+        dct_stat[mt.name]['first_angle'] = a1
+        dct_stat[mt.name]['critical_angle'] = a2
         dct_stat[mt.name]['breaking_pattern'] = mt.breaking_pattern
 
 
@@ -662,12 +688,6 @@ plot_all(mt_list,lst_plotfile)
 # for i,mt in enumerate(mt_list):
 #     plot_all()
 
-
-# 26
-# cd ~/ext/completed_mt/ && ./plot_round_1314_vertlines.py -rnd 26 -psf ~/ext/completed_mt/structural/mt12_plate.psf -nd 156 -ff results.crit_breaks/pname_framebreaks_16
-
-# 11
-# cd ~/ext/completed_mt/ && ./plot_round_1314_vertlines.py -nd 104 -psf structural/mt8nop.psf -ff results.crit_breaks/pname_framebreaks_11 -rnd 11
-
-# 10
-# cd ~/ext/completed_mt/ && ./plot_round_1314_vertlines.py -nd 104 -psf structural/mt8doz.psf -ff results.crit_breaks/pname_framebreaks_10 -rnd 10
+# cd ~/ext/completed_mt/ && ./plot_forceindentation_contacts.py
+#                             -ff results_breaks/ALL.v1 -nd 104 -rnd 10
+#                                                       -nd 156 -rnd 16,17

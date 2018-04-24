@@ -619,7 +619,7 @@ class Microtubule():
         # print self.datdir
         print self.dirname
         num_dimers = len(self.dimers)
-        print 'num_dimers:',num_dimers
+        print 'number of dimers breaking:',num_dimers
         # return
         # sys.exit()
         # data = np.loadtxt(os.path.join(self.)
@@ -681,9 +681,9 @@ class Microtubule():
         # print dir(self)
         # print self.indentationdir
         # print self.datdir
-        print self.dirname
+        # print self.dirname
         num_dimers = len(self.dimers)
-        print 'num_dimers:',num_dimers
+        print 'number of dimers breaking:',num_dimers
         # return
         # sys.exit()
         # data = np.loadtxt(os.path.join(self.)
@@ -721,9 +721,9 @@ class Microtubule():
         # print dir(self)
         # print self.indentationdir
         # print self.datdir
-        print self.dirname
+        # print self.dirname
         num_dimers = len(self.dimers)
-        print 'num_dimers:',num_dimers
+        print 'number of dimers breaking:',num_dimers
         # return
         # sys.exit()
         # data = np.loadtxt(os.path.join(self.)
@@ -758,7 +758,7 @@ class Microtubule():
 
         # print self.file
         data = np.loadtxt(self.file)
-        print data.shape
+        # print data.shape
         frames = data.shape[0] / num_dimers
         frames_x_step = step * frames
         print frames,frames_x_step
@@ -860,11 +860,17 @@ class Microtubule():
         # for i in range(self.force.shape[1]):
         #     print self.force[0,i],self.force[-1,i]
 
-    def get_reverse_abscissa(self,xt):
+    def get_reverse_abscissa(self,**kwargs):
         # print 'xt:',xt
         # print self.ext_raw[::,1][::10]
 
         # new_xt = self.ext_raw * -1 + xt
+
+        if "xt" in kwargs:
+            xt = kwargs['xt']
+        else:
+            xt = self.ext_raw[-1]
+
 
         new_xt = self.ext_raw + xt
         self.ext_raw = new_xt
@@ -881,8 +887,8 @@ class Microtubule():
         # time = self.steps * self.deltax * 0.001
         # time = self.steps * 0.001
         # avtime = np.linspace(0,time,len(self.contacts))
-        pass
-        return
+        # pass
+        # return
 
         avtime = np.linspace(0,self.total_time,len(self.contacts))
         avframe = np.linspace(0,self.total_frames,len(self.contacts))
@@ -898,10 +904,22 @@ class Microtubule():
         # print dir(self)
         # self.
 
-    def truncation_by_percent(self,reversal_frame):
+    # def truncation_by_percent(self,reversal_frame):
+    def truncation_by_percent(self,revframe=-1):
 
-        print 'trunc:'
-        print self.dirname
+        # print 'trunc:'
+        # print self.dirname
+        # print "Calling reversal"
+        # self.get_reversal_frame()
+
+        self.reversal_frame = revframe
+
+        if self.direction == 'reverse':
+            return
+
+        if not self.reversal_frame:
+            print "no reversal frame yet .."
+            sys.exit()
 
 
 # analysis :      [[  0.00000000e+00   0.00000000e+00   0.00000000e+00]
@@ -927,7 +945,7 @@ class Microtubule():
                    'f_nano','f_pico','force','frames','total_frames',
                    'steps']
 
-        percent = float(reversal_frame) / self.total_frames
+        percent = float(self.reversal_frame) / self.total_frames
         # print self.percent
 
         print 'percent_for_truncating:',percent
@@ -1042,6 +1060,11 @@ class Microtubule():
         nesw_contacts = np.concatenate((arr_contacts1,arr_contacts[1:]))
         setattr(self,dir_obj,nesw_contacts)
 
+
+    # def absorb(self):
+    #     """
+    #     Absorb.
+    #     """
 
     def get_extNforce_at_frame(self,frame):
         '''
@@ -3395,6 +3418,61 @@ class Microtubule():
         # print data[::,0,0]
         # sys.exit()
 
+    def get_angle_at_frame(self,frame):
+        """
+        Get the angle by the frame provided.
+        Determine the angle array for histogramming.
+        """
+        print "Getting angle at %d." % frame
+
+        data = self.data_entire_pfang
+
+        percent = float(frame)/self.frames.shape[0]
+        percent_extra = percent + 0.1
+        # print percent
+
+        asize = int(percent * data.shape[0])
+        asize_extra = int(percent_extra * data.shape[0])
+        # fsize = int(percent * self.f_nano.shape[0])
+        # esize = int(percent * self.ext_raw.shape[0])
+        # tempf = self.f_nano[:fsize]
+        # tempe = self.ext_raw[:esize]
+        # lastf = tempf[-1]
+        # laste = tempe[-1]
+
+        tempa = data[:asize,::,::]
+        lastangles = tempa[-1,::,::]
+
+        # print lastangles
+        # print lastangles.shape
+        angle = max(lastangles[::,5])
+
+        index = list(lastangles[::,5]).index(angle)
+
+        self.max_angle_array = data[:asize,index,5]
+        # self.max_angle_array = data[:asize_extra,index,5]
+        # sys.exit()
+
+        return angle
+
+    def write_max_angle_upto_frame(self,frame):
+        """
+        Get the angle by the frame provided.
+        """
+
+        print self.dirname
+
+        fname = 'max_angle_criticalbreak_array.dat'
+        full_path = os.path.join(self.dirname,fname)
+
+        np.savetxt(full_path,self.max_angle_array,fmt='%7.3f')
+
+        # with open(full_path,'w+') as fp:
+            # fp.write(self.max_angle_array)
+            # np.savetxt()
+
+
+
     def plot_entire_PF_ang(self,axes):
         """
         Plot the entire PF.
@@ -3423,6 +3501,9 @@ class Microtubule():
         handles,labels = axes.get_legend_handles_labels()
         axes.legend(handles,labels,prop={'size':12},loc=2)
 
+        axes.set_ylabel(r"Angle$^\circ$")
+        axes.set_xlabel("Frame #")
+
         # for p in range(data.shape[0]):
 
             # print np.std(data[p,::,3])
@@ -3435,3 +3516,5 @@ class Microtubule():
 
         # for p in range(data)
         # sys.exit()
+
+    # def select_

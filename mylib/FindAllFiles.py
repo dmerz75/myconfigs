@@ -61,6 +61,39 @@ class FindAllFiles():
                     self.dct[count]['dirname'] = dirpath
                     self.total = count
 
+    def merge_dct(self,lst_dct):
+
+        # new dict
+        dct = {}
+
+        # the to be combined dct.
+        for d in lst_dct:
+            dct.update(d)
+
+        # built.
+        return dct
+
+    def get_overlapping_entries(self,dctA,dctB):
+        """
+        Get overlapping entries (in both dct).
+        """
+
+        dct = {}
+
+        lst_keys = []
+
+        for k,v in dctA.iteritems():
+
+            if k in dctB.keys():
+
+                lst_keys.append(k)
+
+        for k in lst_keys:
+            dct[k] = dctB[k]
+
+        return dct
+
+
     def sort_dirname(self,pos,dct=None):
         if dct == None:
             dct = self.dct

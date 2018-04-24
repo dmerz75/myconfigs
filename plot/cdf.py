@@ -225,12 +225,13 @@ class myCDF():
         return
 
 
-    def plot_cdf(self,ax,color='b'):
+    def plot_cdf(self,ax,color='b',multiplier=1):
         '''
         Plot the CDF.
         '''
         # CDF-2
-        ax.plot(self.bins[:-1],self.cumulative,color=color)
+        cumulative = self.cumulative * multiplier
+        ax.plot(self.bins[:-1],cumulative,color=color)
 
 
     def empty(self):
@@ -289,10 +290,22 @@ class myCDF():
         # for bar, pattern in zip(bars, patterns):
         #     bar.set_hatch(pattern)
         # CDF-1
+        # print self.bins
+        # print self.norm
+        # print self.width
+        # print color
+        # print fill
+        # print alpha
+        # print color
+        # print pattern
+        # print label
+
+        # alpha
+
         ax.bar(self.bins[:-1],self.norm,self.width,color=color,fill=fill,
-               alpha=alpha,
-               edgecolor=color,
+               alpha=alpha,edgecolor=color,
                hatch=pattern,label=label)
+
         ax.legend(loc=2)
 
 
