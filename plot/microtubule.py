@@ -790,6 +790,13 @@ class Microtubule():
         # self.contacts = self.externalcontacts / maxc
         self.contacts = self.externalcontacts / self.externalcontacts[0,::]
 
+
+        self.scontacts_raw = datax[::,::,6]
+        self.ncontacts_raw = datax[::,::,8]
+        self.econtacts_raw = datax[::,::,9]
+        self.wcontacts_raw = datax[::,::,10]
+
+
         self.scontacts = datax[::,::,6] / south_contacts[0,::]
         self.ncontacts = datax[::,::,8] / north_contacts[0,::]
         self.econtacts = datax[::,::,9] / east_contacts[0,::]
@@ -860,21 +867,41 @@ class Microtubule():
         # for i in range(self.force.shape[1]):
         #     print self.force[0,i],self.force[-1,i]
 
+    # def get_reverse_abscissa(self,**kwargs):
     def get_reverse_abscissa(self,**kwargs):
         # print 'xt:',xt
         # print self.ext_raw[::,1][::10]
 
         # new_xt = self.ext_raw * -1 + xt
 
-        if "xt" in kwargs:
-            xt = kwargs['xt']
+        # if "xt" in kwargs:
+        #     xt = kwargs['xt']
+        # else:
+        #     xt = self.ext_raw[-1]
+
+        # new_xt = self.ext_raw + xt
+        # self.ext_raw = new_xt
+        # # pass
+
+
+        if "ext_raw" in kwargs:
+            ext = kwargs['ext_raw']
         else:
-            xt = self.ext_raw[-1]
+            print "No array to reverse was provided."
+            return
 
 
-        new_xt = self.ext_raw + xt
-        self.ext_raw = new_xt
-        # pass
+        # print self.ext_raw.shape
+        # print ext.shape
+
+        ext = ext + self.ext_raw[-1]
+        self.ext_raw = np.concatenate((self.ext_raw,ext))
+
+        # print self.ext_raw
+        # print ext
+        # print self.ext_raw.shape
+        # print ext.shape
+        # sys.exit()
 
     def get_analysis_by_time_series(self):
         '''
@@ -943,7 +970,9 @@ class Microtubule():
         targets = ['analysis','angles','contacts','curvature',
                    'end_to_end','ext_raw','externalcontacts',
                    'f_nano','f_pico','force','frames','total_frames',
-                   'steps']
+                   'steps','ncontacts','scontacts','econtacts','wcontacts',
+                   'econtacts_raw','ncontacts_raw','scontacts_raw',
+                   'wcontacts_raw']
 
         percent = float(self.reversal_frame) / self.total_frames
         # print self.percent
@@ -963,7 +992,11 @@ class Microtubule():
                 print obj,getattr(self,obj)
 
             if ((obj == 'analysis') or (obj == 'contacts') or (obj == 'curvature') or
-                (obj == 'externalcontacts') or (obj == 'force')):
+                (obj == 'externalcontacts') or (obj == 'force') or
+                (obj == 'ncontacts') or (obj == 'scontacts') or
+                (obj == 'econtacts') or (obj == 'wcontacts') or
+                (obj == 'econtacts_raw') or (obj == 'wcontacts_raw') or
+                (obj == 'scontacts_raw') or (obj == 'ncontacts_raw')):
                 limit = int(getattr(self,obj).shape[0] * percent)
                 arr = getattr(self,obj)[:limit,::]
                 setattr(self,obj,arr)
@@ -987,6 +1020,8 @@ class Microtubule():
         self.truncated = 'yes'
         self.reversal_ind = self.ext_raw[-1]
 
+        # currently, before the ext gets extended.
+        self.ext_limit = self.ext_raw.shape[0]
 
         # self.reversal_time = self.analysis[-1,1]
         # print 'time:'
@@ -1045,19 +1080,69 @@ class Microtubule():
         #     sys.exit()
         # if not hasattr(self,'frames'):
         # print obj
-
         # if self.truncated
 
+        # print "M1_frames:"
+        # print self.frames
+
+        # print arr_contacts.shape
+        # print arr_frames.shape
+        # print "Reversal_frame:",rev_frame
+
+
+        # print m1_con
+        # m1_contacts = getattr(self,dir_obj)[:self.frameindex]
+
+
+        # for i,d in enumerate(self.dimers):
+        #     print m1_contacts[-10:,d]
+        #     print arr_contacts[:10,d]
+        #     print '--'
+        # # for i,d in enumerate(self.dimers):
+        # #     ax.plot(icontacts[::,d],color=mycolors[i])
+
+        # # for i,d in e
+
+        # nesw_contacts = np.concatenate((m1_contacts,arr_contacts))
+        # print nesw_contacts.shape
+        # # print nesw_contacts
+
+        # # sys.exit()
+        # setattr(self,dir_obj,nesw_contacts)
+
+
+        # return
+
+        # previously ..
+
         if not hasattr(self,'frameindex'):
+
             frameindex = int(np.where(self.frames==rev_frame)[0])
+            self.frameindex = frameindex
+
             arr_frames1 = self.frames[:frameindex]
             arr_frames2 = arr_frames[1:] + arr_frames1[-1]
             self.reversal_frame = arr_frames1[-1]
             self.frames = np.concatenate((arr_frames1,arr_frames2))
-            self.frameindex = frameindex
 
-        arr_contacts1 = getattr(self,dir_obj)[:self.frameindex]
-        nesw_contacts = np.concatenate((arr_contacts1,arr_contacts[1:]))
+
+        m1_contacts = getattr(self,dir_obj)[:self.frameindex]
+
+
+        for i,d in enumerate(self.dimers):
+            print m1_contacts[-10:,d]
+            print arr_contacts[:10,d]
+            print '--'
+        # for i,d in enumerate(self.dimers):
+        #     ax.plot(icontacts[::,d],color=mycolors[i])
+
+        # for i,d in e
+
+        nesw_contacts = np.concatenate((m1_contacts,arr_contacts))
+        print nesw_contacts.shape
+        # print nesw_contacts
+
+        # sys.exit()
         setattr(self,dir_obj,nesw_contacts)
 
 
@@ -1096,9 +1181,74 @@ class Microtubule():
         # pass
 
 
+
     def combine_force_and_indentation(self,arr_force,arr_indentation,rev_ind):
         pass
+
+
+    def combine_force(self,arr_force):
+
+        # print self.f_nano.shape
+        # print arr_force.shape
+        self.f_nano = np.concatenate((self.f_nano,arr_force))
+        # print self.f_nano.shape
+        # sys.exit()
+
         # frameindex =
+
+    def combine_ext_raw(self,ext):
+
+        ext = ext + self.ext_raw[-1]
+        self.ext_raw = np.concatenate((self.ext_raw,ext))
+
+
+    def combine_contacts(self,**kwargs):
+        """
+        Try out this name ..
+        """
+        # percent = float(self.reversal_frame) / self.total_frames
+        # print "percent:",percent
+
+        for k,v in kwargs.iteritems():
+            print k
+
+
+            arr2 = kwargs[k]
+            arr1 = getattr(self,k)
+
+            # print arr1.shape
+            # print arr2.shape
+
+            arrc = np.concatenate((arr1,arr2))
+
+            # print arrc.shape
+
+            setattr(self,k,arrc)
+
+            # print getattr(self,k).shape
+        return
+        #     limit = v.shape[0] * percent
+        #     arr1 = getattr(self,k)[:limit,::]
+
+
+
+        limit = int(getattr(self,obj).shape[0] * percent)
+        arr = getattr(self,obj)[:limit,::]
+
+
+
+        arr1 = getattr(self,arrname)
+
+        print arr1.shape
+        print arr2.shape
+
+
+        arrc = np.concatenate((arr1,arr2))
+
+        print arrc.shape
+
+        setattr(self,arrname,arrc)
+
 
 
     def emol_topology_based_contact_files(self,dirname):
@@ -1296,16 +1446,30 @@ class Microtubule():
 
         x = self.ext_raw[1:]
         y = self.f_nano[1:]
+
+        t = self.ext_limit
+        # t = self.reversal_ind
+
+        # print x.shape
+        # print y.shape
+        # print t
+        # sys.exit()
         # ax1.plot(x,y)
 
-        if ((self.direction == 'forward') and (self.truncated == 'no')):
-            ax1.plot(x,y,'k-',label='Full Indent')
-        elif ((self.direction == 'forward') and (self.truncated == 'yes')):
-            ax1.plot(x,y,'r-',label='Partial Indent')
-        else:
-            ax1.plot(x,y,'g-',label='Retracting')
+        # if ((self.direction == 'forward') and (self.truncated == 'no')):
+        #     ax1.plot(x,y,'k-',label='Full Indent')
+        # elif ((self.direction == 'forward') and (self.truncated == 'yes')):
+        #     ax1.plot(x,y,'r-',label='Partial Indent')
+        # else:
+        #     ax1.plot(x,y,'g-',label='Retracting')
+
+
 
         if self.truncated == 'yes':
+
+            ax1.plot(x[:t],y[:t],color='k')
+            ax1.plot(x[t:],y[t:],color='r')
+
             ax1.axvline(self.reversal_ind,color='r',linestyle='-',linewidth=1.5)
         else:
             ax1.plot(x,y,label=self.name)
@@ -1525,7 +1689,7 @@ class Microtubule():
         # return lst_frames[0]
         # sys.exit()
 
-    def plot_contacts(self,ax,dimers,shift=0,limit=None):
+    def plot_contacts(self,ax,dimers,shift=0,limit=None,**kwargs):
         '''
         Provide n the index in mt_list for plotting.
         Provide dimers, a list from "get_dimers."
@@ -1533,6 +1697,13 @@ class Microtubule():
         '''
         print 'plotting contacts'
         ax.set_prop_cycle(cycler('color',mycolors))
+
+        # kwargs:
+        if "loc" in kwargs:
+            loc = kwargs['loc']
+        else:
+            loc = 2
+
 
         x1 = self.frames[1::]
         x1 = x1 + shift
@@ -1573,14 +1744,15 @@ class Microtubule():
         # ax.tick_params(axis='both',labelsize=20)
         # ax.set_xlim(x1[0],x1[-1])
 
-        # ax.set_xlabel("Frame #")
-        ax.set_ylabel(r"$Q_{n}$")
+
+
         # ax.tick_params(axis='both')
         # ax.set_xlim(x1[0],x1[-1])
-        ax.set_xlim(self.frames[0],self.frames[-1])
-        ax.set_ylim(0.36,1.03)
         # ax.set_ylim(-0.03,1.03)
 
+
+        ax.set_xlim(self.frames[0],self.frames[-1])
+        ax.set_ylim(0.36,1.03)
         ax.set_yticks([0.40,0.55,0.70,0.85,1.00])
 
         # if limit != None:
@@ -1597,7 +1769,9 @@ class Microtubule():
         # handles, labels = ax.get_legend_handles_labels()
         # ax.legend(bbox_to_anchor=(1.02, 1),loc=2,borderaxespad=0.0,fontsize=12)
 
-        ax.legend(loc=2,fontsize=6)
+        ax.set_ylabel(r"$Q_{n}$",fontsize=20)
+        ax.set_xlabel("Frame #",fontsize=20)
+        ax.legend(loc=loc,fontsize=12)
 
         if hasattr(self,'reversal_frame'):
             print 'reversal_frame:',self.reversal_frame
@@ -2028,25 +2202,53 @@ class Microtubule():
         # return min_f
 
 
-    def plot_contact_interface(self,ax,face='n',limits=(0,600)):
+    # def plot_contact_interface(self,ax,face='n',limits=(0,600)):
+    def plot_contact_interface(self,ax,**kwargs):
         """
         Plot Contact Interface.
         """
+        if "limits" in kwargs:
+            limits = kwargs['limits']
+        else:
+            limits = (0,600)
+
+
+        for k,v in kwargs.iteritems():
+
+            print k
+
+            if re.search('contacts',k) == None:
+                continue
+
+            icontacts = getattr(self,k)
+            break
+
+
+        # else:
+        #     print "need a contact array."
+        #     return
+
+        # # Choose Face:
+        # if face == "n":
+        #     icontacts = self.ncontacts
+        # elif face == "e":
+        #     icontacts = self.econtacts
+        # elif face == "w":
+        #     icontacts = self.wcontacts
+        # elif face == "s":
+        #     icontacts = self.scontacts
+
+
+        print len(mycolors)
+        print len(self.dimers)
+
         ax.set_prop_cycle(cycler('color',mycolors))
         ax.tick_params(axis='both',labelsize=12)
         ax.set_ylim(-0.03,1.03)
         ax.set_xlim(self.frames[0],self.frames[-1])
-        ax.text(70,0.1,face.upper())
+        # ax.text(70,0.1,face.upper())
+        ax.text(70,0.1,k[0].upper())
 
-        # Choose Face:
-        if face == "n":
-            icontacts = self.ncontacts
-        elif face == "e":
-            icontacts = self.econtacts
-        elif face == "w":
-            icontacts = self.wcontacts
-        elif face == "s":
-            icontacts = self.scontacts
 
         for i,d in enumerate(self.dimers):
             ax.plot(icontacts[::,d],color=mycolors[i])
@@ -3479,42 +3681,200 @@ class Microtubule():
         """
         # (13, 4, 121)
 
-        print "Hello."
-        # ax = axes[0]
         data = self.data_entire_pfang
         x = np.linspace(0,data.shape[0]*5,data.shape[0])
-
-        # for f in range(data.shape[0]):
-        #     for p in range(data.shape[1]):
-        #         print data[f,p,::]
-        #     print '--'
-
-        # axes.plot(x,data[::,0,2])
 
         for p in range(data.shape[1]):
             axes.plot(x,data[::,p,5],color=mycolors[p],label=str(p))
 
 
-        axes.set_ylim((-2,122))
 
         # legend
         handles,labels = axes.get_legend_handles_labels()
         axes.legend(handles,labels,prop={'size':12},loc=2)
 
+
+        axes.set_ylim((-2,122))
         axes.set_ylabel(r"Angle$^\circ$")
         axes.set_xlabel("Frame #")
 
         # for p in range(data.shape[0]):
-
             # print np.std(data[p,::,3])
             # print data[p,::,3]
             # if np.var(data[p,::,3]) > 50:
             #     axes.plot(x,data[p,::,3])
             #     axes.plot(x,data[p,::,2])
-
-
-
         # for p in range(data)
         # sys.exit()
 
-    # def select_
+    def get_work(self):
+
+
+        def dx(x,y):
+            # print x - y
+            return y - x
+
+        print self.ext_limit
+        print self.f_nano.size
+        print self.ext_raw.shape
+        t = self.ext_limit
+        dist = self.ext_raw[t]
+
+        print dist
+        dist_in = self.ext_raw[:t]
+        dist_out = self.ext_raw[t:]
+
+        print "in:",np.abs(dist_in[-1] - dist_in[0])
+        print "out:",np.abs(dist_out[-1] - dist_out[0])
+        print self.ext_raw
+
+
+        # dx_in = np.array([dx(dist_in[i-1] - dist_in[i])  for i in range(1,dist_in.shape+1)])
+        dx_in = np.array([dx(dist_in[i-1],dist_in[i]) for i in range(1,dist_in.shape[0])])
+        # dx_in = np.array([float(dist_in[i-1] - dist_in[i]) for i in range(1,dist_in.shape[0]+1)])
+
+
+        dx_out = np.array([dx(dist_out[i],dist_out[i-1]) for i in range(1,dist_out.shape[0])])
+
+        # print dx_in
+        # print dx_in.shape
+        # print dx_out
+        # print dx_out.shape
+
+        dx_tot = np.concatenate([dx_in,dx_out])
+
+
+        # now use the self.f_nano[1:] * dx_in  as integral(f*dx)
+        work_indentation = np.cumsum(self.f_nano[1:t] * dx_in)
+        # print work_indentation[-1]
+
+        # just the cumulative force
+        # work_indentation = np.cumsum(self.f_nano[:t])
+        # print work_indentation[-1]
+        # sys.exit()
+
+        # work_total = np.cumsum(self.f_nano)
+        # print self.f_nano.shape
+        # print dx_tot.shape
+
+        work_total = np.cumsum(self.f_nano[2:] * dx_tot)
+
+        convf = (1/4.184) * 6.02 * 100
+        self.work_indentation = work_indentation[-1] * convf
+        self.work_total = work_total[-1] * convf
+        self.work_retraction = self.work_total - self.work_indentation
+
+
+        # print work,work[-1]
+        # sys.exit()
+        # return self.work
+
+    def get_min_lateral_contacts(self):
+
+
+        # print dir(self)
+        # print "Reversal: index, time, frame."
+        # print self.reversal_ind
+        # print self.reversal_time
+        # print self.reversal_frame
+        # print self.ext_limit
+        # print self.wcontacts_raw.shape
+
+        # print "East,West"
+        # print self.econtacts_raw
+        # print self.wcontacts_raw
+
+        lst_con = []
+        # curr_diff = 0
+        lst_econtactslost = []
+        # lst_eqn = []
+        lst_wcontactslost = []
+
+        bool_recovers = True
+
+
+        for d in self.dimers:
+            # lst_con.append(self.econtacts_raw[::,d])
+            # min_d = min(self.econtacts_raw[::,d])
+            # min_d = self.econtacts_raw[0,d]
+            # max_d = max(self.econtacts_raw[::,d])
+            # last_d = self.econtacts_raw[-1,d] # truncated already!
+
+            # does it recover..
+            c1 = self.econtacts_raw[0,d]
+            c2 = min(self.econtacts_raw[::,d])
+            c3 = self.econtacts_raw[-1,d]
+            diff = c1 - c2
+            initial_final_ratio = float(c3) / c1
+
+            print c1,float(c2)/c1,c2,"recover:",c3
+
+            if initial_final_ratio < 0.9:
+                bool_recovers = False
+
+
+
+
+            if float(c2)/c1 < 0.70:
+                lst_econtactslost.append(diff)
+            else:
+                lst_econtactslost.append(0.0)
+
+            # diff = max_d - min_d
+            # diff = last_d - min_d
+            # lst_con.append(diff)
+            # print max_d,min_d,diff
+            # if diff > curr_diff:
+                # curr_diff = diff
+                # lst_con.append(diff)
+
+            # min_d = self.wcontacts_raw[0,d]
+            # last_d = self.wcontacts_raw[-1,d] # truncated already!
+            # diff = last_d - min_d
+            # lst_con.append((c1,c2,c3,diff))
+            # lst_econtactslost.append(diff)
+
+
+        for d in self.dimers:
+            c1 = self.wcontacts_raw[0,d]
+            c2 = min(self.wcontacts_raw[::,d])
+            c3 = self.wcontacts_raw[-1,d]
+            diff = c1 - c2
+            initial_final_ratio = float(c3) / c1
+
+            print c1,float(c2)/c1,c2,"recover:",c3
+
+            if initial_final_ratio < 0.9:
+                bool_recovers = False
+
+
+            if float(c2)/c1 < 0.70:
+                lst_wcontactslost.append(diff)
+            else:
+                lst_wcontactslost.append(0.0)
+
+            # lst_wcontactslost.append(diff)
+
+
+        # print lst_con
+        print lst_econtactslost
+        print lst_wcontactslost
+        print "The lattice recovers? %s" % bool_recovers
+
+        mine = np.sum(np.array(lst_econtactslost))
+        minw = np.sum(np.array(lst_wcontactslost))
+
+
+        self.bool_recovers = bool_recovers
+
+
+
+        # if float(min([mine,minw]))/max([mine,minw]) > 0.7:
+        #     max_diff_con = max([mine,minw])
+        # else:
+        #     print 'east,west total contacts lost'
+        #     print mine,minw
+        #     print "Difference is too large."
+        #     # sys.exit()
+
+        return max([mine,minw])

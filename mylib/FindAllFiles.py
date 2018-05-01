@@ -51,6 +51,11 @@ class FindAllFiles():
                     # continue
                 # if not re.search(self.pattern,name) == None:
 
+                    # print count,dirpath
+                    p1 = dirpath.split('/')[-1]
+                    p2 = dirpath.split('/')[-2]
+                    p3 = dirpath.split('/')[-3]
+                    # sys.exit()
                     count += 1
                     fp = os.path.join(dirpath,name)
                     self.lst_files.append(fp)
@@ -59,6 +64,8 @@ class FindAllFiles():
                     self.dct[count]['file'] = fp
                     self.dct[count]['filename'] = name
                     self.dct[count]['dirname'] = dirpath
+                    self.dct[count]['name'] = p1
+
                     self.total = count
 
     def merge_dct(self,lst_dct):
@@ -114,6 +121,7 @@ class FindAllFiles():
             dct_r[count]['file'] = dct[s[1]]['file']
             dct_r[count]['filename'] = dct[s[1]]['filename']
             dct_r[count]['dirname'] = dct[s[1]]['dirname']
+            dct_r[count]['name'] = dct[s[1]]['name']
             count += 1
         return dct_r
 
@@ -133,6 +141,7 @@ class FindAllFiles():
             dct_r[count]['file'] = dct[s[1]]['file']
             dct_r[count]['filename'] = dct[s[1]]['filename']
             dct_r[count]['dirname'] = dct[s[1]]['dirname']
+            dct_r[count]['name'] = dct[s[1]]['name']
             count += 1
 
         return dct_r
@@ -159,6 +168,7 @@ class FindAllFiles():
             dct_r[count]['file'] = dct[s[1]]['file']
             dct_r[count]['filename'] = dct[s[1]]['filename']
             dct_r[count]['dirname'] = dct[s[1]]['dirname']
+            dct_r[count]['name'] = dct[s[1]]['name']
             count += 1
         return dct_r
 
@@ -216,6 +226,7 @@ class FindAllFiles():
             dct_new[i]['file'] = lst_files[i]
             dct_new[i]['filename'] = os.path.basename(lst_files[i])
             dct_new[i]['dirname'] = os.path.dirname(lst_files[i])
+            # dct_new[i]['dirname'] = os.path.dirname(lst_files[i])
         x = len(dct_new.keys())
         print('returning',len(dct_new.keys()),searchstring,'files;','empty dirs:',len(lst_empty))
         return dct_new,lst_empty
