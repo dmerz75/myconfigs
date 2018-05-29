@@ -21,6 +21,9 @@ from plot.cdf import *
 from mylib.FindAllFiles import *
 from plot.SETTINGS import *
 import argparse
+
+from plot.SETTINGS import *
+
 #  ---------------------------------------------------------  #
 #  Start matplotlib (1/4)                                     #
 #  ---------------------------------------------------------  #
@@ -200,10 +203,14 @@ def get_pertinent_data(lst,keyword=None):
         # print v[0]
 
         for key in keyword:
-            # print key
-            if re.search(key,v[0]) != None:
+            result = re.search(key,v[0])
+            print key,v[0],result
+            if result != None:
+            # if re.search(key,v[0]) != None:
+                # print key,v[0]
                 # lst.remove(v)
                 lst_data.append(v)
+
         # print len(lst)
 
 
@@ -705,7 +712,7 @@ if args['sel'] == 171:
     sys.exit()
 
 
-if args['sel'] >= 2000:
+if args['sel'] == 2000:
     # RUN
     # 0 pname_framebreaks_13.maxvalue.out
     # 1 pname_framebreaks_13.first.out
@@ -932,7 +939,7 @@ if args['sel'] >= 2000:
 
     P = SaveFig(my_dir,
                 'hist_%s_%s' % (result_type,data_name),
-                destdirname='fig/histogramCDF')
+                destdirname='fig/histogramCDF_force')
     sys.exit()
 
 
@@ -957,6 +964,7 @@ def plot_all(ax,dfiles,**kwargs):
         nbins = kwargs['nbins']
     else:
         nbins = 6
+        # nbins = 10
     if 'topology' in kwargs:
         topology = kwargs['topology']
     else:
@@ -967,25 +975,43 @@ def plot_all(ax,dfiles,**kwargs):
         position = None
 
 
-    nbins = 8
-    if re.search('critical',dfiles[0]) != None:
+    nbins = 12
+    print dfiles
+    # sys.exit()
+    if re.search('.critical.',dfiles[0]) != None:
         lower_limit = 0.48
         upper_limit = 0.96
     else:
         lower_limit = 0.24
         upper_limit = 0.60
-
+    print upper_limit,lower_limit
+    # sys.exit()
 
 
     str_name = ''
     lst_cdf = []
+
+    patterns = ['-','\\']
+
     for i,dfile in enumerate(dfiles):
 
+        label = ''
         tdata = get_lst_tup_data(dfile)
         print len(tdata)
         lst_tdata = get_pertinent_data(tdata,topology)
+        print len(lst_tdata)
+        print "position",position
         lst_tdata = get_pertinent_data(lst_tdata,position)
+        print len(lst_tdata)
         data = np.array(sorted([v[2] for v in lst_tdata]))
+        avg = np.mean(data)
+        print avg
+        if ((avg > 0.60) and (avg < 0.90)):
+            lower_limit = 0.48
+            upper_limit = 0.96
+        elif ((avg < 0.60) and (avg > 0.20)):
+            lower_limit = 0.24
+            upper_limit = 0.62
         # print data.shape
         # print data
         # sys.exit()
@@ -1002,7 +1028,24 @@ def plot_all(ax,dfiles,**kwargs):
                                   upper_limit=upper_limit) # nbins,lower_limit,upper_limit
         cdf.get_hist() # none,processing
         # cdf.plot_bars(color=color,fill=fill,alpha=alpha,pattern=pattern)
-        cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=cdf.name) # color,fill,alpha,pattern,label
+        # cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=cdf.name) # color,fill,alpha,pattern,label
+        entity = re.search("Dimers(\d+)",cdf.name)
+        # numD = [int(i) for i in re.findall(r'\d+',entity.group())]
+        numD = re.findall(r'\d+',entity.group())
+        print "entity:",entity.group()
+        print "numD:",numD
+        label = label + "%sD" % numD[0]
+        # sys.exit()
+
+        if re.search("NoPlate",cdf.name) != None:
+            label = label + ", No Plate"
+            pattern = patterns[i]
+        else:
+            label = label + ", Plate"
+            pattern = patterns[i]
+        # label = cdf.name
+        cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=label) # color,fill,alpha,pattern,label
+        # cdf.plot_bars(ax,color=colors[i],alpha=0.6,label=label,pattern=pattern)
         cdf.plot_cdf(ax,color=colors[i])
         # print 'limits initially: ',cdf.lower_limit,cdf.upper_limit
         # print 'nbins:',nbins
@@ -1046,15 +1089,17 @@ def plot_all(ax,dfiles,**kwargs):
             Result = 'Reject. diff dist.'
         else:
             print "We cannot reject the null hypothesis. (more/less the same dist.)"
-            print "Do Not Reject."
             Result = 'Do Not Reject. (same dist.)'
+            print Result
+
+        print args
 
         lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,d,p,Result))
     # sys.exit()
 
-    print "KS-results:"
-    for tup in lst_KStups:
-        print tup[0],tup[1],tup[2],tup[3],tup[4]
+    # print "KS-results:"
+    # for tup in lst_KStups:
+    #     print tup[0],tup[1],tup[2],tup[3],tup[4]
 
     lst_global_ks.append(lst_KStups)
 
@@ -1077,14 +1122,15 @@ def plot_all(ax,dfiles,**kwargs):
     data_name = data_name + str_name
 
     # ax.set_label(fontsize=14)
-    ax.tick_params(axis='both',labelsize=14)
+    ax.tick_params(axis='both',labelsize=18)
     # ax.axis(size=14)
-    ax.set_xlabel('Breaking Force',fontsize=16)
-    ax.set_ylabel('Normalized Freq.',fontsize=16)
+
+    ax.set_xlabel('Force (nN)',fontsize=20)
+    ax.set_ylabel('Normalized Freq.',fontsize=20)
 
     P = SaveFig(my_dir,
                 'hist_%s_%s' % (result_type,data_name),
-                destdirname='fig/histogramCDF')
+                destdirname='fig/histogramCDF_force')
     plt.clf()
 
 
@@ -1164,6 +1210,8 @@ if ((args['sel'] >= 700) and (args['sel'] <= 725)):
     ax = new_fig() # description='plate, 8v12')
     plot_all(ax[0],files4,
              nbins=nbins,lower_limit=lower_limit,upper_limit=upper_limit)
+
+
 
 if ((args['sel'] >= 750) and (args['sel'] <= 759)):
 
@@ -1263,3 +1311,52 @@ if ((args['sel'] >= 750) and (args['sel'] <= 759)):
 # # print datafiles
 # # datafiles1 =
 # plot_all(ax[0],dfiles1,None,None)
+# -----------------
+
+if (args['sel'] >= 5000):
+
+    # print my_dir
+    files_forces = glob.glob(os.path.join(my_dir,"results_breaks/r10.*/*.out"))
+    files_first = sorted(files_forces)
+    # for f in files_forces:
+    #     print f
+    # 0  ALL.v1.critical.10.Dimers8.Plate.out
+    # 1  ALL.v1.critical.11.Dimers8.NoPlate.out
+    # 2  ALL.v1.critical.16.Dimers12.NoPlate.out
+    # 3  ALL.v1.critical.17.Dimers12.Plate.out
+    # 4  ALL.v1.first.10.Dimers8.Plate.out
+    # 5  ALL.v1.first.11.Dimers8.NoPlate.out
+    # 6  ALL.v1.first.16.Dimers12.NoPlate.out
+    # 7  ALL.v1.first.17.Dimers12.Plate.out
+    # sys.exit()
+    # tup_files = [(4,0),(5,1),(6,2),(7,3)] # first,crit
+    tup_files = [(0,1),(3,2),(4,5),(7,6),
+                 (0,3),(1,2),(4,7),(5,6)] # Plate,NOP
+
+    lst_global_ks = []
+    for t in range(len(tup_files)):
+        files = [files_first[tup_files[t][0]],
+                 files_first[tup_files[t][1]]]
+        ax = new_fig()
+        plot_all(ax[0],files,nbins=nbins,topology=topology,position=position)
+        axis_settings()
+
+
+    # def print_this()
+    print "Final_KS_Results:"
+    for lst in lst_global_ks:
+        # print (' ').join([str(obj) for obj in lst])
+        for tup in lst:
+            print tup[0],tup[1]
+        # for tup in lst:
+        #     print '%5.3f' % tup[2], '%5.3f' % tup[3],tup[4]
+
+    for lst in lst_global_ks:
+        # print (' ').join([str(obj) for obj in lst])
+        # for tup in lst:
+        #     print tup[0],tup[1]
+        for tup in lst:
+            # print tup[0],tup[1]
+            print '%5.3f' % tup[2], '%5.3f' % tup[3],tup[4]
+
+    sys.exit()

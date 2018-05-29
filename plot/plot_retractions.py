@@ -34,20 +34,27 @@ def make_plots():
                 'weight':'normal',
                 'size'  :'16'}
     matplotlib.rc('font',**dct_font)
-    gs = GridSpec(8,24)
+    gs = GridSpec(12,24)
     fig.set_size_inches(15.0,13.0)
-    plt.subplots_adjust(left=0.12,right=0.96,top=0.960,bottom=0.08,hspace=1.3,wspace=0.3)
+    plt.subplots_adjust(left=0.12,right=0.96,top=0.960,bottom=0.08,hspace=4.0,wspace=1.0)
 
     # Axes4
-    ax1 = plt.subplot(gs[0:4,0:11]) # 1 3
-    ax2 = plt.subplot(gs[4:8,0:11]) # 2 4
+    ax0 = plt.subplot(gs[0:4,0:11]) # 1 3
+    ax1 = plt.subplot(gs[4:8,0:11]) # 1 3
+    ax2 = plt.subplot(gs[8:12,0:11]) # 2 4
 
-    ax3 = plt.subplot(gs[0:2,13:24])
-    ax4 = plt.subplot(gs[2:4,13:24])
-    ax5 = plt.subplot(gs[4:6,13:24])
-    ax6 = plt.subplot(gs[6:8,13:24])
 
-    axes = [ax1,ax2,ax3,ax4,ax5,ax6]
+    # ax3 = plt.subplot(gs[0:2,13:24])
+    # ax4 = plt.subplot(gs[2:4,13:24])
+    # ax5 = plt.subplot(gs[4:6,13:24])
+    # ax6 = plt.subplot(gs[6:8,13:24])
+
+    ax3 = plt.subplot(gs[0:3,13:24])
+    ax4 = plt.subplot(gs[3:6,13:24])
+    ax5 = plt.subplot(gs[6:9,13:24])
+    ax6 = plt.subplot(gs[9:12,13:24])
+
+    axes = [ax0,ax1,ax2,ax3,ax4,ax5,ax6]
     return axes
 
 
@@ -318,9 +325,26 @@ lst_retractpairs = get_retraction_dct(dct_total)
 # print lst_retractpairs
 # print len(lst_retractpairs)
 
+# Run these:
+if rnd == 16:
+    # plot_pairs = [(3,4),(10,12),(18,19),(26,27),(26,28),(34,35),(44,45),(54,55)]
+    plot_pairs = [(3,4),(10,12),(18,19),(26,27),(26,28),(34,35),(44,45),(54,55)]
+if rnd == 17:
+    # plot_pairs = [(1,2),(1,4),(6,8),(10,12),(15,16),(26,27),(29,30),(40,41),
+    #               (45,46),(50,51),(64,65)]
+    plot_pairs = [(1,2),(1,4),(6,8),(10,12),(15,16),(26,27),(29,30),
+                  (45,46),(50,51),(64,65)]
+    # remove 59,60; 59,62
+
+
 for tup in lst_retractpairs:
     print tup
     label = ('_').join([str(i) for i in tup])
+
+    # if label in plot_pairs:
+    #     continue
+    if tup not in plot_pairs:
+        continue
 
     namef = dct_total[tup[0]]['dirname'].split('/')[-1]
     namer = dct_total[tup[1]]['dirname'].split('/')[-1]
@@ -381,21 +405,35 @@ for tup in lst_retractpairs:
 
 
     # PLOT: contacts
-    # cmt.plot_forceframe(axes[0])
     mtf.plot_forceindentation(axes[0])
-    mtf.plot_contacts(axes[1],mtf.dimers,loc=3)
+    mtf.plot_forceframe(axes[1])
+    mtf.plot_contacts(axes[2],mtf.dimers,loc=3)
 
-    mtf.plot_contact_interface(axes[2],ncontacts=mtf.ncontacts)
-    mtf.plot_contact_interface(axes[3],scontacts=mtf.scontacts)
-    mtf.plot_contact_interface(axes[4],econtacts=mtf.econtacts)
-    mtf.plot_contact_interface(axes[5],wcontacts=mtf.wcontacts)
+    mtf.plot_contact_interface(axes[3],ncontacts=mtf.ncontacts)
+    mtf.plot_contact_interface(axes[4],scontacts=mtf.scontacts)
+    mtf.plot_contact_interface(axes[5],econtacts=mtf.econtacts)
+    mtf.plot_contact_interface(axes[6],wcontacts=mtf.wcontacts)
     mtf.plot_vertlines(axes,[mtr.reversal_frame],color='r')
 
     mtf.get_work()
 
+    mtf.get_energy_beginend()
+    # sys.exit()
+
 
     # determine if the retraction permits recovery.
     contact_count = mtf.get_min_lateral_contacts()
+
+    print type(mtf.potentE0)
+    print mtf.potentE0
+    print mtf.potentE1
+    print mtf.potentE2
+
+    deltaH = mtf.potentE2 - mtf.potentE1
+    energyperbond = deltaH / contact_count
+
+    print "DeltaH:",deltaH,"Energy/bond:",energyperbond
+
 
     # maxcount,mincount = mtf.get_min_lateral_contacts()
     # contact_count = min(np.concatenate([mtf.econtacts_raw,mtf.wcontacts_raw]))
@@ -406,12 +444,24 @@ for tup in lst_retractpairs:
 
 
     # str1 = '# %s %s %s (kcal/mol ~600/(200-300)contacts)' % (label, namef, namer)
+
+    freeEcontact = mtf.work_indentation / contact_count
+
     str1 = '# %s %s %s %s' % (label, namef, namer,mtf.bool_recovers)
-    str2 = "%6.2f  %6.2f  %6.2f  %3d" % (mtf.work_indentation,
-                                           mtf.work_retraction,
-                                           mtf.work_total,contact_count)
+    str1b = "# worki, workr, workt, con#, GibbsFE/con, delH, delH/contact:"
+    str2 = "%6.2f  %6.2f  %6.2f  %3d  %6.2f  %7.1f  %6.2f" % (
+        mtf.work_indentation,
+        mtf.work_retraction,
+        mtf.work_total,
+        contact_count,
+        freeEcontact,
+        deltaH,
+        energyperbond)
+
     print str1
+    print str1b
     print str2
+    # print str3
     # break
 
 
@@ -420,8 +470,13 @@ for tup in lst_retractpairs:
     f = open(fp,'a+')
     f.write(str1)
     f.write("\n")
+    f.write(str1b)
+    f.write("\n")
     f.write(str2)
     f.write("\n")
+    # f.write(str3)
+    # f.write("\n")
+
     # f.write("# %s\n" % mtf.bool_recovers)
     f.close()
     # lst_work.append(w)
@@ -433,3 +488,6 @@ for tup in lst_retractpairs:
                 'ret_%s_%s' % (rnd,label),
                 destdirname='fig/retractions')
     # break
+
+
+# Saves figures in fig/retractions

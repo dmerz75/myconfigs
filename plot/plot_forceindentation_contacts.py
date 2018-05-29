@@ -400,15 +400,16 @@ def plot_all(mt_list,lst_plot):
         matplotlib.rc('font',**dct_font)
         gs = GridSpec(8,24)
         fig.set_size_inches(15.0,13.0)
+        # fig.set_size_inches(8.5,7.4)
         plt.subplots_adjust(left=0.12,right=0.96,top=0.960,bottom=0.08,hspace=1.3,wspace=0.3)
 
         # Row 1: Force-Indentation, N,S
-        ax1 = plt.subplot(gs[0:2,0:8])
+        ax1 = plt.subplot(gs[0:2,0:7])
         ax3 = plt.subplot(gs[0:2,10:16])
         ax5 = plt.subplot(gs[0:2,18:24])
 
         # Row 2: Contacts, W,E
-        ax2 = plt.subplot(gs[2:4,0:8])
+        ax2 = plt.subplot(gs[2:4,0:7])
         ax4 = plt.subplot(gs[2:4,10:16])
         ax6 = plt.subplot(gs[2:4,18:24])
 
@@ -495,10 +496,16 @@ def plot_all(mt_list,lst_plot):
         # PLOT: contacts
         mt.plot_forceframe(ax1)
         mt.plot_contacts(ax2,mt.dimers)
-        mt.plot_contact_interface(ax3,'n')
-        mt.plot_contact_interface(ax4,'s')
-        mt.plot_contact_interface(ax5,'w')
-        mt.plot_contact_interface(ax6,'e')
+        # mt.plot_contact_interface(ax3,'n')
+        # mt.plot_contact_interface(ax4,'s')
+        # mt.plot_contact_interface(ax5,'w')
+        # mt.plot_contact_interface(ax6,'e')
+        mt.plot_contact_interface(ax3,ncontacts=mt.ncontacts)
+        mt.plot_contact_interface(ax4,scontacts=mt.scontacts)
+        mt.plot_contact_interface(ax5,econtacts=mt.econtacts)
+        mt.plot_contact_interface(ax6,wcontacts=mt.wcontacts)
+
+
         print "The Breaking Pattern: ",mt.breaking_pattern
 
 
@@ -605,7 +612,10 @@ def plot_all(mt_list,lst_plot):
             # ax.tick_params()
             # ax.tick_params(axis='both',labelsize=12)
         P = SaveFig(mt.my_dir,mt.name,
-                    destdirname='fig/contacts_full/%s' % mt.rnd)
+                    destdirname='fig/contacts_full/%s' % mt.rnd,
+                    dpi=300)
+
+        # sys.exit()
 
         # mt1 = mt
         # mt2 = mt
@@ -660,11 +670,18 @@ def plot_all(mt_list,lst_plot):
 # End all
 dct_dat = load_dct(my_dir,'mt_analysis.dat')
 # for tracking:
-for k,v in dct_dat.items():
+# for k,v in dct_dat.items():
     # print k,v
-    print v['dirname']
+    # print v['dirname']
 # sys.exit()
 lst_plotfile,dct_plotfile = get_plotted(ffile)
+
+# for k,v in sorted(dct_plotfile.items()):
+#     # print k,v
+#     # print v
+#     print v['round'],v['path'].split('/')[-1],'\t\t ',v['pos'],'\n'
+# sys.exit()
+
 mt_list = build_mt(dct_dat)
 plot_all(mt_list,lst_plotfile)
 
@@ -691,3 +708,7 @@ plot_all(mt_list,lst_plotfile)
 # cd ~/ext/completed_mt/ && ./plot_forceindentation_contacts.py
 #                             -ff results_breaks/ALL.v1 -nd 104 -rnd 10
 #                                                       -nd 156 -rnd 16,17
+# Writing: /home/dmerz3/ext/completed_mt/results_breaks/ALL.v1.critical.11.Dimers8.NoPlate.out
+# GOOD EXAMPLE:
+# '/home/dmerz3/ext/completed_mt/fig/contacts_full/10/seamup_poz5_fix2_reg_1070-4.png'
+# --does drop a little early in the lateral east.

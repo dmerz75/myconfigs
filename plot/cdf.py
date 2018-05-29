@@ -287,8 +287,9 @@ class myCDF():
         # sys.exit()
 
         # patterns = ('-', '+', 'x', '\\', '*', 'o', 'O', '.')
+        # patterns = ('-','\\')
         # for bar, pattern in zip(bars, patterns):
-        #     bar.set_hatch(pattern)
+            # bar.set_hatch(pattern)
         # CDF-1
         # print self.bins
         # print self.norm
@@ -306,7 +307,27 @@ class myCDF():
                alpha=alpha,edgecolor=color,
                hatch=pattern,label=label)
 
-        ax.legend(loc=2)
+        ax.legend(loc=2,fontsize=16)
+
+        # ax.set_xlim([])
+
+        # print min(self.norm)
+        # print max(self.norm)
+        # print dir(self)
+        # print self.data
+        # print min(self.bins)
+        # print max(self.bins)
+        # print self.bins[0]
+        # print self.bins[-1]
+
+        minx = self.bins[0] - self.width
+        maxx = self.bins[-1] + 0.5 * self.width
+        # print self.width
+        # sys.exit()
+
+        # ax.set_xlim([self.bins[0],self.bins[-1]])
+        ax.set_xlim([minx,maxx])
+        # sys.exit()
 
 
 

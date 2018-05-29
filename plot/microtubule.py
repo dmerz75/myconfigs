@@ -1478,15 +1478,18 @@ class Microtubule():
         ax1.set_xlim(-1,31)
         ax1.set_xticks([0,10,20,30])
 
-        ax1.set_ylim(-.20,.905)
-        ax1.set_yticks([0,.2,.4,.6,.8])
-        ax1.set_ylim(-0.04,0.94)
+        # ax1.set_ylim(-.20,.905)
+        # ax1.set_ylim(-0.04,0.94)
+        # ax1.set_yticks([0,.2,.4,.6,.8])
+
+        ax1.set_ylim(-0.04,0.96)
+        ax1.set_yticks([0,0.3,0.6,0.9])
 
         # ax1.set_xlabel('Indentation Depth X/nm',fontsize=16)
         # ax1.set_ylabel('Indentation Force F/nN',fontsize=16)
-        ax1.set_xlabel('Indentation Depth X/nm')
+        ax1.set_xlabel('Indentation Depth X/nm',fontsize=20)
         # ax1.set_ylabel('Indentation Force F/nN')
-        ax1.set_ylabel('Indentation Force (nN)')
+        ax1.set_ylabel('Force (nN)',fontsize=20)
         # ax1.title(self.name)
 
         # legend
@@ -1506,8 +1509,8 @@ class Microtubule():
         ax1.set_yticks([0,.2,.4,.6,.8])
         ax1.set_ylim(-0.04,0.94)
 
-        ax1.set_xlabel('Indentation Depth X/nm',fontsize=24)
-        ax1.set_ylabel('Indentation Force F/nN',fontsize=24)
+        ax1.set_xlabel('Indentation Depth X/nm',fontsize=20)
+        ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
 
         # legend
         handles,labels = ax1.get_legend_handles_labels()
@@ -1536,7 +1539,8 @@ class Microtubule():
         # ax1.set_xlabel('Indentation Depth X/nm')
         # ax1.set_xlabel('Frame #')
         # ax1.set_ylabel('Indentation Force F/nN',fontsize=20)
-        ax1.set_ylabel('Indentation Force F/nN')
+        ax1.set_ylabel('Force (nN)',fontsize=20)
+        ax1.set_xlabel('Frame #',fontsize=20)
         # ax1.tick_params(axis='both',labelsize=20)
 
         # legend
@@ -1771,7 +1775,9 @@ class Microtubule():
 
         ax.set_ylabel(r"$Q_{n}$",fontsize=20)
         ax.set_xlabel("Frame #",fontsize=20)
-        ax.legend(loc=loc,fontsize=12)
+
+        if 'loc' in kwargs:
+            ax.legend(loc=loc,fontsize=12)
 
         if hasattr(self,'reversal_frame'):
             print 'reversal_frame:',self.reversal_frame
@@ -2246,6 +2252,12 @@ class Microtubule():
         ax.tick_params(axis='both',labelsize=12)
         ax.set_ylim(-0.03,1.03)
         ax.set_xlim(self.frames[0],self.frames[-1])
+
+
+        ax.set_xlabel("Frame #",fontsize=16)
+        ax.set_ylabel(r"$Q_{n}$",fontsize=16)
+
+
         # ax.text(70,0.1,face.upper())
         ax.text(70,0.1,k[0].upper())
 
@@ -3681,11 +3693,21 @@ class Microtubule():
         """
         # (13, 4, 121)
 
+        # mycolors = ['k', 'r', 'g', 'b','c','m','lime',
+        #             'darkorange','sandybrown','hotpink',
+        #             'mediumseagreen','crimson','slategray',
+        #             'orange','orchid','darkgrey','indianred',
+        #             'tan','cadetblue']
+        mycolors = ['firebrick','r','darkorange','khaki','springgreen',
+                    'lime','limegreen',
+                    'green','cyan','dodgerblue','cadetblue','blue','navy']
+
+
         data = self.data_entire_pfang
         x = np.linspace(0,data.shape[0]*5,data.shape[0])
 
         for p in range(data.shape[1]):
-            axes.plot(x,data[::,p,5],color=mycolors[p],label=str(p))
+            axes.plot(x,data[::,p,5],color=mycolors[p],label=str(p+1))
 
 
 
@@ -3694,9 +3716,9 @@ class Microtubule():
         axes.legend(handles,labels,prop={'size':12},loc=2)
 
 
-        axes.set_ylim((-2,122))
-        axes.set_ylabel(r"Angle$^\circ$")
-        axes.set_xlabel("Frame #")
+        axes.set_ylim((-2,112))
+        axes.set_ylabel(r"Angle$^\circ$",fontsize=20)
+        axes.set_xlabel("Frame #",fontsize=20)
 
         # for p in range(data.shape[0]):
             # print np.std(data[p,::,3])
@@ -3708,7 +3730,9 @@ class Microtubule():
         # sys.exit()
 
     def get_work(self):
-
+        """
+        Get the Indentation Work.
+        """
 
         def dx(x,y):
             # print x - y
@@ -3769,7 +3793,147 @@ class Microtubule():
         # sys.exit()
         # return self.work
 
+    def get_energy_beginend(self):
+        """
+        Get the work, at the beginning and the end of the log file.
+        Thermodynamics.
+        Getting the Enthalpy, H.
+        Will compute the Entropy.
+        del G = del H - T del S
+        """
+        # print self.my_dir
+        # print self.dirname  # ***
+        # print self.indentation_dir
+        # print self.outputdir
+        # print dir(self)
+        # print "frame:",self.frameindex
+        # print self.frameindex * 1000000
+        stepmax = self.frameindex * 1000000
+        # print self.frame_of_first_pf_to_break
+
+        lst_logfile = glob.glob(os.path.join(self.dirname,'mt*.log'))
+        try:
+            logfile = lst_logfile[0]
+        except:
+            lst_logfile = glob.glob(os.path.join(self.dirname,'MT*.log'))
+            logfile = lst_logfile[0]
+        print logfile
+
+        fo = open(logfile,"r+")
+        filelines = fo.readlines()
+        num_lines = len(filelines)
+        # filelines = logfile.readlines()
+
+        for i,line in enumerate(filelines):
+
+            if line.startswith("Writing output at step 0"):
+                print "Current line:",i
+                i = i + 2
+                # print line
+                line = filelines[i]
+                potentE0 = float(line.split()[2])
+                break
+
+        # print "Next line-1, line, and next 2 lines:"
+        # print filelines[i-1]
+        # print filelines[i]
+        # print filelines[i+1]
+        # print filelines[i+2]
+
+        # print "Next 10 lines:"
+
+        for j,k in enumerate(range(i,num_lines)):
+
+            line = filelines[k]
+
+            if line.startswith("Writing output at step 100000"):
+                print "Current line:",k
+                k = k + 2
+
+                line = filelines[k]
+                potentE1 = float(line.split()[2])
+                break
+
+            # print j,k,filelines[k]
+            # if j > 10:
+            #     break
+
+
+        count = 0
+
+
+        for m,n in enumerate(range(k,num_lines)):
+
+            line = filelines[n]
+
+            if line.startswith("Writing output"):
+
+
+                step = int(re.search(r'\d+',line).group())
+                # print line,step
+                # print line.index("step ")
+                # break
+                if step > stepmax:
+                    count += 1
+
+                    print "Current line:",n
+                    line = filelines[n+2]
+                    potentE2 = float(line.split()[2])
+                    break
+
+        # LAST
+
+        if count == 0:
+            for m,n in enumerate(range(num_lines-1,num_lines-100,-1)):
+
+                print "n:",n
+                print m,n,num_lines
+                line = filelines[n]
+
+                if line.startswith("Writing output"):
+                    count += 1
+
+                    if count > 1:
+
+                        print "Current line:",n
+                        n = n + 2
+
+                        line = filelines[n]
+                        potentE2 = float(line.split()[2])
+                        break
+
+
+        print "Potential Energies:"
+        print potentE0,potentE1,potentE2
+
+        self.potentE0 = potentE0
+        self.potentE1 = potentE1
+        self.potentE2 = potentE2
+        # sys.exit()
+
+            # print fp[i]
+            # print fp[i+1]
+
+
+        # with open(logfile,"r+") as fp:
+        #     for i,line in enumerate(fp):
+        #         if line.startswith("Writing output at step 0"):
+        #             print "Current line:"
+        #             print line
+        #             # break
+        #         print fp[i-1]
+        #         print fp[i]
+        #         print fp[i+1]
+
+
+
+
     def get_min_lateral_contacts(self):
+        """
+        Dimers,
+
+        need to check frame limit
+        """
 
 
         # print dir(self)
@@ -3800,9 +3964,13 @@ class Microtubule():
             # max_d = max(self.econtacts_raw[::,d])
             # last_d = self.econtacts_raw[-1,d] # truncated already!
 
+            # print self.econtacts_raw.shape
+            # print self.frameindex
+
+
             # does it recover..
             c1 = self.econtacts_raw[0,d]
-            c2 = min(self.econtacts_raw[::,d])
+            c2 = min(self.econtacts_raw[:self.frameindex,d])
             c3 = self.econtacts_raw[-1,d]
             diff = c1 - c2
             initial_final_ratio = float(c3) / c1
@@ -3837,7 +4005,7 @@ class Microtubule():
 
         for d in self.dimers:
             c1 = self.wcontacts_raw[0,d]
-            c2 = min(self.wcontacts_raw[::,d])
+            c2 = min(self.wcontacts_raw[:self.frameindex,d])
             c3 = self.wcontacts_raw[-1,d]
             diff = c1 - c2
             initial_final_ratio = float(c3) / c1
@@ -3857,12 +4025,20 @@ class Microtubule():
 
 
         # print lst_con
+        print 'east'
         print lst_econtactslost
+        print 'west'
         print lst_wcontactslost
         print "The lattice recovers? %s" % bool_recovers
 
         mine = np.sum(np.array(lst_econtactslost))
         minw = np.sum(np.array(lst_wcontactslost))
+
+        print "work_in:",self.work_indentation
+        print "contacts:(e,w):",mine,minw
+        avgwE = self.work_indentation / mine
+        avgwW = self.work_indentation / minw
+        print "east,west work:",avgwE,avgwW
 
 
         self.bool_recovers = bool_recovers
@@ -3877,4 +4053,4 @@ class Microtubule():
         #     print "Difference is too large."
         #     # sys.exit()
 
-        return max([mine,minw])
+        return min([mine,minw])

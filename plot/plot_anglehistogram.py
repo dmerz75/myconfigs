@@ -65,6 +65,7 @@ def parse_arguments():
     parser.add_argument("-rnd","--rnd",help="round: 13, 14, 16, 17")
     parser.add_argument("-nb","--nbins",help="number of bins: 3,4,5,6..",type=int)
     parser.add_argument("-cdf","--cdf",help="cdf-line: 0-off, 1-on",type=int)
+    parser.add_argument("-bar","--bar",help="bars: 0-off, 1-on",type=int)
     parser.add_argument("-sel","--sel",help="select: 100,101,102..",type=int)
     args = vars(parser.parse_args())
     return args
@@ -90,6 +91,7 @@ else:
 fnum = args['filenumber']
 nbins = args['nbins']
 cdf_on_off = args['cdf']
+bars_on_off = args['bar']
 
 # print rnd
 # sys.exit()
@@ -435,9 +437,9 @@ def axis_settings(axes,plot_type='forces',**kwargs):
 
         if plot_type == 'angle':
 
-            ax.set_xlabel(r"Angle$^\circ$",fontsize=20)
+            ax.set_xlabel(r"Bending Angle$^\circ$",fontsize=20)
             # ax.set_xlabel('Angle',fontsize=20)
-            ax.set_ylabel('Norm. Freq.',fontsize=20)
+            ax.set_ylabel('Normalized Freq.',fontsize=20)
 
 
 
@@ -949,17 +951,15 @@ def get_total_histogram(lst,color='b'):
 
     filename = 'array_%s_%s.dat' % (round_name,position_name)
     outfile = os.path.join(my_dir,'results_breaks',filename)
-    np.savetxt(outfile,x)
+    np.savetxt(outfile,x,fmt='%5.2f')
     # sys.exit()
 
     cdf = myCDF(x)
     cdf.get_meanstdev()
     cdf.determine_bins_limits(lower_limit=0,upper_limit=80,nbins=81) # set
     cdf.get_hist()
-    # cdf.print_values()
-
-    # OFF or ON
-    cdf.plot_bars(ax[0],color=color,alpha=0.6)
+    print "------------------------------------------------"
+    cdf.print_values()
 
 
     # high_point = 0.0
@@ -967,28 +967,33 @@ def get_total_histogram(lst,color='b'):
     #     ax[0].set_ylim(0,ax[0].set_ylim()[1] + 0.1 * ax[0].set_ylim()[1])
     #     high_point = ax[0].set_ylim()[1]
 
-
     if max(cdf.norm) > ax[0].get_ylim()[1]:
         ax[0].set_ylim(0,max(cdf.norm)+0.1*max(cdf.norm))
 
+    if bars_on_off == 1:
+        cdf.plot_bars(ax[0],color=color,alpha=0.6)
+        ax[0].set_xlim(-1,72)
+        ax[0].set_ylim(0,0.094)
 
+    if (cdf_on_off == 1) and (bars_on_off == 1):
+        cdf.plot_cdf(ax[0],color=color,multiplier=0.09)
+    elif ((cdf_on_off == 1) and (bars_on_off != 1)):
+        cdf.plot_cdf(ax[0],color=color,multiplier=1.0)
+        ax[0].set_xlim(-1,72)
+        ax[0].set_ylim(-0.02,1.02)
+
+
+    axis_settings(ax,'angle')
     # if cdf_on_off != None:
-    if 0:
         # first one is the hist/cdf
         # second is for cdf only
         # third is for single hist/cdf
         # cdf.plot_cdf(ax[0],color=color,multiplier=ax[0].get_ylim()[1])
         # cdf.plot_cdf(ax[0],color=color)
-        cdf.plot_cdf(ax[0],color=color,multiplier=0.09)
         # cdf.plot_cdf(ax[0],color=color,multiplier=max(cdf.norm))
 
-
-
-    axis_settings(ax,'angle')
     # legend_settings(ax[0],lst=[names])
     # sys.exit()
-    ax[0].set_xlim(-1,72)
-    ax[0].set_ylim(0,0.094)
     # ax[0].set_ylim(0,1.05)
 
     # if max(cdf.norm) > ax[0].get_ylim()[1]:
@@ -1017,24 +1022,54 @@ def get_total_histogram(lst,color='b'):
 dct_anglehist = load_angle_dct(my_dir,"max_angle_criticalbreak_array.dat")
 print len(dct_anglehist)
 lst_Angles = build_angle_hist_class(dct_anglehist,rnd,position)
-print len(lst_Angles)
-sizes = []
-for lst in lst_Angles:
-    sizes.append(lst.data.shape[0])
-print np.mean(np.array(sizes))
+# print len(lst_Angles)
+# sizes = []
+# for lst in lst_Angles:
+#     sizes.append(lst.data.shape[0])
+# print np.mean(np.array(sizes))
 
 
+# Experimental Histogram:
 # filename = 'Angles_highsalt_mod.txt'
 # filename = 'Angles_highsalt_modkate.txt'
 # filename = 'Angles_highsalt_modkate.txt.unix.txt'
+
+
 filename = 'highsalt_angles.curated.dat'
 fpath = os.path.join(my_dir,'experimental/',filename)
 Edata = process_experimental_angles(fpath)
-lst_ExpAngles = build_exp_angle_hist_class(Edata)
-# sys.exit()
+lst_ExpAngles2 = build_exp_angle_hist_class(Edata)
 
+
+if 0:
+    filename = 'highsalt_angles.curated.dat'
+    fpath = os.path.join(my_dir,'experimental/',filename)
+    Edata = process_experimental_angles(fpath)
+    lst_ExpAngles = build_exp_angle_hist_class(Edata)
+else:
+    filename = 'angles_controlMTs.curated.dat'
+    fpath = os.path.join(my_dir,'experimental/',filename)
+    Edata = process_experimental_angles(fpath)
+    lst_ExpAngles = build_exp_angle_hist_class(Edata)
+
+
+# filename = 'highsalt_angles.curated_may24.dat'
+# fpath = os.path.join(my_dir,'experimental/',filename)
+# Edata = process_experimental_angles(fpath)
+# lst_ExpAngles2 = build_exp_angle_hist_class(Edata)
+# # sys.exit()
+
+# filename = 'control.dat'
+# fpath = os.path.join(my_dir,'experimental/',filename)
+# Edata = process_experimental_angles(fpath)
+# lst_ExpAnglesC = build_exp_angle_hist_class(Edata)
+
+
+# New Figure. Get Histograms. (Return Data)
 ax = new_fig()
-dataA = get_total_histogram(lst_Angles,'b')
+# dataA = get_total_histogram(lst_Angles,'b')
+
+dataA = get_total_histogram(lst_ExpAngles2,'g')
 dataE = get_total_histogram(lst_ExpAngles,'r')
 
 
@@ -1046,17 +1081,17 @@ then reject the null hypothesis."""
 print "K-S value:",d
 print "two-tailed p-value:",p
 
-if p < 0.05:
+if p < 0.11:
     print "We reject the null hypothesis. (a different distribution)"
     # print "Reject."
     Result = 'Reject. diff dist.'
     print Result
 else:
     print "We cannot reject the null hypothesis. (more/less the same dist.)"
-    # print "Do Not Reject."
     Result = 'Do Not Reject. (same dist.)'
     print Result
 
+print args
 
 
 if rnd != None:
@@ -1069,10 +1104,28 @@ if position != None:
 else:
     position_name = 'all'
 
+if (cdf_on_off == 1):
+    extra_name = 'cdf'
+else:
+    extra_name = ''
+if (bars_on_off == 1):
+    extra_name = extra_name + '_bar'
+
 P = SaveFig(my_dir,
-            'hist_%s_%s' % (round_name,position_name),
-            destdirname='fig/histogramCDFangles')
+            'hist_%s_%s_%s' % (round_name,position_name,extra_name),
+            destdirname='fig/histogramCDFangles/controlcurated')
 # else:
 #     P = SaveFig(my_dir,
 #                 'hist_%s_%s' % ('angles',str(('.').join(rnd))),
 #                 destdirname='fig/histogramCDFangles')
+
+
+
+'''
+What it does:
+load_angle             | grabs all of the max_angle_critical_breaks.
+                       | (all located in the local trajectory directories)
+build_angle_hist_class | returns a list of the angle entries
+get_total_histogram    | concatenates the arrays. prints them to file.
+                       | then it builds the CDF
+'''
