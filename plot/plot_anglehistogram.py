@@ -264,6 +264,13 @@ def build_exp_angle_hist_class(lst):
 
     return lst_class
 
+def build_exp_angle_hist_class100n50(fn):
+    """
+    Lst of floats.
+    """
+    x = np.array(fn)
+    C = myCDF(x)
+    return [C]
 
 
 def sort_routine1(dct):
@@ -971,7 +978,7 @@ def get_total_histogram(lst,color='b'):
         ax[0].set_ylim(0,max(cdf.norm)+0.1*max(cdf.norm))
 
     if bars_on_off == 1:
-        cdf.plot_bars(ax[0],color=color,alpha=0.6)
+        cdf.plot_bars(ax[0],color=color,alpha=0.8)
         ax[0].set_xlim(-1,72)
         ax[0].set_ylim(0,0.094)
 
@@ -1016,42 +1023,10 @@ def get_total_histogram(lst,color='b'):
     return x
 
 
-
-
-# Angle Histograms:
-dct_anglehist = load_angle_dct(my_dir,"max_angle_criticalbreak_array.dat")
-print len(dct_anglehist)
-lst_Angles = build_angle_hist_class(dct_anglehist,rnd,position)
-# print len(lst_Angles)
-# sizes = []
-# for lst in lst_Angles:
-#     sizes.append(lst.data.shape[0])
-# print np.mean(np.array(sizes))
-
-
 # Experimental Histogram:
 # filename = 'Angles_highsalt_mod.txt'
 # filename = 'Angles_highsalt_modkate.txt'
 # filename = 'Angles_highsalt_modkate.txt.unix.txt'
-
-
-filename = 'highsalt_angles.curated.dat'
-fpath = os.path.join(my_dir,'experimental/',filename)
-Edata = process_experimental_angles(fpath)
-lst_ExpAngles2 = build_exp_angle_hist_class(Edata)
-
-
-if 0:
-    filename = 'highsalt_angles.curated.dat'
-    fpath = os.path.join(my_dir,'experimental/',filename)
-    Edata = process_experimental_angles(fpath)
-    lst_ExpAngles = build_exp_angle_hist_class(Edata)
-else:
-    filename = 'angles_controlMTs.curated.dat'
-    fpath = os.path.join(my_dir,'experimental/',filename)
-    Edata = process_experimental_angles(fpath)
-    lst_ExpAngles = build_exp_angle_hist_class(Edata)
-
 
 # filename = 'highsalt_angles.curated_may24.dat'
 # fpath = os.path.join(my_dir,'experimental/',filename)
@@ -1065,33 +1040,120 @@ else:
 # lst_ExpAnglesC = build_exp_angle_hist_class(Edata)
 
 
+# Angle Histograms:
+dct_anglehist = load_angle_dct(my_dir,"max_angle_criticalbreak_array.dat")
+print len(dct_anglehist)
+lst_SimAngles = build_angle_hist_class(dct_anglehist,rnd,position)
+# print len(lst_Angles)
+# sizes = []
+# for lst in lst_Angles:
+#     sizes.append(lst.data.shape[0])
+# print np.mean(np.array(sizes))
+
+# high salt
+filename = 'highsalt_angles.curated.dat'
+fpath = os.path.join(my_dir,'experimental/',filename)
+Sdata = process_experimental_angles(fpath)
+lst_ExpHighSalt = build_exp_angle_hist_class(Sdata)
+
+
+# control
+filename = 'angles_controlMTs.curated.dat'
+fpath = os.path.join(my_dir,'experimental/',filename)
+Cdata = process_experimental_angles(fpath)
+lst_ExpCtrl = build_exp_angle_hist_class(Cdata)
+
+filename = 'angles_100nM_fromNan.dat'
+fpath = os.path.join(my_dir,'experimental/',filename)
+data100 = process_experimental_angles(fpath)
+lst_Exp100 = build_exp_angle_hist_class100n50(data100)
+# print lst_Exp100
+# cdf = lst_Exp100[0]
+# print dir(cdf)
+# print cdf.data
+
+# filename = 'angles_50nM_fromNan.dat'
+# fpath = os.path.join(my_dir,'experimental/',filename)
+# data50 = process_experimental_angles(fpath)
+# lst_Exp50 = build_exp_angle_hist_class(data50)
+
+
+# sys.exit()
+
+
+
 # New Figure. Get Histograms. (Return Data)
 ax = new_fig()
-# dataA = get_total_histogram(lst_Angles,'b')
+# d,p = Kolmogorov_Smirnov_Test(dataA,dataE)
+# dataSim = get_total_histogram(lst_SimAngles,'b')
+# dataSalt = get_total_histogram(lst_ExpHighSalt,'r')
+# dataCtrl = get_total_histogram(lst_ExpCtrl,'g')
 
-dataA = get_total_histogram(lst_ExpAngles2,'g')
-dataE = get_total_histogram(lst_ExpAngles,'r')
+# 1
+# dataSim = get_total_histogram(lst_SimAngles,'b')
+# dataSalt = get_total_histogram(lst_ExpHighSalt,'r')
+# KS = KSTest(dataSim,dataSalt)
+# dir_pic = 'simsalt'
+
+# 2
+# dataSim = get_total_histogram(lst_SimAngles,'b')
+# dataCtrl = get_total_histogram(lst_ExpCtrl,'g')
+# KS = KSTest(dataSim,dataCtrl)
+# dir_pic = 'simctrl'
+
+# 3
+# dataSalt = get_total_histogram(lst_ExpHighSalt,'r')
+# dataCtrl = get_total_histogram(lst_ExpCtrl,'g')
+# KS = KSTest(dataSalt,dataCtrl)
+# dir_pic = 'saltctrl'
+
+# 4
+data100s = get_total_histogram(lst_Exp100,'m')
+dataSim = get_total_histogram(lst_SimAngles,'b')
+KS = KSTest(data100s,dataSime)
+dir_pic = 'sim100s'
 
 
 
-d,p = Kolmogorov_Smirnov_Test(dataA,dataE)
-print """ The null hypothesis is that the distributions of the two
-samples are the same. If the K-S value is small or the p-value is high,
-then reject the null hypothesis."""
-print "K-S value:",d
-print "two-tailed p-value:",p
 
-if p < 0.11:
-    print "We reject the null hypothesis. (a different distribution)"
-    # print "Reject."
-    Result = 'Reject. diff dist.'
-    print Result
-else:
-    print "We cannot reject the null hypothesis. (more/less the same dist.)"
-    Result = 'Do Not Reject. (same dist.)'
-    print Result
+# print "Doc:"
+# print KS.__doc__
+KS.print_description()
+# basically 80, but going with 60
+# KS.compute_KS_and_p_value(size1=60,size2=60)
+KS.compute_KS_and_p_value()
+KS.evaluate_hypothesis()
+KS.print_result()
+KS.plot_KS_result(ax[0],color='r',pos=(50,0.05))
+
+
+filename = "results_angle_histograms_%s.txt" % dir_pic
+with open(filename,"a+") as fp:
+    fp.write("----\n")
+    try:
+        fp.write("Rnd: %s\n" % args['rnd'])
+    except KeyError:
+        pass
+    try:
+        fp.write("Pos: %s\n" % args['position'])
+        # for pos in args['position']:
+            # fp.write("Pos: %s\n  " % pos)
+    except KeyError:
+        pass
+
+    fp.write("%s\n" % KS.Results[0][1])
+    fp.write("%s\n" % KS.Results[0][0])
 
 print args
+if ('rnd' in args):
+    print "Rnd:",args['rnd']
+if ('pos' in args):
+    print "Pos:",args['position']
+
+print KS.Results[0][1]
+print KS.Results[0][0]
+
+
 
 
 if rnd != None:
@@ -1113,12 +1175,8 @@ if (bars_on_off == 1):
 
 P = SaveFig(my_dir,
             'hist_%s_%s_%s' % (round_name,position_name,extra_name),
-            destdirname='fig/histogramCDFangles/controlcurated')
-# else:
-#     P = SaveFig(my_dir,
-#                 'hist_%s_%s' % ('angles',str(('.').join(rnd))),
-#                 destdirname='fig/histogramCDFangles')
-
+            destdirname='fig/histogramCDF_angles/salt_and_control_curated/%s'
+            % dir_pic)
 
 
 '''

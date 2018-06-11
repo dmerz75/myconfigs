@@ -4,14 +4,17 @@ import numpy as np
 # import matplotlib
 import matplotlib.pyplot as plt
 import sys
+import re
+from decimal import Decimal
 
 from scipy import stats
 
-
-def Kolmogorov_Smirnov_Test(data1,data2):
+class KSTest():
     """
+    Perform the Kolmogorov-Smirnov-Test for distribution comparison.
+
     The two sample K-S test.
-    https://en.wikipedia.org/wiki/Kolmogorov-Smirnov_test
+    https://en.wikipedia.org/wiki/Kolmogorov_Smirnov_test
     Two-sample Kolmogorov–Smirnov test
 
     //
@@ -30,11 +33,322 @@ def Kolmogorov_Smirnov_Test(data1,data2):
     Returns:
     D : (float) KS statistic
     p-value : (float) two-tailed p-value
+    Result: Reject or Accept, null hypothesis: the distributions are the same.
     """
 
-    d,p = stats.ks_2samp(data1,data2)
+    # def __init__(self,d1,d2,**kwargs):
+    def __init__(self,d1,d2):
 
-    return d,p
+
+        # \alpha  : 0.10  0.05   0.025   0.01   0.005   0.001
+        # C(alpha): 1.22  1.36   1.48    1.63   1.73    1.95
+        self.alpha = np.array([0.10,0.05,0.025,0.01,0.005,0.001])
+        self.calpha = np.array([1.22,1.36,1.48,1.63,1.73,1.95])
+
+        self.d1 = d1
+        self.d2 = d2
+
+
+        self.d1size = d1.shape[0]
+        self.d2size = d2.shape[0]
+
+
+        self.criterion = "p"
+
+        self.null_hypothesis = True
+
+
+        # self.compute_KS_and_p_value()
+
+
+    def print_description(self):
+        '''
+        # d,p = Kolmogorov_Smirnov_Test(lst_cdf[i].data,lst_cdf[f].data)
+        '''
+        print """ The null hypothesis is that the distributions of the two
+        samples are the same.
+        If the K-S value is small: reject the null hypothesis.
+        If the p-value is high: reject the null hypothesis. """
+
+        print "Sizes:"
+        print self.d1size,self.d2size
+
+
+    def print_result(self):
+
+
+        print "K-S value: (critical)",self.d
+        print "two-tailed p-value:",self.p
+        # print "Result:",self.Result
+
+        print "Criterion: ",self.criterion
+
+
+        if self.criterion == 'p':
+            print self.Results[-1][0]
+            print self.Results[-1][1]
+
+        else:
+            for i,res in enumerate(self.Results[0:-1]):
+                print res[0]
+                print self.alpha[i],res[1]
+
+
+
+        # return d,p,Result
+
+        # if p < 0.01:
+        #     print "We reject the null hypothesis. (a different distribution)"
+        #     print "Reject."
+        #     Result = 'Reject. diff dist.'
+        # elif p > 0.1:
+        #     print "We cannot reject the null hypothesis. (more/less the same dist.)"
+        #     print "Do Not Reject."
+        #     Result = 'Do Not Reject. (same dist.)'
+        # else:
+        #     print p,"It is uncertain whether we can reject the null hypothesis. Reject. ?"
+
+    # print data1.shape
+    # print data2.shape
+
+    def compute_radicands(self,**kwargs):
+
+        if (('size1' in kwargs) and ('size2' in kwargs)):
+
+            size1 = kwargs['size1']
+            size2 = kwargs['size2']
+
+        else:
+            size1 = self.d1size
+            size2 = self.d2size
+
+
+        radicand = float(size1 + size2) / float((size1 * size2))
+        self.rad = np.sqrt(radicand)
+
+
+    def compute_KS_and_p_value(self,**kwargs):
+
+        # sqrt ( (n+m)  /  n*m )  ==> rad
+        # rad * c(alpha)
+
+        # else:
+            # radicand = float(self.d1size + self.d2size) / float((self.d1size * self.d2size))
+            # self.rad = np.sqrt(radicand)
+
+        # if "binsize" in kwargs:
+            # self.d1size
+
+        # print "radicand:",radicand
+        # print "sqrt:",self.rad
+
+        if "size1" in kwargs:
+            size1 = kwargs['size1']
+        else:
+            size1 = self.d1size
+
+        if "size2" in kwargs:
+            size2 = kwargs['size2']
+        else:
+            size2 = self.d2size
+
+
+        self.compute_radicands(size1=size1,size2=size2)
+
+
+        # list of critical values:
+        lst_cv = []
+
+        for i in range(len(self.alpha)):
+
+            critical_value = self.calpha[i] * self.rad
+            # print i,alpha[i],calpha[i],critical_value
+            lst_cv.append(critical_value)
+
+        self.critical_values = np.array(lst_cv)
+
+        self.d,self.p = stats.ks_2samp(self.d1,self.d2)
+
+
+
+    def reject_null(self,**kwargs):
+        '''
+        cv: critical_value
+        '''
+        # self.Result = "Reject the null hypothesis. The distributions are different."
+
+        if 'p' in kwargs:
+
+            if self.criterion == 'KS':
+                # res_label = "%13.10f < %13.10f (<-d)" \
+                #     % (kwargs['critical'],kwargs['d'])
+                # res_label = "%13.10f" % self.p
+                res_label = "%0.3E" % self.p
+            else:
+                res_label = "%f %f" % (self.pthreshold,kwargs['p'])
+
+        else:
+            res_label = "%9.6f < %9.6f (<-d)" % (kwargs['critical'],kwargs['d'])
+
+        Result = "Reject the null hypothesis. The distributions are different."
+        self.null_hypothesis = False
+
+        # lst_Results.append((self.Result,res_label))
+        return Result,res_label
+
+
+
+    def accept_null(self,**kwargs):
+        # self.Result = "Accept the null hypothesis. The distributions are the same."
+
+        if 'p' in kwargs:
+
+            # res_label = "%f %f" % (self.pthreshold,kwargs['p'])
+            if self.criterion == 'KS':
+                # res_label = "%13.10f" % self.p
+                # res_label = "%13.10f %13.10f" % (self.pthreshold,kwargs['p'])
+                res_label = "%0.3E" % self.p
+            else:
+                res_label = "%f %f" % (self.pthreshold,kwargs['p'])
+
+        else:
+            res_label = "%9.6f > %9.6f (<-d)" % \
+                (kwargs['critical'],kwargs['d'])
+
+        Result = "Accept the null hypothesis. The distributions are the same."
+        self.null_hypothesis = True
+
+        # lst_Results.append((self.Result,res_label))
+        return Result,res_label
+
+
+    def evaluate_hypothesis(self,pthreshold=0.05):
+        """
+        # if p < 0.05:
+        #     print "We reject the null hypothesis. (a different distribution)"
+        #     Result = 'Reject. (diff dist.)'
+        # else:
+        #     print "We cannot reject the null hypothesis. (more/less the same dist.)"
+        #     Result = 'Do Not Reject. (same dist.)'
+
+        """
+        self.criterion = "KS" # or p
+
+        if((self.d1size > 50) and (self.d2size > 50)):
+            self.criterion = "KS"
+        else:
+            self.criterion = "p"
+
+
+        self.pthreshold = pthreshold
+        lst_Results = []
+
+
+        # First alternative for determining large data set similarity.
+        # if self.criterion == "KS":
+        #     # D, or KS-value comparison:
+        #     # If the K-S value is small: reject the null hypothesis.
+        #     for i,crit in enumerate(self.critical_values):
+        #         if self.d < crit:
+        #             R,L = self.accept_null(d=self.d,critical=crit)
+        #             lst_Results.append((R,L))
+        #         else:
+        #             R,L = self.reject_null(d=self.d,critical=crit)
+        #             lst_Results.append((R,L))
+
+        if self.criterion == "KS":
+
+            if self.p > 0.000000001:
+                # p value low
+                R,L = self.accept_null(p=self.p)
+                lst_Results.append((R,L))
+            else:
+                # p value high
+                R,L = self.reject_null(p=self.p)
+                lst_Results.append((R,L))
+
+
+
+        else:
+            # If the p-value is high: reject the null hypothesis.
+
+            # pthreshold = 0.05 (default)
+            if self.p > pthreshold:
+                # p value low
+                R,L = self.accept_null(p=self.p)
+                lst_Results.append((R,L))
+            else:
+                # p value high
+                R,L = self.reject_null(p=self.p)
+                lst_Results.append((R,L))
+
+
+        self.Results = lst_Results
+
+
+
+    def plot_KS_result(self,ax,**kwargs):
+        """
+        Plot the KS result.
+        Are the distributions the same or different?
+        """
+
+        # Must be null hypothesis Reject/False.
+        # -- that the distributions are different
+        if self.null_hypothesis == True:
+            return
+
+
+        # print kwargs.items()
+        # print kwargs['pos']
+
+        if 'pos' in kwargs:
+            x = kwargs['pos'][0]
+            y = kwargs['pos'][1]
+        else:
+            print "did not find pos."
+            x = 0.5
+            y = 0.5
+            print "x:",x,"y:",y
+
+        # if KS.criterion == 'p':
+        #     lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,KS.d,KS.p,KS.Results[-1]))
+        #     # print KS.Results[-1]
+        #     # sys.exit()
+        #     print KS.Results[-1][0]
+
+        #     # Search for Do Not Reject the null hypothesis, same dist.
+        #     if re.search('Accept',KS.Results[-1][0]) != None:
+        #         print "Same, Found it!"
+        #         # sys.exit()
+        #     else:
+        #         print "Different"
+        #         KS.plot_KS_result(ax,color='r')
+        #         # sys.exit()
+        # else:
+        #     lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,KS.d,KS.p,KS.Results[:-1]))
+
+
+        # if
+        # print self.Results
+        # print dir(self)
+
+        for i,res in enumerate(self.Results):
+
+            if re.search('Reject the null',res[0]) != None:
+
+                print res[0],res[1],self.alpha[i]
+
+                ax.text(x,y,"Reject",color='r',
+                        style='oblique',size=22,rotation=15)
+
+                break
+
+
+        # sys.exit()
+
+
+
 
 
 class myCDF():
@@ -108,16 +422,34 @@ class myCDF():
 
     def print_values(self):
         print 'Data:'
-        print self.data
+        if self.data.shape[0] < 100:
+            print self.data,self.data.shape
+        else:
+            print self.data.shape,self.data[0:8]
         print 'Mean:',self.mean
         print 'StdDev:',self.std
         print 'binwidth:',self.width
-        print 'bins:',self.bins
+        print 'bins:'
+        if self.bins.shape[0] > 20:
+            print self.bins[0:5]
+            print self.bins[-4:]
+        else:
+            print self.bins
+
         print 'frequency:',self.freq
         print 'normalized:'
-        print self.norm
+        if self.norm.shape[0] > 20:
+            print self.norm[0:5]
+            print self.norm[-4:]
+        else:
+            print self.norm
+
         print 'cumulative:'
-        print self.cumulative
+        if self.cumulative.shape[0] > 20:
+            print self.cumulative[0:5]
+            print self.cumulative[-4:]
+        else:
+            print self.cumulative
         print 'regular-sum:',self.regsum
 
     def get_meanstdev(self):
@@ -223,6 +555,8 @@ class myCDF():
         self.regsum = np.sum(self.norm)
 
         return
+
+
 
 
     def plot_cdf(self,ax,color='b',multiplier=1):

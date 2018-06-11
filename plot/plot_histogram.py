@@ -1063,13 +1063,45 @@ def plot_all(ax,dfiles,**kwargs):
         print lst_cdf[f].data
         Result = "Uncertain."
 
-    # d,p = scipy.stats.ks_2samp(data1,data2)
-        d,p = Kolmogorov_Smirnov_Test(lst_cdf[i].data,lst_cdf[f].data)
-        print """ The null hypothesis is that the distributions of the two
-        samples are the same. If the K-S value is small or the p-value is high,
-        then reject the null hypothesis."""
-        print "K-S value:",d
-        print "two-tailed p-value:",p
+        # d,p = scipy.stats.ks_2samp(data1,data2)
+        # d,p = Kolmogorov_Smirnov_Test(lst_cdf[i].data,lst_cdf[f].data)
+        print args
+
+        KS = KSTest(lst_cdf[i].data,lst_cdf[f].data)
+
+        # print "Doc:"
+        # print KS.__doc__
+        KS.print_description()
+        KS.compute_KS_and_p_value()
+        KS.evaluate_hypothesis()
+        KS.print_result()
+
+        if KS.criterion == 'p':
+            lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,KS.d,KS.p,KS.Results[-1]))
+
+            KS.plot_KS_result(ax,color='r')
+            # # print KS.Results[-1]
+            # # sys.exit()
+            # print KS.Results[-1][0]
+
+            # # Search for Do Not Reject the null hypothesis, same dist.
+            # if re.search('Accept',KS.Results[-1][0]) != None:
+            #     print "Same, Found it!"
+            #     # sys.exit()
+            # else:
+            #     print "Different"
+            #     KS.plot_KS_result(ax,color='r')
+            #     # sys.exit()
+
+        else:
+            lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,KS.d,KS.p,KS.Results[:-1]))
+
+
+        # print """ The null hypothesis is that the distributions of the two
+        # samples are the same. If the K-S value is small or the p-value is high,
+        # then reject the null hypothesis."""
+        # print "K-S value:",d
+        # print "two-tailed p-value:",p
 
         # if p < 0.01:
         #     print "We reject the null hypothesis. (a different distribution)"
@@ -1083,18 +1115,18 @@ def plot_all(ax,dfiles,**kwargs):
         #     print p,"It is uncertain whether we can reject the null hypothesis. Reject. ?"
 
 
-        if p < 0.05:
-            print "We reject the null hypothesis. (a different distribution)"
-            print "Reject."
-            Result = 'Reject. diff dist.'
-        else:
-            print "We cannot reject the null hypothesis. (more/less the same dist.)"
-            Result = 'Do Not Reject. (same dist.)'
-            print Result
+        # if p < 0.05:
+        #     print "We reject the null hypothesis. (a different distribution)"
+        #     print "Reject."
+        #     Result = 'Reject. diff dist.'
+        # else:
+        #     print "We cannot reject the null hypothesis. (more/less the same dist.)"
+        #     Result = 'Do Not Reject. (same dist.)'
+        #     print Result
 
-        print args
+        # continue
 
-        lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,d,p,Result))
+        # lst_KStups.append((lst_cdf[i].name,lst_cdf[f].name,d,p,Result))
     # sys.exit()
 
     # print "KS-results:"
@@ -1344,10 +1376,10 @@ if (args['sel'] >= 5000):
 
     # def print_this()
     print "Final_KS_Results:"
-    for lst in lst_global_ks:
+    # for lst in lst_global_ks:
         # print (' ').join([str(obj) for obj in lst])
-        for tup in lst:
-            print tup[0],tup[1]
+        # for tup in lst:
+        #     print tup[0],tup[1]
         # for tup in lst:
         #     print '%5.3f' % tup[2], '%5.3f' % tup[3],tup[4]
 
@@ -1356,7 +1388,7 @@ if (args['sel'] >= 5000):
         # for tup in lst:
         #     print tup[0],tup[1]
         for tup in lst:
-            # print tup[0],tup[1]
-            print '%5.3f' % tup[2], '%5.3f' % tup[3],tup[4]
+            print '\t',tup[0],tup[1]
+            print '\t','%5.3f' % tup[2], '%5.3f' % tup[3],tup[4]
 
     sys.exit()
