@@ -6,12 +6,12 @@ import gzip
 
 class FileConverter(object):
 
-    def __init__(self,main_path,ext1,final_path,ext2):
+    def __init__(self,main_path,globber,final_path,ext2):
 
         self.main_path = main_path
         self.final_path = final_path
         self.temp_path = os.path.join(self.main_path,'temp_path')
-        self.ext1 = ext1
+        self.globber = globber
         self.ext2 = ext2
 
         print(self.main_path)
@@ -39,7 +39,7 @@ class FileConverter(object):
 
     def FindFiles(self):
 
-        lst_files = glob(os.path.join(self.main_path,'*.ZIP'))
+        lst_files = glob(os.path.join(self.main_path,self.globber))
         self.files = lst_files
 
     def BuildCommandList(self,command):
@@ -64,7 +64,7 @@ class FileConverter(object):
 
             for z in self.zipfiles:
                 # Process, sieve, ..
-                self.ScrubData(z)
+                # self.ScrubData(z)
                 file_out = os.path.join(self.final_path,self.filename + '.gz')
                 self.Gzip(z,file_out)
 

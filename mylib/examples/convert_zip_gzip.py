@@ -14,6 +14,6 @@ except:
     from FileConverter import *
 
 
-F = FileConverter(my_dir,'ZIP',out_dir,'gz')
+F = FileConverter(my_dir,'*EHT*.ZIP',out_dir,'gz')
 F.FindFiles()
 F.CopyFiles()
