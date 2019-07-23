@@ -14,19 +14,30 @@ else
 fi
 
 vm_create () {
-    az vm create --resource-group $RG --name $VM --image $DISTRO --admin-username azureuser --generate-ssh-keys
+    az vm create \
+    --resource-group $RG \
+    --name $VM \
+    --image $DISTRO \
+    --admin-username azureuser \
+    --generate-ssh-keys
 }
 vm_start () {
     ## Start the VM
-    az vm start --name $VM --resource-group $RG
+    az vm start \
+    --resource-group $RG \
+    --name $VM
 }
 vm_stop () {
     ## Stop the VM
-    az vm stop --name $VM --resource-group $RG
+    az vm stop \
+    --resource-group $RG \
+    --name $VM
 }
 vm_deallocate () {
     ## Stop the VM
-    az vm deallocate --name $VM --resource-group $RG
+    az vm deallocate \
+    --resource-group $RG \
+    --name $VM
 }
 
 $VMCOMMAND
