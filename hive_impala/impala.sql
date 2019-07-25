@@ -1,0 +1,7 @@
+-- API:
+invalidate metadata dd_media_in.grofers_purchasing_hist_test
+refresh dd_media_in.grofers_purchasing_hist_test
+compute stats dd_media_in.grofers_purchasing_hist_test
+show table stats dd_media_in.grofers_purchasing_hist_test
+describe formatted dd_media_in.grofers_purchasing_hist
+select * from dd_media_in.grofers_purchasing_hist_test limit 20
