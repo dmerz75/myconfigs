@@ -19,7 +19,8 @@ LOCATION '/enterprise_data/dev/media_in/grofers/raw/event_round4/'
 --FIELDS TERMINATED BY '|'
 
 --Step 2.
-load data inpath '/enterprise_data/dev/media_in/grofers/raw/event_round4/'
-into table dd_media_in.grofers_event
+-- LOAD RAW DATA:
+load data inpath   '/enterprise_data/dev/tv_media/rld/type72_unfiltered'
+into table dd_tv_media.type72_unfiltered
 -- End of parquet to hive.
 
