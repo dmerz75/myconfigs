@@ -1,3 +1,4 @@
+hive_impala/rld/
 linux_fedora-centos/cudatoolkit_4.2.9_linux_64_fedora14.run
 linux_fedora-centos/gpucomputingsdk_4.2.9_linux.run
 
@@ -10,6 +11,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.idea
 .Python
 env/
 build/
