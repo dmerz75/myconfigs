@@ -1,4 +1,16 @@
 -- API:
+-- run
+invalidate metadata dd_media_in.grofers_demographic_r10
+refresh dd_media_in.grofers_demographic_r10
+compute stats dd_media_in.grofers_demographic_r10
+select count(1) from dd_media_in.grofers_demographic_r10
+select * from dd_media_in.grofers_demographic_r10 limit 20
+-- extra
+show table stats dd_media_in.grofers_demographic_r10
+describe formatted dd_media_in.grofers_purchasing_hist_test
+
+
+
 invalidate metadata dd_media_in.grofers_purchasing_hist_test
 refresh dd_media_in.grofers_purchasing_hist_test
 compute stats dd_media_in.grofers_purchasing_hist_test

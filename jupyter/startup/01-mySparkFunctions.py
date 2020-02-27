@@ -48,9 +48,9 @@ def column_comparison(df1,df2):
     only1_cols = set(df1_cols) - set(df2_cols)
     only2_cols = set(df2_cols) - set(df1_cols)
     common = list(set(df1_cols).intersection(set(df2_cols)))
-    print("Unique to df1:\n\t",only1_cols)
-    print("Unique to df2:\n\t",only2_cols)
-    print("Members in both:\n\t",common)
+    print("Unique to df1:\n\t", only1_cols)
+    print("Unique to df2:\n\t", only2_cols)
+    print("Members in both:\n\t", common)
     return common
 
 
