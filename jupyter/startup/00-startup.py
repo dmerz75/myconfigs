@@ -6,7 +6,7 @@ from IPython.core.interactiveshell import InteractiveShell
 print("Loading 00-startup.py")
 
 # Pandas options
-pd.options.display.max_columns = 30
+pd.options.display.max_columns = 50
 pd.options.display.max_rows = 20
 
 x000 = np.linspace(0, 10, 11)
@@ -34,4 +34,4 @@ InteractiveShell.ast_node_interactivity = 'all'
 # cf.go_offline(connected=True)
 # cf.set_config_file(theme='pearl')
 
-print('Your favorite libraries have been loaded.')
+print('My libraries have been loaded.')
